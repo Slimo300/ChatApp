@@ -28,28 +28,28 @@ export default class RegisterForm extends React.Component {
             message = <h5 className="mb-4 text-danger">{this.state.errormsg}</h5>;
         }
         return (
-            <div className="mt-5">
+            <div className="mt-5 d-flex justify-content-center">
               <div className="mt-5 row">
-                <form>
+                <form onSubmit={this.handleSubmit}>
                   <div className="display-1 mb-4 text-center text-primary"> Register</div>
-                  <div class="mb-3 text-center">
-                    <label for="username" className="form-label">Username</label>
-                    <input type="text" className="form-control" id="username" onChange={this.handleChange}/>
+                  <div className="mb-3 text-center">
+                    <label htmlFor="username" className="form-label">Username</label>
+                    <input name="username" type="text" className="form-control" id="username" onChange={this.handleChange}/>
                   </div>
-                  <div class="mb-3 text-center">
-                    <label for="email" className="form-label">Email address</label>
-                    <input type="email" className="form-control" id="email" onChange={this.handleChange}/>
+                  <div className="mb-3 text-center">
+                    <label htmlFor="email" className="form-label">Email address</label>
+                    <input name="email" type="email" className="form-control" id="email" onChange={this.handleChange}/>
                   </div>
-                  <div class="mb-3 text-center">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" onChange={this.handleChange}/>
+                  <div className="mb-3 text-center">
+                    <label htmlFor="pass" className="form-label">Password</label>
+                    <input name="password" type="password" className="form-control" id="password" onChange={this.handleChange}/>
                   </div>
-                  <div class="mb-3 text-center">
-                    <label for="r-password" class="form-label">Repeat Password</label>
-                    <input type="password" class="form-control" id="r-password" onChange={this.handleChange}/>
+                  <div className="mb-3 text-center">
+                    <label htmlFor="pass" className="form-label">Repeat Password</label>
+                    <input name="rpassword" type="password" className="form-control" id="rpassword" onChange={this.handleChange}/>
                   </div>
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary text-center">Submit</button>
+                  <div className="text-center">
+                    <button type="submit" className="btn btn-primary text-center">Submit</button>
                   </div>
                   <div className="display-5 mt-4 text-center text-primary"><a href="#">or Log in</a></div>
                 </form>

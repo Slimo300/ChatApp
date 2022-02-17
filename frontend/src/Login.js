@@ -28,7 +28,7 @@ export default class SignInForm extends React.Component {
             message = <h5 className="mb-4 text-danger">{this.state.errormsg}</h5>;
         }
         return (
-            <div className="mt-5">
+            <div className="mt-5 d-flex justify-content-center">
               <div className="mt-5 row">
                 {message}
                 <form onSubmit={this.handleSubmit}>
@@ -38,13 +38,13 @@ export default class SignInForm extends React.Component {
                     <input name="email" type="email" className="form-control" id="email" onChange={this.handleChange}/>
                   </div>
                   <div className="mb-3 text-center">
-                    <label htmlFor="password" class="form-label">Password</label>
-                    <input name="password" type="password" class="form-control" id="password" onChange={this.handleChange}/>
+                    <label htmlFor="password" className="form-label">Password</label>
+                    <input name="password" type="password" className="form-control" id="password" onChange={this.handleChange}/>
                   </div>
                   <div className="text-center">
-                    <button type="submit" class="btn btn-primary text-center">Submit</button>
+                    <button type="submit" className="btn btn-primary text-center">Submit</button>
                   </div>
-                  <div className="display-5 mt-4 text-center text-primary"><a href="#">or Register</a></div>
+                  <div className="display-5 mt-4 text-center text-primary"><a href="/register">or Register</a></div>
                 </form>
               </div>
             </div>
