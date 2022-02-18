@@ -1,8 +1,7 @@
-module github.com/Slimo300/ChatApp/backend
+module github.com/Slimo300/backend
 
 go 1.17
 
-require (
-	github.com/jinzhu/gorm v1.9.16 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-)
+require github.com/jinzhu/gorm v1.9.16
+
+require github.com/jinzhu/inflection v1.0.0 // indirect
