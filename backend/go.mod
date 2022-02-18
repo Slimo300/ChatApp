@@ -1,4 +1,4 @@
-module github.com/Slimo300/ChatApp
+module github.com/Slimo300/ChatApp/backend
 
 go 1.17
 
