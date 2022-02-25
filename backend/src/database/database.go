@@ -46,7 +46,7 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 		return user, err
 	}
 	if !checkPassword(user.Pass, pass) {
-		return user, errors.New("Invalid password")
+		return user, ErrINVALIDPASSWORD
 	}
 	user.Pass = ""
 	err = result.Update("loggedin", 1).Error
@@ -57,13 +57,35 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 	return user, result.Find(&user).Error
 }
 
-// GetUserGroups returns a slice of Groups of which user is a member
-func (db *Database) GetUserGroups(id int) (groups []models.Group, err error) {
-	return groups, db.Table("members").Select("*").
-		Joins("join members on group.id = group_id").
-		Joins("join users on user.id = user_id").
-		Where("user_id=?", id).Scan(&groups).Error
+func (db *Database) SignOutUser(id int) error {
+	return db.Table("users").Where(&models.User{ID: id}).Update("loggedin", 0).Error
 }
+
+// // GetUserGroups returns a slice of Groups of which user is a member
+// func (db *Database) GetUserGroups(id int) (groups []models.Group, err error) {
+// 	return groups, db.Table("members").Select("*").
+// 		Joins("join members on group.id = group_id").
+// 		Joins("join users on user.id = user_id").
+// 		Where("user_id=?", id).Scan(&groups).Error
+// }
+
+// func (db *Database) AddUserToGroup(id int) error {
+// 	return nil
+// }
+
+// func (db *Database) CreateGroup(name, desc string) (models.Group, error) {
+// 	return models.Group{ID: 1, Name: name, Desc: desc, Created: time.Now()}, nil
+// }
+
+// func (db *Database) DeleteUserFromGroup(id int) error {
+// 	return nil
+// }
+
+// func (db *Database) GetGroupMessages(id int, since time.Time) ([]models.Message, error) {
+// 	return nil, nil
+// }
+
+// func (db *Database) GrantPriv(granter models.User, receiver models.User, err error)
 
 func hashPassword(s *string) error {
 	if s == nil {

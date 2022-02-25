@@ -14,6 +14,10 @@ type User struct {
 	LoggedIn bool      `gorm:"column:logged" json:"logged"`
 }
 
+func (User) TableName() string {
+	return "users"
+}
+
 type Group struct {
 	ID      int       `gorm:"primaryKey"`
 	Name    string    `gorm:"column:name" json:"name"`
@@ -21,15 +25,25 @@ type Group struct {
 	Created time.Time `gorm:"column:created" json:"created"`
 }
 
+func (Group) TableName() string {
+	return "user_groups"
+}
+
 type Message struct {
 	ID     int       `gorm:"primaryKey"`
 	Posted time.Time `gorm:"column:posted" json:"posted"`
 }
 
+func (Message) TableName() string {
+	return "messages"
+}
+
 type Priv struct {
-	Add_user    bool
-	Delete_user bool
-	Settings    bool // title, desc, nicks
+	ID int `gorm:"primaryKey;column:id"` // title, desc, nicks
+}
+
+func (Priv) TableName() string {
+	return "rights"
 }
 
 type Member struct {
@@ -37,4 +51,8 @@ type Member struct {
 	id_user  int    `gorm:"primaryKey;column:id_user"`
 	nick     string `gorm:"column:nick"`
 	priv     Priv   `gorm:"embedded"`
+}
+
+func (Member) TableName() string {
+	return "members"
 }
