@@ -2,36 +2,39 @@ package models
 
 import (
 	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
 type User struct {
-	gorm.Model
-	Image    string    `json:"img"`
+	ID       int       `gorm:"primaryKey"`
 	UserName string    `gorm:"column:username" json:"username"`
 	Email    string    `gorm:"column:email" json:"email"`
 	Pass     string    `gorm:"column:password" json:"password"`
-	Desc     string    `gorm:"column:desc" json:"desc"`
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
 	LoggedIn bool      `gorm:"column:logged" json:"logged"`
 }
 
 type Group struct {
-	gorm.Model
-	Image   string    `json:"img"`
+	ID      int       `gorm:"primaryKey"`
 	Name    string    `gorm:"column:name" json:"name"`
+	Desc    string    `gorm:"column:desc" json:"desc"`
 	Created time.Time `gorm:"column:created" json:"created"`
 }
 
 type Message struct {
-	gorm.Model
+	ID     int       `gorm:"primaryKey"`
 	Posted time.Time `gorm:"column:posted" json:"posted"`
 }
 
 type Priv struct {
 	Add_user    bool
 	Delete_user bool
-	Settings    bool
+	Settings    bool // title, desc, nicks
+}
+
+type Member struct {
+	id_group int    `gorm:"primaryKey;column:id_group"`
+	id_user  int    `gorm:"primaryKey;column:id_user"`
+	nick     string `gorm:"column:nick"`
+	priv     Priv   `gorm:"embedded"`
 }
