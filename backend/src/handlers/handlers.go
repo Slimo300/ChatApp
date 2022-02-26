@@ -13,6 +13,7 @@ import (
 
 func (s *Server) Register(c *gin.Context) {
 	if s.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
 		return
 	}
 	user := models.User{
@@ -23,7 +24,7 @@ func (s *Server) Register(c *gin.Context) {
 
 	user, err := s.DB.RegisterUser(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
 		return
 	}
 

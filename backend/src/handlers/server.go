@@ -10,10 +10,6 @@ type Server struct {
 	domain string
 }
 
-func NewServer() (*Server, error) {
-	db, err := database.Setup()
-	if err != nil {
-		return nil, err
-	}
+func NewServer(db database.DBlayer) (*Server, error) {
 	return &Server{DB: db, secret: "wołowina", domain: "localhost"}, nil
 }
