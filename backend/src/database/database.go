@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	_ "github.com/go-sql-driver/mysql"
@@ -23,6 +24,9 @@ func Setup() (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.AutoMigrate(&models.User{})
+
 	return &Database{DB: db}, nil
 }
 
@@ -33,8 +37,14 @@ func (db *Database) GetUserById(id int) (user models.User, err error) {
 
 //RegisterUser adds a new user to database
 func (db *Database) RegisterUser(user models.User) (models.User, error) {
-	hashPassword(&user.Pass)
-	user.LoggedIn = true
+	pass, err := hashPassword(user.Pass)
+	if err != nil {
+		return models.User{}, err
+	}
+	user.Pass = pass
+	user.Active = time.Now()
+	user.SignUp = time.Now()
+	user.LoggedIn = false
 	return user, db.Create(&user).Error
 }
 
@@ -49,7 +59,7 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 		return user, ErrINVALIDPASSWORD
 	}
 	user.Pass = ""
-	err = result.Update("loggedin", 1).Error
+	err = result.Update("logged", 1).Error
 	if err != nil {
 		return user, err
 	}
@@ -57,8 +67,8 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 	return user, result.Find(&user).Error
 }
 
-func (db *Database) SignOutUser(id int) error {
-	return db.Table("users").Where(&models.User{ID: id}).Update("loggedin", 0).Error
+func (db *Database) SignOutUser(email string) error {
+	return db.Table("users").Where(&models.User{Email: email}).Update("logged", 0).Error
 }
 
 // // GetUserGroups returns a slice of Groups of which user is a member
@@ -87,18 +97,18 @@ func (db *Database) SignOutUser(id int) error {
 
 // func (db *Database) GrantPriv(granter models.User, receiver models.User, err error)
 
-func hashPassword(s *string) error {
-	if s == nil {
-		return errors.New("Reference provided for hashing password is nil")
+func hashPassword(s string) (string, error) {
+	if s == "" {
+		return "", errors.New("Reference provided for hashing password is nil")
 	}
-	sBytes := []byte(*s)
+	sBytes := []byte(s)
 	hashedBytes, err := bcrypt.GenerateFromPassword(sBytes, bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	*s = string(hashedBytes)
-	return nil
+	s = string(hashedBytes)
+	return s, nil
 }
 
 func checkPassword(existingHash, incomingPass string) bool {

@@ -5,9 +5,9 @@ import (
 )
 
 type User struct {
-	ID       int       `gorm:"primaryKey"`
+	ID       uint      `gorm:"primaryKey"`
 	UserName string    `gorm:"column:username" json:"username"`
-	Email    string    `gorm:"column:email" json:"email"`
+	Email    string    `gorm:"column:email;unique" json:"email"`
 	Pass     string    `gorm:"column:password" json:"password"`
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
@@ -19,7 +19,7 @@ func (User) TableName() string {
 }
 
 type Group struct {
-	ID      int       `gorm:"primaryKey"`
+	ID      uint      `gorm:"primaryKey"`
 	Name    string    `gorm:"column:name" json:"name"`
 	Desc    string    `gorm:"column:desc" json:"desc"`
 	Created time.Time `gorm:"column:created" json:"created"`
@@ -30,7 +30,7 @@ func (Group) TableName() string {
 }
 
 type Message struct {
-	ID     int       `gorm:"primaryKey"`
+	ID     uint      `gorm:"primaryKey"`
 	Posted time.Time `gorm:"column:posted" json:"posted"`
 }
 
@@ -39,7 +39,8 @@ func (Message) TableName() string {
 }
 
 type Priv struct {
-	ID int `gorm:"primaryKey;column:id"` // title, desc, nicks
+	ID     uint   `gorm:"primaryKey;column:id"` // title, desc, nicks
+	Rights string `gorm:"column:rights" json:"rights"`
 }
 
 func (Priv) TableName() string {
@@ -47,8 +48,8 @@ func (Priv) TableName() string {
 }
 
 type Member struct {
-	id_group int    `gorm:"primaryKey;column:id_group"`
-	id_user  int    `gorm:"primaryKey;column:id_user"`
+	id_group uint   `gorm:"primaryKey;column:id_group"`
+	id_user  uint   `gorm:"primaryKey;column:id_user"`
 	nick     string `gorm:"column:nick"`
 	priv     Priv   `gorm:"embedded"`
 }

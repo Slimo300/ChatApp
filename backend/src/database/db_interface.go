@@ -12,7 +12,7 @@ type DBlayer interface {
 	// GetUserGroups(id int) ([]models.Group, error)
 
 	SignInUser(name string, pass string) (models.User, error)
-	SignOutUser(id int) error
+	SignOutUser(email string) error
 
 	// GetGroupMessages(id int, since time.Time) ([]models.Message, error)
 
