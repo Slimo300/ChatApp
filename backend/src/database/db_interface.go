@@ -22,4 +22,4 @@ type DBlayer interface {
 	// GrantPriv(id_group, id_user int, priv models.Priv)
 }
 
-var ErrINVALIDPASSWORD = errors.New("Invalid password")
+var ErrINVALIDPASSWORD = errors.New("invalid password")

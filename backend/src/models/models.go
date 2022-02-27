@@ -9,9 +9,9 @@ type User struct {
 	UserName string    `gorm:"column:username" json:"username"`
 	Email    string    `gorm:"column:email;unique" json:"email"`
 	Pass     string    `gorm:"column:password" json:"password"`
-	Active   time.Time `gorm:"column:activity" json:"activity"`
-	SignUp   time.Time `gorm:"column:signup" json:"signup"`
-	LoggedIn bool      `gorm:"column:logged" json:"logged"`
+	Active   time.Time `gorm:"column:activity" json:"activity;omitempty"`
+	SignUp   time.Time `gorm:"column:signup" json:"signup;omitempty"`
+	LoggedIn bool      `gorm:"column:logged" json:"logged;omitempty"`
 }
 
 func (User) TableName() string {

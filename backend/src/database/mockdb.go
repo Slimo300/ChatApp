@@ -11,10 +11,10 @@ import (
 )
 
 type MockDB struct {
-	users    []models.User
-	groups   []models.Group
-	messages []models.Message
-	members  []models.Member
+	Users    []models.User
+	Groups   []models.Group
+	Messages []models.Message
+	Members  []models.Member
 }
 
 func NewMockDB() *MockDB {
@@ -26,7 +26,7 @@ func NewMockDB() *MockDB {
 				"active": "2019-01-13T22:00:45Z",
 				"username": "Mal",
 				"email": "mal.zein@email.com",
-				"password": "$2a$10$BUOsZ9O5Lt/YJv31gMio/.HvuOTiu7waiE936g7dnKQ37VY8he2GW",
+				"password": "$2a$10$6BSuuiaPdRJJF2AygYAfnOGkrKLY2o0wDWbEpebn.9Rk0O95D3hW.",
 				"logged": true,
 		},
 		{
@@ -35,18 +35,18 @@ func NewMockDB() *MockDB {
 				"active": "2019-01-12T22:39:01Z",
 				"username": "River",
 				"email": "river.sam@email.com",
-				"password": "$2a$10$mNbCLmfCAc0.4crDg3V3fe0iO1yr03aRfE7Rr3vdfKMGVnnzovCZq",
+				"password": "$2a$10$BvQjoN.PH8FkVPV3ZMBK1O.3LGhrF/RhZ2kM/h9M3jPA1d2lZkL.C",
 				"logged": false,
 		},
 		{
 				"ID": 3,
+				"username": "John",
 				"signup": "2019-01-13T08:43:44Z",
 				"active": "2019-01-13T15:12:25Z",
-				"username": "John",
 				"email": "john.doe@bla.com",
 				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
 				"logged": false,
-		}
+		},
 	]
 	`
 
@@ -54,7 +54,7 @@ func NewMockDB() *MockDB {
 	json.Unmarshal([]byte(USERS), &users)
 
 	// add data
-	return &MockDB{users: users}
+	return &MockDB{Users: users}
 }
 
 // GetUserById(id int) (models.User, error)
@@ -64,7 +64,7 @@ func NewMockDB() *MockDB {
 // SignOutUser(email string) error
 
 func (m *MockDB) GetUserById(id int) (models.User, error) {
-	for _, user := range m.users {
+	for _, user := range m.Users {
 		if user.ID == uint(id) {
 			return user, nil
 		}
@@ -73,34 +73,41 @@ func (m *MockDB) GetUserById(id int) (models.User, error) {
 }
 
 func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
-	user.ID = uint(len(m.users) + 1)
+	user.ID = uint(len(m.Users) + 1)
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false
-	for _, u := range m.users {
+	pass, err := hashPassword(user.Pass)
+	user.Pass = pass
+	if err != nil {
+		return models.User{}, errors.New("couldn't register user")
+	}
+	for _, u := range m.Users {
 		if user.Email == u.Email {
 			return user, errors.New("email taken")
 		}
 	}
-	m.users = append(m.users, user)
+	m.Users = append(m.Users, user)
 	return user, nil
 }
 
 func (m *MockDB) SignInUser(name, pass string) (models.User, error) {
-	for _, user := range m.users {
-		if !strings.EqualFold(user.Email, name) {
+	for _, user := range m.Users {
+		if !(user.Email == name) {
 			continue
 		}
 		if checkPassword(user.Pass, pass) {
 			user.LoggedIn = true
 			return user, nil
+		} else {
+			return models.User{}, ErrINVALIDPASSWORD
 		}
 	}
 	return models.User{}, fmt.Errorf("No email %s in database", name)
 }
 
 func (m *MockDB) SignOutUser(email string) error {
-	for _, user := range m.users {
+	for _, user := range m.Users {
 		if !strings.EqualFold(user.Email, email) {
 			continue
 		}
