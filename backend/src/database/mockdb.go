@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -76,6 +77,11 @@ func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false
+	for _, u := range m.users {
+		if user.Email == u.Email {
+			return user, errors.New("email taken")
+		}
+	}
 	m.users = append(m.users, user)
 	return user, nil
 }
