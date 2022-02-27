@@ -51,6 +51,7 @@ func NewMockDB() *MockDB {
 	`
 
 	var users []models.User
+	fmt.Println(users)
 	json.Unmarshal([]byte(USERS), &users)
 
 	// add data
