@@ -88,11 +88,12 @@ func (s *Server) SignIn(c *gin.Context) {
 // SignOutUser method
 func (s *Server) SignOutUser(c *gin.Context) {
 	if s.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
 		return
 	}
 
 	if err := s.DB.SignOutUser(c.Query("email")); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 

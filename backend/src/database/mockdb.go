@@ -11,10 +11,7 @@ import (
 )
 
 type MockDB struct {
-	Users    []models.User
-	Groups   []models.Group
-	Messages []models.Message
-	Members  []models.Member
+	Users []models.User
 }
 
 func NewMockDB() *MockDB {
@@ -27,7 +24,7 @@ func NewMockDB() *MockDB {
 				"username": "Mal",
 				"email": "mal.zein@email.com",
 				"password": "$2a$10$6BSuuiaPdRJJF2AygYAfnOGkrKLY2o0wDWbEpebn.9Rk0O95D3hW.",
-				"logged": true,
+				"logged": true
 		},
 		{
 				"ID": 2,
@@ -36,7 +33,7 @@ func NewMockDB() *MockDB {
 				"username": "River",
 				"email": "river.sam@email.com",
 				"password": "$2a$10$BvQjoN.PH8FkVPV3ZMBK1O.3LGhrF/RhZ2kM/h9M3jPA1d2lZkL.C",
-				"logged": false,
+				"logged": false
 		},
 		{
 				"ID": 3,
@@ -45,13 +42,12 @@ func NewMockDB() *MockDB {
 				"active": "2019-01-13T15:12:25Z",
 				"email": "john.doe@bla.com",
 				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
-				"logged": false,
-		},
+				"logged": false
+		}
 	]
 	`
 
 	var users []models.User
-	fmt.Println(users)
 	json.Unmarshal([]byte(USERS), &users)
 
 	// add data

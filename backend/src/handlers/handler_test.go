@@ -103,38 +103,33 @@ func TestSignIn(t *testing.T) {
 	}
 	testCases := []struct {
 		desc               string
-		err                bool
 		user               models.User
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "loginsuccess",
-			err:                false,
 			user:               models.User{Email: "mal.zein@email.com", Pass: "test"},
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   models.User{Email: "mal.zein@email.com"},
+			expectedResponse:   gin.H{"message": "success"},
 		},
 		{
 			desc:               "logininvalidemail",
-			err:                true,
 			user:               models.User{Email: "mal.zein@email.com1", Pass: "test"},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid email"},
 		},
 		{
 			desc:               "logininvalidpass",
-			err:                true,
 			user:               models.User{Email: "mal.zein@email.com", Pass: "passeord"},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "invalid password"},
 		},
 		{
 			desc:               "loginnosuchuser",
-			err:                true,
 			user:               models.User{Email: "johnny@net.pl", Pass: "password"},
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "not a valid email"},
+			expectedResponse:   gin.H{"err": "No email johnny@net.pl in database"},
 		},
 	}
 
@@ -151,16 +146,59 @@ func TestSignIn(t *testing.T) {
 			if response.StatusCode != tC.expectedStatusCode {
 				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
 			}
-			var respBody interface{}
-			if tC.err {
-				var errmsg gin.H
-				json.NewDecoder(response.Body).Decode(&errmsg)
-				respBody = errmsg
-			} else {
-				var user models.User
-				json.NewDecoder(response.Body).Decode(&user)
-				respBody = models.User{Email: user.Email}
+			var respBody gin.H
+			json.NewDecoder(response.Body).Decode(&respBody)
+			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
+				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
 			}
+		})
+	}
+}
+
+func TestSignOut(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db := database.NewMockDB()
+	s, err := handlers.NewServer(db)
+	if err != nil {
+		t.Errorf("Error when creating server")
+	}
+
+	testCases := []struct {
+		desc               string
+		email              string
+		expectedStatusCode int
+		expectedResponse   interface{}
+	}{
+		{
+			desc:               "logoutsuccess",
+			email:              "mal.zein@email.com",
+			expectedStatusCode: http.StatusOK,
+			expectedResponse:   gin.H{"message": "ok"},
+		},
+		{
+			desc:               "logoutnouser",
+			email:              "johnny@user.com",
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "No user with email: johnny@user.com"},
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			url := fmt.Sprintf("/api/signout?email=%s", tC.email)
+			req := httptest.NewRequest(http.MethodPost, url, nil)
+			w := httptest.NewRecorder()
+			_, engine := gin.CreateTestContext(w)
+			engine.Handle(http.MethodPost, "/api/signout", s.SignOutUser)
+			engine.ServeHTTP(w, req)
+			response := w.Result()
+
+			if response.StatusCode != tC.expectedStatusCode {
+				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
+			}
+
+			var respBody gin.H
+			json.NewDecoder(response.Body).Decode(&respBody)
 			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
 				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
 			}
