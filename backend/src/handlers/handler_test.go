@@ -17,7 +17,7 @@ import (
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s, err := handlers.NewServer(&mock)
+	s, err := handlers.NewServer(mock)
 	if err != nil {
 		t.Errorf("Couldn't create a server")
 	}
@@ -27,6 +27,10 @@ func TestRegister(t *testing.T) {
 		user               models.User
 		expectedStatusCode int
 		expectedResponse   interface{}
+		function           func(*gin.Context)
+		method             string
+		path               string
+		url                map[string]string
 	}{
 		{
 			desc:               "testsuccessfull",
@@ -34,6 +38,9 @@ func TestRegister(t *testing.T) {
 			user:               models.User{UserName: "johnny", Email: "johnny@net.pl", Pass: "password"},
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   models.User{UserName: "johnny", Email: "johnny@net.pl"},
+			function:           s.Register,
+			method:             http.MethodPost,
+			path:               "/api/register",
 		},
 		{
 			desc:               "nopasswordprovided",
@@ -41,6 +48,9 @@ func TestRegister(t *testing.T) {
 			user:               models.User{Email: "johnny@net.pl", Pass: ""},
 			expectedStatusCode: http.StatusInternalServerError,
 			expectedResponse:   gin.H{"err": "couldn't register user"},
+			function:           s.Register,
+			method:             http.MethodPost,
+			path:               "/api/register",
 		},
 	}
 	for _, tC := range testCases {
@@ -49,7 +59,7 @@ func TestRegister(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, url, nil)
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.POST("/api/register", s.Register)
+			engine.Handle(tC.method, "/api/register", tC.function)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 

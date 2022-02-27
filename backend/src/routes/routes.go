@@ -6,7 +6,7 @@ import (
 )
 
 func Setup(engine *gin.Engine, server *handlers.Server) {
-	engine.Use(handlers.CORSMiddleware())
+	engine.Use(CORSMiddleware())
 	engine.POST("/api/login", server.SignIn)
 	engine.POST("/api/register", server.Register)
 	engine.POST("/api/signout", server.SignOutUser)

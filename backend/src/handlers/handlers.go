@@ -11,6 +11,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Register method
 func (s *Server) Register(c *gin.Context) {
 	if s.DB == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
@@ -20,6 +22,18 @@ func (s *Server) Register(c *gin.Context) {
 		UserName: c.Query("name"),
 		Email:    c.Query("email"),
 		Pass:     c.Query("password"),
+	}
+	if !isEmailValid(user.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
+		return
+	}
+	if len(user.Pass) <= 6 {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid password"})
+		return
+	}
+	if len(user.UserName) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid username"})
+		return
 	}
 
 	user, err := s.DB.RegisterUser(user)
@@ -31,12 +45,17 @@ func (s *Server) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SignIn method
 func (s *Server) SignIn(c *gin.Context) {
 	if s.DB == nil {
 		return
 	}
 
 	email := c.Query("email")
+	if !isEmailValid(email) {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
+	}
 	password := c.Query("password")
 
 	user, err := s.DB.SignInUser(email, password)
@@ -65,6 +84,8 @@ func (s *Server) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+// SignOutUser method
 func (s *Server) SignOutUser(c *gin.Context) {
 	if s.DB == nil {
 		return
