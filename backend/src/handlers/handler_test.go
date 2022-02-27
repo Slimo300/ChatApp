@@ -27,30 +27,41 @@ func TestRegister(t *testing.T) {
 		user               models.User
 		expectedStatusCode int
 		expectedResponse   interface{}
-		function           func(*gin.Context)
-		method             string
-		path               string
-		url                map[string]string
 	}{
 		{
-			desc:               "testsuccessfull",
+			desc:               "registersuccess",
 			err:                false,
 			user:               models.User{UserName: "johnny", Email: "johnny@net.pl", Pass: "password"},
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   models.User{UserName: "johnny", Email: "johnny@net.pl"},
-			function:           s.Register,
-			method:             http.MethodPost,
-			path:               "/api/register",
 		},
 		{
-			desc:               "nopasswordprovided",
+			desc:               "registeremailtaken",
 			err:                true,
-			user:               models.User{Email: "johnny@net.pl", Pass: ""},
+			user:               models.User{UserName: "johnny", Email: "johnny@net.pl", Pass: "password"},
 			expectedStatusCode: http.StatusInternalServerError,
 			expectedResponse:   gin.H{"err": "couldn't register user"},
-			function:           s.Register,
-			method:             http.MethodPost,
-			path:               "/api/register",
+		},
+		{
+			desc:               "registerinvalidpass",
+			err:                true,
+			user:               models.User{UserName: "johnny", Email: "johnny@net.pl", Pass: ""},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "not a valid password"},
+		},
+		{
+			desc:               "registerinvalidemail",
+			err:                true,
+			user:               models.User{UserName: "johnny", Email: "johnny@net.pl2", Pass: "password"},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "not a valid email"},
+		},
+		{
+			desc:               "registerinvalidusername",
+			err:                true,
+			user:               models.User{UserName: "j", Email: "johnny@net.pl", Pass: "password"},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "not a valid username"},
 		},
 	}
 	for _, tC := range testCases {
@@ -59,7 +70,7 @@ func TestRegister(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, url, nil)
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(tC.method, "/api/register", tC.function)
+			engine.Handle(http.MethodPost, "/api/register", s.Register)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
