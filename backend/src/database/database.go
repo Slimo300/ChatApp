@@ -68,7 +68,15 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 }
 
 func (db *Database) SignOutUser(email string) error {
-	return db.Table("users").Where(&models.User{Email: email}).Update("logged", 0).Error
+	user := db.Table("users").Where(models.User{Email: email}).First(&models.User{Email: email})
+	if user.Error != nil {
+		return user.Error
+	}
+	err := user.Update("logged", 0).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // // GetUserGroups returns a slice of Groups of which user is a member

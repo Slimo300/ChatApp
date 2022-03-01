@@ -1,33 +1,55 @@
 import React from 'react';
-import NavLink from 'react-router-dom'
+import {NavLink} from 'react-router-dom'
 
 export default class Navigation extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {
+          user: this.props.user
+        };
+      }
+    
+
     render() {
         return (
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">Navbar</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="#">Features</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="#">Pricing</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link disabled">Disabled</a>
-                        </li>
+            <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+                <a className="navbar-brand" href="#">ChatApp</a>
+                <div className="collapse navbar-collapse" id="navbarCollapse">
+                    <ul className="navbar-nav mr-auto">
+                    
                     </ul>
-                    </div>
+                    <NavLink className="nav-item nav-link" to="/login">Login</NavLink>
+                    <NavLink className="nav-item nav-link" to="/register">Register</NavLink>
                 </div>
             </nav>
+        )
+    }
+}
+
+class NavUnathenticated extends React.Component {
+    render() {
+        return (
+            <div className="collapse navbar-collapse" id="navbarCollapse">
+                <ul className="navbar-nav mr-auto"></ul>
+                <NavLink className="nav-item nav-link" to="/login">Login</NavLink>
+                <NavLink className="nav-item nav-link" to="/register">Register</NavLink>
+            </div>
+        )
+    }
+}
+
+class NavAuthenticated extends React.Component {
+    render() {
+        return (
+            <div className="collapse navbar-collapse" id="navbarCollapse">
+                <ul className="navbar-nav mr-auto">
+                    <NavLink className="nav-item nav-link" to="/logout">Create Room</NavLink>
+                    <NavLink className="nav-item nav-link" to="/logout">Add Friend</NavLink>
+                </ul>
+
+                <NavLink className="nav-item nav-link" to="/logout">Account</NavLink>
+                <NavLink className="nav-item nav-link" to="/logout">Logout</NavLink>
+            </div>
         )
     }
 }

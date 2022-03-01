@@ -11,11 +11,11 @@ import (
 
 func main() {
 	engine := gin.Default()
-	db := database.NewMockDB()
-	// db, err := database.Setup()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	// db := database.NewMockDB()
+	db, err := database.Setup()
+	if err != nil {
+		log.Fatal(err)
+	}
 	server, err := handlers.NewServer(db)
 	if err != nil {
 		log.Fatal(err)

@@ -1,4 +1,5 @@
 import React from "react";
+import { Navigate } from "react-router-dom";
 
 export default class SignInForm extends React.Component {
     constructor(props) {
@@ -17,9 +18,27 @@ export default class SignInForm extends React.Component {
         });
     }
 
-    handleSubmit(event) {
+    async handleSubmit(event) {
         event.preventDefault();
-        console.log(JSON.stringify(this.state));
+        let email = this.state.email;
+        let password = this.state.password;
+
+        const response = await fetch("http://localhost:8080/api/login",
+        {
+          method: 'POST',
+          headers: {"Content-Type": "application/json"},
+          credentials: "include",
+          body: JSON.stringify({
+            email,
+            password
+          })
+        });
+
+        const content = await response.json()
+        console.log(content)
+        this.props.setName(content.name)
+        console.log(content.name)
+        return (<Navigate to="/" />)
     }
 
     render() {

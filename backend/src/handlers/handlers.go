@@ -18,10 +18,11 @@ func (s *Server) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
 		return
 	}
-	user := models.User{
-		UserName: c.Query("name"),
-		Email:    c.Query("email"),
-		Pass:     c.Query("password"),
+	var user models.User
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
 	}
 	if !isEmailValid(user.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
@@ -36,7 +37,7 @@ func (s *Server) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := s.DB.RegisterUser(user)
+	user, err = s.DB.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
 		return
@@ -51,14 +52,19 @@ func (s *Server) SignIn(c *gin.Context) {
 	if s.DB == nil {
 		return
 	}
-
-	email := c.Query("email")
-	if !isEmailValid(email) {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
+	var user models.User
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
 	}
-	password := c.Query("password")
 
-	user, err := s.DB.SignInUser(email, password)
+	if !isEmailValid(user.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"email": user.Email, "err": "not a valid email"})
+		return
+	}
+
+	user, err = s.DB.SignInUser(user.Email, user.Pass)
 	if err != nil {
 		if err == database.ErrINVALIDPASSWORD {
 			c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
@@ -81,7 +87,7 @@ func (s *Server) SignIn(c *gin.Context) {
 
 	c.SetCookie("jwt", tokenString, 3600, "/", s.domain, false, true)
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"name": user.UserName})
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,13 +97,19 @@ func (s *Server) SignOutUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
 		return
 	}
+	var user models.User
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error(), "email": user.Email})
+		return
+	}
 
-	if err := s.DB.SignOutUser(c.Query("email")); err != nil {
+	if err = s.DB.SignOutUser(user.Email); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
 	c.SetCookie("jwt", "", -1, "/", s.domain, false, true)
 
-	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+	c.JSON(http.StatusOK, gin.H{"name": user.UserName})
 }
