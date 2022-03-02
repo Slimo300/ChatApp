@@ -64,11 +64,11 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 		return user, err
 	}
 
-	return user, result.Find(&user).Error
+	return user, nil
 }
 
-func (db *Database) SignOutUser(email string) error {
-	user := db.Table("users").Where(models.User{Email: email}).First(&models.User{Email: email})
+func (db *Database) SignOutUser(id uint) error {
+	user := db.Table("users").First(&models.User{ID: id})
 	if user.Error != nil {
 		return user.Error
 	}

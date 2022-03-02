@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
@@ -103,13 +102,13 @@ func (m *MockDB) SignInUser(name, pass string) (models.User, error) {
 	return models.User{}, fmt.Errorf("No email %s in database", name)
 }
 
-func (m *MockDB) SignOutUser(email string) error {
+func (m *MockDB) SignOutUser(id uint) error {
 	for _, user := range m.Users {
-		if !strings.EqualFold(user.Email, email) {
+		if user.ID != id {
 			continue
 		}
 		user.LoggedIn = false
 		return nil
 	}
-	return fmt.Errorf("No user with email: %s", email)
+	return fmt.Errorf("No user with id: %d", id)
 }
