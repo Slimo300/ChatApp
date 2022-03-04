@@ -13,10 +13,11 @@ function RegisterForm() {
     e.preventDefault();
 
     if (password !== rpassword) {
-      setMessage("Passwords don't match")
+      setMessage("Passwords don't match");
+      return;
     }
 
-    await fetch('http://localhost:8080/api/register', {
+    const response = await fetch('http://localhost:8080/api/register', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',
@@ -26,8 +27,15 @@ function RegisterForm() {
           password
         })
     });
+    const content = await response.json();
+    console.log(content.message);
 
-    setRedirect(true);
+    if (content.message == "success") {
+      setRedirect(true);
+    }
+    else {
+      setMessage(content.err);
+    }
   };
 
   if (redirect) {
@@ -42,19 +50,19 @@ function RegisterForm() {
             <div className="mb-3 text-center">{message}</div>
             <div className="mb-3 text-center">
               <label htmlFor="username" className="form-label">Username</label>
-              <input name="username" type="text" className="form-control" id="username" onChange={setName}/>
+              <input name="username" type="text" className="form-control" id="username" onChange={(e) => setName(e.target.value)}/>
             </div>
             <div className="mb-3 text-center">
               <label htmlFor="email" className="form-label">Email address</label>
-              <input name="email" type="email" className="form-control" id="email" onChange={setEmail}/>
+              <input name="email" type="email" className="form-control" id="email" onChange={(e) => setEmail(e.target.value)}/>
             </div>
             <div className="mb-3 text-center">
               <label htmlFor="pass" className="form-label">Password</label>
-              <input name="password" type="password" className="form-control" id="password" onChange={setPassword}/>
+              <input name="password" type="password" className="form-control" id="password" onChange={(e) => setPassword(e.target.value)}/>
             </div>
             <div className="mb-3 text-center">
               <label htmlFor="pass" className="form-label">Repeat Password</label>
-              <input name="rpassword" type="password" className="form-control" id="rpassword" onChange={setRPassword}/>
+              <input name="rpassword" type="password" className="form-control" id="rpassword" onChange={(e) => setRPassword(e.target.value)}/>
             </div>
             <div className="text-center">
               <button type="submit" className="btn btn-primary text-center">Submit</button>

@@ -1,21 +1,21 @@
 import React from "react";
 import {Navigate} from "react-router-dom";
 
-export default function AuthMain(){
+const Main = (props) => {
 
-    console.log(this.props.name)
+    console.log(props.name)
     return (
         <div>
-            {this.props.name === ""? <Navigate to="/login" />:<Main/>}
+            {props.name === undefined? <Navigate to="/login" />:<AuthMain name={props.name}/>}
         </div>
     );
 }
 
-class Main extends React.Component {
+const AuthMain = (props) => {
 
-    render() {
-        return (
-            <h1>Main page</h1>
-        )
-    }
+    return (
+        <h1>Hello {props.name}!</h1>
+    )
 }
+
+export default Main;

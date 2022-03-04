@@ -11,7 +11,8 @@ const SignInForm = (props) => {
   const submit = async (e) => {
     e.preventDefault();
     if (email === "") {
-      setMessage("Email can't be blank")
+      setMessage("email cannot be blank");
+      return;
     }
 
     const response = await fetch('http://localhost:8080/api/login', {
@@ -25,10 +26,15 @@ const SignInForm = (props) => {
     });
 
     const content = await response.json();
-    console.log(content)
+    
+    if (content.name != undefined){
+      console.log(content.name);
+      props.setName(content.name);
+      setRedirect(true);
+    }
 
-    setRedirect(true);
-    props.setName(content.name);
+    setMessage(content.err);    
+    
   }
 
   if (redirect) {
@@ -38,16 +44,16 @@ const SignInForm = (props) => {
   return (
     <div className="mt-5 d-flex justify-content-center">
       <div className="mt-5 row">
-        {message}
         <form onSubmit={submit}>
           <div className="display-3 mb-4 text-center text-primary"> Log In</div>
+          <div id="message" className="mb-3 text-center">{message}</div>
           <div className="mb-3 text-center">
             <label htmlFor="email" className="form-label">Email address</label>
-            <input name="email" type="email" className="form-control" id="email" onChange={setEmail}/>
+            <input type="email" className="form-control" id="email" onChange={e => setEmail(e.target.value)}/>
           </div>
           <div className="mb-3 text-center">
             <label htmlFor="password" className="form-label">Password</label>
-            <input name="password" type="password" className="form-control" id="password" onChange={setPassword}/>
+            <input type="password" className="form-control" id="password" onChange={e => setPassword(e.target.value)}/>
           </div>
           <div className="text-center">
             <button type="submit" className="btn btn-primary text-center">Submit</button>

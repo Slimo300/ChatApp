@@ -1,48 +1,48 @@
 import React from 'react';
 import {NavLink} from 'react-router-dom'
 
-function Navigation() {
+const Navigation = (props) => {
+    const logout = async () => {
+        await fetch("http://localhost:8080/api/signout", {
+            method: "POST",
+            credentials: "include",
+            headers: {"Content-Type": "application/json"}
+        });
+        props.setName('');
+    };
 
-    return (
-        <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-            <a className="navbar-brand" href="#">ChatApp</a>
-            <div className="collapse navbar-collapse" id="navbarCollapse">
-                <ul className="navbar-nav mr-auto">
-                
-                </ul>
-                <NavLink className="nav-item nav-link" to="/login">Login</NavLink>
-                <NavLink className="nav-item nav-link" to="/register">Register</NavLink>
-            </div>
-        </nav>
-    )
-}
+    let menu;
 
-class NavUnathenticated extends React.Component {
-    render() {
-        return (
+    if (props.name === undefined) {
+        menu = (
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav mr-auto"></ul>
                 <NavLink className="nav-item nav-link" to="/login">Login</NavLink>
                 <NavLink className="nav-item nav-link" to="/register">Register</NavLink>
             </div>
-        )
-    }
-}
-
-class NavAuthenticated extends React.Component {
-    render() {
-        return (
+        );
+    } else {
+        menu = (
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav mr-auto">
                     <NavLink className="nav-item nav-link" to="/logout">Create Room</NavLink>
                     <NavLink className="nav-item nav-link" to="/logout">Add Friend</NavLink>
                 </ul>
-
+    
                 <NavLink className="nav-item nav-link" to="/logout">Account</NavLink>
-                <NavLink className="nav-item nav-link" to="/logout">Logout</NavLink>
+                <NavLink className="nav-item nav-link" to="/login" onClick={logout}>Logout</NavLink>
             </div>
-        )
+        );
     }
+
+    return (
+        <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+            <a className="navbar-brand" href="#">ChatApp</a>
+            <div className="collapse navbar-collapse" id="navbarCollapse">
+                {menu}
+            </div>
+        </nav>
+    )
 }
 
 export default Navigation;
