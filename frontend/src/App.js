@@ -1,42 +1,56 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import SignInForm from './Login';
 import AuthMain from "./Main";
 import Navigation from "./Navigation";
 import RegisterForm from "./Register";
 
-class App extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      user: ""
-    }
-    this.setName = this.setName.bind(this)
-  }
+function App() {
   
-  setName(name) {
-    this.setState(
-    {
-      user: name
-    });
-  }
+  const [name, setName] = useState('');
 
-  render() {
+  // useEffect(() => {
+  //   async function fetchMyAPI() {
+  //     let response = await fetch('http://localhost:8080/api/user', {
+  //       headers: {'Content-Type': 'application/json'},
+  //       credentials: 'include',
+  //   })
+  //     response = await response.json()
+  //     setName(response.name)
+  //   }
+
+  //   fetchMyAPI()
+  // }, [])
+
+  useEffect(() => {
+    (
+        async () => {
+            const response = await fetch('http://localhost:8080/api/user', {
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+            });
+
+            const content = await response.json();
+
+            setName(content.name);
+        }
+    )();
+  });
+
     return (
         <div>
           <Router>
-            <Navigation user={this.state.user}></Navigation>
-            <div className="container pt-4 mt-4">
+            <Navigation user={name} setName={setName}></Navigation>
+            <main className="container pt-4 mt-4">
               <Routes>
-                <Route path="/" element={<AuthMain name={this.state.user}/>} exact />
-                <Route path="/login" element={<SignInForm setName={this.setName}/>} exact />
+                <Route path="/" element={<AuthMain name={name}/>} exact />
+                <Route path="/login" element={<SignInForm setName={setName}/>} exact />
                 <Route path="/register" element={<RegisterForm/>} exact />
               </Routes>
-            </div>
+            </main>
           </Router>
         </div>
     )
-  }
 }
 
 export default App;
