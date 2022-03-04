@@ -25,10 +25,10 @@ function App() {
   });
 
     return (
-        <div>
+        <div >
           <Router>
             <Navigation name={name} setName={setName}></Navigation>
-            <main className="container pt-4 mt-4">
+            <main>
               <Routes>
                 <Route path="/" element={<Main name={name}/>}/>
                 <Route path="/login" element={<SignInForm setName={setName}/>}/>

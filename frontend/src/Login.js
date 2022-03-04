@@ -42,6 +42,7 @@ const SignInForm = (props) => {
   }
 
   return (
+    <div className="container pt-4 mt-4">
     <div className="mt-5 d-flex justify-content-center">
       <div className="mt-5 row">
         <form onSubmit={submit}>
@@ -61,6 +62,7 @@ const SignInForm = (props) => {
           <div className="display-5 mt-4 text-center text-primary"><a href="/register">or Register</a></div>
         </form>
       </div>
+    </div>
     </div>
    )
 }

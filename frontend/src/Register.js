@@ -43,6 +43,7 @@ function RegisterForm() {
   }
 
   return (
+    <div className="container mt-4 pt-4">
       <div className="mt-5 d-flex justify-content-center">
         <div className="mt-5 row">
           <form onSubmit={submit}>
@@ -70,6 +71,7 @@ function RegisterForm() {
             <div className="display-5 mt-4 text-center text-primary"><a href="#">or Log in</a></div>
           </form>
         </div>
+      </div>
       </div>
     );
   }
