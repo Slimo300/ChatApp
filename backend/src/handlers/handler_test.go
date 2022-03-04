@@ -11,7 +11,6 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
-	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,42 +23,36 @@ func TestRegister(t *testing.T) {
 	}
 	testCases := []struct {
 		desc               string
-		err                bool
 		data               map[string]string
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "registersuccess",
-			err:                false,
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   models.User{UserName: "johnny", Email: "johnny@net.pl"},
+			expectedResponse:   gin.H{"message": "success"},
 		},
 		{
 			desc:               "registeremailtaken",
-			err:                true,
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusInternalServerError,
-			expectedResponse:   gin.H{"err": "couldn't register user"},
+			expectedResponse:   gin.H{"err": "email taken"},
 		},
 		{
 			desc:               "registerinvalidpass",
-			err:                true,
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": ""},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid password"},
 		},
 		{
 			desc:               "registerinvalidemail",
-			err:                true,
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl2", "password": "password"},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid email"},
 		},
 		{
 			desc:               "registerinvalidusername",
-			err:                true,
 			data:               map[string]string{"username": "j", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid username"},
@@ -82,15 +75,9 @@ func TestRegister(t *testing.T) {
 				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
 			}
 			var respBody interface{}
-			if tC.err {
-				var errmsg gin.H
-				json.NewDecoder(response.Body).Decode(&errmsg)
-				respBody = errmsg
-			} else {
-				var user models.User
-				json.NewDecoder(response.Body).Decode(&user)
-				respBody = models.User{UserName: user.UserName, Email: user.Email}
-			}
+			var errmsg gin.H
+			json.NewDecoder(response.Body).Decode(&errmsg)
+			respBody = errmsg
 			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
 				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
 			}
