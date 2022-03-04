@@ -38,11 +38,11 @@ func (s *Server) Register(c *gin.Context) {
 
 	user, err = s.DB.RegisterUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ func (s *Server) SignOutUser(c *gin.Context) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // GetUserById method
-func (s *Server) GetUserById(c *gin.Context) {
+func (s *Server) GetUser(c *gin.Context) {
 	if s.DB == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
 		return
@@ -123,6 +123,7 @@ func (s *Server) GetUserById(c *gin.Context) {
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
 	}
 
 	user, err := s.DB.GetUserById(id)
@@ -130,6 +131,7 @@ func (s *Server) GetUserById(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "no such user"})
 		return
 	}
+	user.Pass = ""
 
 	c.JSON(http.StatusOK, user)
 }

@@ -10,4 +10,5 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	engine.POST("/api/login", server.SignIn)
 	engine.POST("/api/register", server.Register)
 	engine.POST("/api/signout", server.SignOutUser)
+	engine.GET("/api/user", server.GetUser)
 }
