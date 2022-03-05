@@ -112,3 +112,15 @@ func (m *MockDB) SignOutUser(id uint) error {
 	}
 	return fmt.Errorf("No user with id: %d", id)
 }
+
+func (m *MockDB) CreateGroup(id uint, name, desc string) (models.Group, error) {
+	return models.Group{}, nil
+}
+
+func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) error {
+	return nil
+}
+
+func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
+	return nil
+}

@@ -16,10 +16,11 @@ type DBlayer interface {
 
 	// GetGroupMessages(id int, since time.Time) ([]models.Message, error)
 
-	// CreateGroup(name, desc string) (models.Group, error)
-	// AddUserToGroup(id int) error
-	// DeleteUserFromGroup(id int) error
+	CreateGroup(id uint, name, desc string) (models.Group, error)
+	AddUserToGroup(name string, id_group uint, id_user uint) error
+	DeleteUserFromGroup(id_member, id_group, id_user uint) error
 	// GrantPriv(id_group, id_user int, priv models.Priv)
 }
 
 var ErrINVALIDPASSWORD = errors.New("invalid password")
+var ErrNoPrivilages = errors.New("insufficient privilages")

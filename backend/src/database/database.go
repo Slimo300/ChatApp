@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type Database struct {
@@ -18,14 +18,15 @@ type Database struct {
 
 // Setup creates Database object and initializes connection between MySQL database
 func Setup() (*Database, error) {
-	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
-			os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLDBNAME")))
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
+		os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLDBNAME"))), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Priv{})
 
 	return &Database{DB: db}, nil
 }
@@ -91,9 +92,77 @@ func (db *Database) SignOutUser(id uint) error {
 // 	return nil
 // }
 
-// func (db *Database) CreateGroup(name, desc string) (models.Group, error) {
-// 	return models.Group{ID: 1, Name: name, Desc: desc, Created: time.Now()}, nil
-// }
+func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
+	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
+
+	db.Transaction(func(tx *gorm.DB) error {
+		creation := tx.Create(&group)
+		if creation.Error != nil {
+			return creation.Error
+		}
+		member := models.Member{UserID: id, GroupID: group.ID, PrivID: 9}
+		m_create := tx.Create(&member)
+		if m_create.Error != nil {
+			return m_create.Error
+		}
+
+		return nil
+	})
+
+	return group, nil
+}
+
+func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) error {
+
+	var priv models.Priv
+	db.Table("members").Select("priv.adding").Joins("inner join priv on priv.id = members.id_priv").
+		Joins("inner join users on users.id = members.user_id").
+		Joins("inner join groups on groups.id = members.group_id").
+		Where("users.id = ?", id_user).
+		Where("groups.id = ?", id_group).Scan(&priv)
+
+	if !priv.Adding {
+		return ErrNoPrivilages
+	}
+	var user models.User
+	selection := db.Where(&models.User{UserName: username}).First(&user)
+	if selection.Error != nil {
+		return selection.Error
+	}
+	member := models.Member{UserID: user.ID, GroupID: id_group, PrivID: 1}
+	creation := db.Create(&member)
+	if creation.Error != nil {
+		return creation.Error
+	}
+
+	return nil
+}
+
+func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
+
+	var priv models.Priv
+	db.Table("members").Select("priv.adding").Joins("inner join priv on priv.id = members.id_priv").
+		Joins("inner join users on users.id = members.user_id").
+		Joins("inner join groups on groups.id = members.group_id").
+		Where("users.id = ?", id_user).
+		Where("groups.id = ?", id_group).Scan(&priv)
+
+	if !priv.Deleting {
+		return ErrNoPrivilages
+	}
+
+	var member models.Member
+	selection := db.Where(&models.Member{ID: id_member}).First(&member)
+	if selection.Error != nil {
+		return selection.Error
+	}
+
+	deletion := db.Delete(&member)
+	if deletion.Error != nil {
+		return deletion.Error
+	}
+	return nil
+}
 
 // func (db *Database) DeleteUserFromGroup(id int) error {
 // 	return nil

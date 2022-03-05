@@ -12,6 +12,7 @@ type User struct {
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
 	LoggedIn bool      `gorm:"column:logged" json:"logged"`
+	Members  []Member  `gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {
@@ -26,12 +27,14 @@ type Group struct {
 }
 
 func (Group) TableName() string {
-	return "user_groups"
+	return "groups"
 }
 
 type Message struct {
-	ID     uint      `gorm:"primaryKey"`
-	Posted time.Time `gorm:"column:posted" json:"posted"`
+	ID       uint      `gorm:"primaryKey"`
+	Posted   time.Time `gorm:"column:posted" json:"posted"`
+	MemberID uint      `gorm:"column:id_member"`
+	Member   Member
 }
 
 func (Message) TableName() string {
@@ -39,19 +42,24 @@ func (Message) TableName() string {
 }
 
 type Priv struct {
-	ID     uint   `gorm:"primaryKey;column:id"` // title, desc, nicks
-	Rights string `gorm:"column:rights" json:"rights"`
+	ID       uint `gorm:"primaryKey"` // title, desc, nicks
+	Adding   bool `gorm:"column:adding"`
+	Deleting bool `gorm:"column:deleting"`
+	Setting  bool `gorm:"column:setting"`
+	Creator  bool `gorm:"column:creator"`
 }
 
 func (Priv) TableName() string {
-	return "rights"
+	return "priv"
 }
 
 type Member struct {
-	id_group uint   `gorm:"primaryKey;column:id_group"`
-	id_user  uint   `gorm:"primaryKey;column:id_user"`
-	nick     string `gorm:"column:nick"`
-	priv     Priv   `gorm:"embedded"`
+	ID      uint   `gorm:"primaryKey"`
+	GroupID uint   `gorm:"column:group_id"`
+	UserID  uint   `gorm:"column:user_id"`
+	Nick    string `gorm:"column:nick"`
+	PrivID  uint   `gorm:"column:id_priv"`
+	Priv    Priv   `gorm:"foreignKey:ID"`
 }
 
 func (Member) TableName() string {
