@@ -12,7 +12,6 @@ type User struct {
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
 	LoggedIn bool      `gorm:"column:logged" json:"logged"`
-	Members  []Member  `gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {
@@ -41,25 +40,17 @@ func (Message) TableName() string {
 	return "messages"
 }
 
-type Priv struct {
-	ID       uint `gorm:"primaryKey"` // title, desc, nicks
-	Adding   bool `gorm:"column:adding"`
-	Deleting bool `gorm:"column:deleting"`
-	Setting  bool `gorm:"column:setting"`
-	Creator  bool `gorm:"column:creator"`
-}
-
-func (Priv) TableName() string {
-	return "priv"
-}
-
 type Member struct {
-	ID      uint   `gorm:"primaryKey"`
-	GroupID uint   `gorm:"column:group_id"`
-	UserID  uint   `gorm:"column:user_id"`
-	Nick    string `gorm:"column:nick"`
-	PrivID  uint   `gorm:"column:id_priv"`
-	Priv    Priv   `gorm:"foreignKey:ID"`
+	ID       uint `gorm:"primaryKey"`
+	GroupID  uint `gorm:"column:group_id"`
+	UserID   uint `gorm:"column:user_id"`
+	User     User
+	Group    Group
+	Nick     string `gorm:"column:nick"`
+	Adding   bool   `gorm:"column:adding"`
+	Deleting bool   `gorm:"column:deleting"`
+	Setting  bool   `gorm:"column:setting"`
+	Creator  bool   `gorm:"column:creator"`
 }
 
 func (Member) TableName() string {

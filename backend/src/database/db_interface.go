@@ -9,7 +9,7 @@ import (
 type DBlayer interface {
 	GetUserById(id int) (models.User, error)
 	RegisterUser(models.User) (models.User, error)
-	// GetUserGroups(id int) ([]models.Group, error)
+	GetUserGroups(id uint) ([]models.Group, error)
 
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
@@ -24,3 +24,4 @@ type DBlayer interface {
 
 var ErrINVALIDPASSWORD = errors.New("invalid password")
 var ErrNoPrivilages = errors.New("insufficient privilages")
+var ErrInternal = errors.New("internal transaction error")

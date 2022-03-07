@@ -26,7 +26,7 @@ func Setup() (*Database, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Priv{})
+	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{})
 
 	return &Database{DB: db}, nil
 }
@@ -80,48 +80,50 @@ func (db *Database) SignOutUser(id uint) error {
 	return nil
 }
 
-// // GetUserGroups returns a slice of Groups of which user is a member
-// func (db *Database) GetUserGroups(id int) (groups []models.Group, err error) {
-// 	return groups, db.Table("members").Select("*").
-// 		Joins("join members on group.id = group_id").
-// 		Joins("join users on user.id = user_id").
-// 		Where("user_id=?", id).Scan(&groups).Error
-// }
-
-// func (db *Database) AddUserToGroup(id int) error {
-// 	return nil
-// }
+// GetUserGroups returns a slice of Groups of which user is a member
+func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
+	return groups, db.Table("`groups`").Select("`groups`.*").
+		Joins("join `members` on `groups`.id = `members`.group_id").
+		Joins("join `users` on `users`.id = `members`.user_id").
+		Where("user_id=?", id).Scan(&groups).Error
+}
 
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
 	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
+	transactionFlag := false
 
 	db.Transaction(func(tx *gorm.DB) error {
 		creation := tx.Create(&group)
 		if creation.Error != nil {
 			return creation.Error
 		}
-		member := models.Member{UserID: id, GroupID: group.ID, PrivID: 9}
+		member := models.Member{UserID: id, GroupID: group.ID, Adding: true, Deleting: true, Setting: true, Creator: true}
 		m_create := tx.Create(&member)
 		if m_create.Error != nil {
 			return m_create.Error
 		}
+		transactionFlag = true
 
 		return nil
 	})
+
+	if transactionFlag == false {
+		return models.Group{}, ErrInternal
+	}
 
 	return group, nil
 }
 
 func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) error {
 
-	var priv models.Priv
-	db.Table("members").Select("priv.adding").Joins("inner join priv on priv.id = members.id_priv").
-		Joins("inner join users on users.id = members.user_id").
-		Joins("inner join groups on groups.id = members.group_id").
-		Where("users.id = ?", id_user).
-		Where("groups.id = ?", id_group).Scan(&priv)
+	var member models.Member
+	db.Table("`members`").Select("members.*").
+		Joins("inner join `users` on `users`.id = `members`.user_id").
+		Joins("inner join `groups` on `groups`.id = `members`.group_id").
+		Where("`users`.id = ?", id_user).
+		Where("`groups`.id = ?", id_group).Scan(&member)
 
-	if !priv.Adding {
+	if !member.Adding {
 		return ErrNoPrivilages
 	}
 	var user models.User
@@ -129,7 +131,7 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 	if selection.Error != nil {
 		return selection.Error
 	}
-	member := models.Member{UserID: user.ID, GroupID: id_group, PrivID: 1}
+	member = models.Member{UserID: user.ID, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
 	creation := db.Create(&member)
 	if creation.Error != nil {
 		return creation.Error
@@ -140,19 +142,19 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 
 func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
 
-	var priv models.Priv
-	db.Table("members").Select("priv.adding").Joins("inner join priv on priv.id = members.id_priv").
-		Joins("inner join users on users.id = members.user_id").
-		Joins("inner join groups on groups.id = members.group_id").
-		Where("users.id = ?", id_user).
-		Where("groups.id = ?", id_group).Scan(&priv)
+	var member models.Member
+	db.Table("`members`").Select("`members`.*").
+		Joins("inner join `users` on `users`.id = `members`.user_id").
+		Joins("inner join `groups` on `groups`.id = `members`.group_id").
+		Where("`users`.id = ?", id_user).
+		Where("`groups`.id = ?", id_group).Scan(&member)
 
-	if !priv.Deleting {
+	if !member.Deleting {
 		return ErrNoPrivilages
 	}
 
-	var member models.Member
-	selection := db.Where(&models.Member{ID: id_member}).First(&member)
+	var del_member models.Member
+	selection := db.Where(&models.Member{ID: id_member}).First(&del_member)
 	if selection.Error != nil {
 		return selection.Error
 	}

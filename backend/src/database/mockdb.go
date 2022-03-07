@@ -124,3 +124,7 @@ func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) er
 func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
 	return nil
 }
+
+func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
+	return []models.Group{}, nil
+}
