@@ -159,22 +159,12 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 		return selection.Error
 	}
 
-	deletion := db.Delete(&member)
+	deletion := db.Delete(del_member)
 	if deletion.Error != nil {
 		return deletion.Error
 	}
 	return nil
 }
-
-// func (db *Database) DeleteUserFromGroup(id int) error {
-// 	return nil
-// }
-
-// func (db *Database) GetGroupMessages(id int, since time.Time) ([]models.Message, error) {
-// 	return nil, nil
-// }
-
-// func (db *Database) GrantPriv(granter models.User, receiver models.User, err error)
 
 func hashPassword(s string) (string, error) {
 	if s == "" {
