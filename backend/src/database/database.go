@@ -131,7 +131,7 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 	if selection.Error != nil {
 		return selection.Error
 	}
-	member = models.Member{UserID: user.ID, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
+	member = models.Member{UserID: user.ID, Nick: user.UserName, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
 	creation := db.Create(&member)
 	if creation.Error != nil {
 		return creation.Error
@@ -164,6 +164,16 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 		return deletion.Error
 	}
 	return nil
+}
+
+func (db *Database) GetGroupMessages(id uint, offset uint) ([]models.Message, error) {
+	var messages []models.Message
+	selection := db.Joins("Member", db.Where(&models.Member{GroupID: id})).Offset(int(offset)*15).Limit(15).Find(&messages, "`Member`.`group_id` = ?", id)
+	if selection.Error != nil {
+		return messages, selection.Error
+	}
+
+	return messages, nil
 }
 
 func hashPassword(s string) (string, error) {

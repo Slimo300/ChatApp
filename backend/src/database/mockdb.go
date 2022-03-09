@@ -128,3 +128,7 @@ func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
 func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return []models.Group{}, nil
 }
+
+func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]models.Message, error) {
+	return []models.Message{}, nil
+}

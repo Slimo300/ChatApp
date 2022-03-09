@@ -32,7 +32,8 @@ func (Group) TableName() string {
 type Message struct {
 	ID       uint      `gorm:"primaryKey"`
 	Posted   time.Time `gorm:"column:posted" json:"posted"`
-	MemberID uint      `gorm:"column:id_member"`
+	Text     string    `gorm:"column:text" json:"text"`
+	MemberID uint      `gorm:"column:id_member" json:"member_id"`
 	Member   Member
 }
 

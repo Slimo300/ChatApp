@@ -24,6 +24,10 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
+	if len(groups) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "You don't have any group"})
+		return
+	}
 
 	c.JSON(http.StatusOK, groups)
 
@@ -117,4 +121,40 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
+}
+
+func (s *Server) GetGroupMessages(c *gin.Context) {
+	if s.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
+		return
+	}
+
+	_, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		return
+	}
+
+	load := struct {
+		Group  int `json:"group"`
+		Offset int `json:"offset"`
+	}{}
+
+	err = c.ShouldBindJSON(&load)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	messages, err := s.DB.GetGroupMessages(uint(load.Group), uint(load.Offset))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+	if len(messages) == 0 {
+		c.JSON(http.StatusOK, load)
+		return
+	}
+
+	c.JSON(http.StatusOK, messages)
 }
