@@ -15,7 +15,7 @@ const AuthMain = (props) => {
 
     const [groups, setGroups] = useState([]);
     const [current, setCurrent] = useState(0);
-    const [messages, setMessages] = useState({});
+    const [messages, setMessages] = useState([]);
     useEffect(()=>{
         (
             async () => {
@@ -38,7 +38,7 @@ const AuthMain = (props) => {
                     const responseJSON = await response.json();
                     console.log(responseJSON);
                     setMessages(responseJSON);
-                    setCurrent(0);
+                    // setCurrent(0);
                 }
             }
         )();
@@ -58,7 +58,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages}/>
+                                <Chat messages={messages} group={current}/>
                             </div>
                         </div>
                     </div>
@@ -66,31 +66,6 @@ const AuthMain = (props) => {
             </div>
         </div>
     )
-}
-
-const Chat = (props) => {
-    let load;
-
-    if (props.group === undefined) {
-        load = <h1>Select a group to chat!</h1>;
-    } else {
-    load = (
-        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
-            <div class="selected-user">
-                <span>To: <span class="name">{props.name}</span></span>
-            </div>
-            <div class="chat-container">
-                <ul class="chat-box chatContainerScroll">
-                    
-                </ul>
-                <div class="form-group mt-3 mb-0">
-                    <textarea class="form-control" rows="3" placeholder="Type your message here..."></textarea>
-                </div>
-            </div>
-        </div>
-    );
-    }
-    return load;
 }
 
 const GroupLabel = (props) => {
@@ -106,6 +81,45 @@ const GroupLabel = (props) => {
             </p>
         </li>
     );
+}
+
+const Chat = (props) => {
+    const [member, setMember] = useState(0);
+    const getMember = async () => {
+        const response = await fetch("http://localhost:8080/api/group/membership?group=" + props.group.toString(), {
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+        });
+        const responseJSON = await response.json();
+        if (responseJSON.ID !== member) {
+            setMember(responseJSON.ID);
+            console.log(responseJSON);
+        }
+    }
+    let load;
+
+    if (props.group === 0) {
+        load = <h1>Select a group to chat!</h1>;
+    } else {
+        getMember();
+        
+        load = (
+            <div className="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
+                <div className="selected-user">
+                    <span>To: <span className="name">{props.name}</span></span>
+                </div>
+                <div className="chat-container">
+                    <ul className="chat-box chatContainerScroll">
+                        {props.messages.map(item => {return <Message key={item.ID} time={item.posted} message={item.text} name={item.Member.Nick} member={item.member_id} user={member}/>})}
+                    </ul>
+                    <div className="form-group mt-3 mb-0">
+                        <textarea className="form-control" rows="3" placeholder="Type your message here..."></textarea>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    return load;
 }
 
 const Message = (props) => {
@@ -133,7 +147,7 @@ const Message = (props) => {
 
     return (
         <div>
-            {props.owned?left:right}
+            {props.member===props.user?left:right}
         </div>
     )
 }

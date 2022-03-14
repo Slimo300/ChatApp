@@ -176,6 +176,16 @@ func (db *Database) GetGroupMessages(id uint, offset uint) ([]models.Message, er
 	return messages, nil
 }
 
+func (db *Database) GetGroupMembership(group, user uint) (models.Member, error) {
+	var membership models.Member
+	selection := db.Where(&models.Member{UserID: user, GroupID: group}).First(&membership)
+	if selection.Error != nil {
+		return membership, selection.Error
+	}
+
+	return membership, nil
+}
+
 func hashPassword(s string) (string, error) {
 	if s == "" {
 		return "", errors.New("Reference provided for hashing password is nil")

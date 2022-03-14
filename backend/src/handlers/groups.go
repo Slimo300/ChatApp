@@ -159,17 +159,6 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 		}
 	}
 
-	// load := struct {
-	// 	Group  int `json:"group"`
-	// 	Offset int `json:"offset"`
-	// }{}
-
-	// err = c.ShouldBindJSON(&load)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
-	// 	return
-	// }
-
 	messages, err := s.DB.GetGroupMessages(uint(group_int), uint(offset_int))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
@@ -181,4 +170,40 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, messages)
+}
+
+func (s *Server) GetGroupMembership(c *gin.Context) {
+	if s.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
+		return
+	}
+	id, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		return
+	}
+
+	group := c.Query("group")
+	if group == "" || group == "0" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Select a group"})
+		return
+	}
+
+	group_int, err := strconv.Atoi(group)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+	// if true {
+	// 	c.JSON(http.StatusOK, gin.H{"group": group_int, "user": id})
+	// 	return
+	// }
+
+	member, err := s.DB.GetGroupMembership(uint(group_int), uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, member)
 }

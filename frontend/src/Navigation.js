@@ -8,7 +8,7 @@ const Navigation = (props) => {
             credentials: "include",
             headers: {"Content-Type": "application/json"}
         });
-        props.setName('');
+        props.setName("");
     };
 
     let menu;

@@ -132,3 +132,7 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]models.Message, error) {
 	return []models.Message{}, nil
 }
+
+func (m *MockDB) GetGroupMembership(group, user uint) (models.Member, error) {
+	return models.Member{}, nil
+}
