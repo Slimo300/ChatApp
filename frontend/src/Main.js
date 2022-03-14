@@ -6,7 +6,7 @@ const Main = (props) => {
     console.log(props.name)
     return (
         <div>
-            {props.name === undefined? <Navigate to="/login" />:<AuthMain name={props.name}/>}
+            {props.name === ""? <Navigate to="/login" />:<AuthMain name={props.name}/>}
         </div>
     );
 }
@@ -15,6 +15,7 @@ const AuthMain = (props) => {
 
     const [groups, setGroups] = useState([]);
     const [current, setCurrent] = useState(0);
+    const [messages, setMessages] = useState({});
     useEffect(()=>{
         (
             async () => {
@@ -26,6 +27,22 @@ const AuthMain = (props) => {
             }
         )();
     }, []);
+    useEffect(()=>{
+        (
+            async () => {
+                if (current !== 0) {
+                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.toString(), {
+                        headers: {"Content-Type": "application/json"},
+                        credentials: "include",
+                    });
+                    const responseJSON = await response.json();
+                    console.log(responseJSON);
+                    setMessages(responseJSON);
+                    setCurrent(0);
+                }
+            }
+        )();
+    }, [current])
 
     return (
         <div className="container" >
@@ -37,11 +54,11 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users">
-                                            {groups.map(item => {return <GroupLabel name={item.name} key={item.ID}/>})}
+                                            {groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent}/>})}
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat />
+                                <Chat messages={messages}/>
                             </div>
                         </div>
                     </div>
@@ -77,17 +94,18 @@ const Chat = (props) => {
 }
 
 const GroupLabel = (props) => {
+    const change = () => {props.setCurrent(props.id)};
     return (
-        <li className="person" >
+        <li className="person" onClick={change}>
             <div className="user">
                 <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/>
-                <span className={"status busy" + props.status}></span>
+                <span className={"status" + props.status}></span>
             </div>
             <p className="name-time">
                 <span className="name">{props.name}</span>
             </p>
         </li>
-    )
+    );
 }
 
 const Message = (props) => {

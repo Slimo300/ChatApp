@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
@@ -135,24 +136,47 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 		return
 	}
 
-	load := struct {
-		Group  int `json:"group"`
-		Offset int `json:"offset"`
-	}{}
-
-	err = c.ShouldBindJSON(&load)
+	group := c.Query("group")
+	if group == "" || group == "0" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Select a group"})
+		return
+	}
+	group_int, err := strconv.Atoi(group)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
-	messages, err := s.DB.GetGroupMessages(uint(load.Group), uint(load.Offset))
+	offset := c.Query("offset")
+	var offset_int int
+	if offset == "" {
+		offset_int = 0
+	} else {
+		offset_int, err = strconv.Atoi(offset)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+			return
+		}
+	}
+
+	// load := struct {
+	// 	Group  int `json:"group"`
+	// 	Offset int `json:"offset"`
+	// }{}
+
+	// err = c.ShouldBindJSON(&load)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+	// 	return
+	// }
+
+	messages, err := s.DB.GetGroupMessages(uint(group_int), uint(offset_int))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 	if len(messages) == 0 {
-		c.JSON(http.StatusOK, load)
+		c.JSON(http.StatusOK, gin.H{"group": group, "offset": offset, "err": err.Error()})
 		return
 	}
 

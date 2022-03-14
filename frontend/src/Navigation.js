@@ -13,7 +13,7 @@ const Navigation = (props) => {
 
     let menu;
 
-    if (props.name === undefined) {
+    if (props.name === "") {
         menu = (
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav mr-auto"></ul>
