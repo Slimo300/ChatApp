@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import SignInForm from './Login';
 import Main from "./Main";
@@ -9,21 +9,6 @@ function App() {
   
   const [name, setName] = useState('');
 
-  // useEffect(() => {
-  //   (
-  //       async () => {
-  //           const response = await fetch('http://localhost:8080/api/user', {
-  //               headers: {'Content-Type': 'application/json'},
-  //               credentials: 'include',
-  //           });
-
-  //           const content = await response.json();
-  //           console.log(content);
-  //           setName(content.username);
-  //       }
-  //   )();
-  // });
-
     return (
         <div >
           <Router>
@@ -31,7 +16,7 @@ function App() {
             <main>
               <Routes>
                 <Route path="/" element={<Main name={name}/>}/>
-                <Route path="/login" element={<SignInForm setName={setName}/>}/>
+                <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
                 <Route path="/register" element={<RegisterForm/>}/>
               </Routes>
             </main>

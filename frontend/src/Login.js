@@ -27,8 +27,7 @@ const SignInForm = (props) => {
 
     const content = await response.json();
     
-    if (content.name != undefined){
-      console.log(content.name);
+    if (content.name !== undefined){
       props.setName(content.name);
       setRedirect(true);
     }
@@ -38,7 +37,7 @@ const SignInForm = (props) => {
   }
 
   if (redirect) {
-    return <Navigate to="/"/>;
+    return <Navigate to="/" />;
   }
 
   return (

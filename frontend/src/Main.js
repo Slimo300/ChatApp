@@ -3,19 +3,20 @@ import {Navigate} from "react-router-dom";
 
 const Main = (props) => {
 
-    console.log(props.name)
     return (
         <div>
-            {props.name === ""? <Navigate to="/login" />:<AuthMain name={props.name}/>}
+            {props.name === ""? <Navigate to="/login" />:<AuthMain />}
         </div>
     );
 }
 
-const AuthMain = (props) => {
+const AuthMain = () => {
 
     const [groups, setGroups] = useState([]);
     const [current, setCurrent] = useState(0);
     const [messages, setMessages] = useState([]);
+    const [groupname, setGroupName] = useState("");
+
     useEffect(()=>{
         (
             async () => {
@@ -36,9 +37,7 @@ const AuthMain = (props) => {
                         credentials: "include",
                     });
                     const responseJSON = await response.json();
-                    console.log(responseJSON);
                     setMessages(responseJSON);
-                    // setCurrent(0);
                 }
             }
         )();
@@ -54,11 +53,11 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users">
-                                            {groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent}/>})}
+                                            {groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent} setGroupName={setGroupName}/>})}
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current}/>
+                                <Chat messages={messages} group={current} groupname={groupname}/>
                             </div>
                         </div>
                     </div>
@@ -69,7 +68,10 @@ const AuthMain = (props) => {
 }
 
 const GroupLabel = (props) => {
-    const change = () => {props.setCurrent(props.id)};
+    const change = () => {
+        props.setCurrent(props.id);
+        props.setGroupName(props.name);
+    };
     return (
         <li className="person" onClick={change}>
             <div className="user">
@@ -93,7 +95,6 @@ const Chat = (props) => {
         const responseJSON = await response.json();
         if (responseJSON.ID !== member) {
             setMember(responseJSON.ID);
-            console.log(responseJSON);
         }
     }
     let load;
@@ -106,7 +107,7 @@ const Chat = (props) => {
         load = (
             <div className="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
                 <div className="selected-user">
-                    <span>To: <span className="name">{props.name}</span></span>
+                    <span>To: <span className="name">{props.groupname}</span></span>
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box chatContainerScroll">
@@ -141,13 +142,13 @@ const Message = (props) => {
                 <div className="chat-name">{props.name}</div>
             </div>
             <div className="chat-text">{props.message}</div>
-            <div className="chat-hour">{props.time} <span class="fa fa-check-circle"></span></div>
+            <div className="chat-hour">{props.time} <span className="fa fa-check-circle"></span></div>
         </li>
     )
 
     return (
         <div>
-            {props.member===props.user?left:right}
+            {props.member===props.user?right:left}
         </div>
     )
 }
