@@ -5,17 +5,28 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"github.com/golang-jwt/jwt"
 )
 
 type Server struct {
 	DB     database.DBlayer
+	Hub    *ws.Hub
 	secret string
 	domain string
 }
 
-func NewServer(db database.DBlayer) (*Server, error) {
-	return &Server{DB: db, secret: "wołowina", domain: "localhost"}, nil
+func NewServer(db database.DBlayer) *Server {
+	return &Server{
+		DB:     db,
+		secret: "wołowina",
+		domain: "localhost",
+		Hub:    ws.NewHub(),
+	}
+}
+
+func (s *Server) RunHub() {
+	s.Hub.Run()
 }
 
 func (s *Server) CreateSignedToken(iss int) (string, error) {

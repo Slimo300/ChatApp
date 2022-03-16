@@ -17,10 +17,7 @@ import (
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s, err := handlers.NewServer(mock)
-	if err != nil {
-		t.Errorf("Couldn't create a server")
-	}
+	s := handlers.NewServer(mock)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -88,10 +85,7 @@ func TestRegister(t *testing.T) {
 func TestSignIn(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s, err := handlers.NewServer(mock)
-	if err != nil {
-		t.Errorf("Couldn't create a server")
-	}
+	s := handlers.NewServer(mock)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -149,10 +143,7 @@ func TestSignIn(t *testing.T) {
 func TestSignOut(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db := database.NewMockDB()
-	s, err := handlers.NewServer(db)
-	if err != nil {
-		t.Errorf("Error when creating server")
-	}
+	s := handlers.NewServer(db)
 
 	testCases := []struct {
 		desc               string

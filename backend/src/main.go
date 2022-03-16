@@ -16,12 +16,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	server, err := handlers.NewServer(db)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	server := handlers.NewServer(db)
 	routes.Setup(engine, server)
+	go server.RunHub()
 
 	engine.Run(":8080")
 
