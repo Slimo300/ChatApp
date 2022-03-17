@@ -11,7 +11,6 @@ import (
 
 func main() {
 	engine := gin.Default()
-	// db := database.NewMockDB()
 	db, err := database.Setup()
 	if err != nil {
 		log.Fatal(err)

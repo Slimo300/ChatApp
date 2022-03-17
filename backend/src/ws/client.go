@@ -16,12 +16,12 @@ type client struct {
 func (c *client) read() {
 	defer c.socket.Close()
 	for {
-		var msg *Message
+		var msg Message
 		if err := c.socket.ReadJSON(&msg); err != nil {
 			return
 		}
 		msg.When = time.Now()
-		c.hub.forward <- msg
+		c.hub.forward <- &msg
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -166,14 +167,25 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 	return nil
 }
 
-func (db *Database) GetGroupMessages(id uint, offset uint) ([]models.Message, error) {
+func (db *Database) GetGroupMessages(id uint, offset uint) ([]ws.Message, error) {
 	var messages []models.Message
 	selection := db.Joins("Member", db.Where(&models.Member{GroupID: id})).Offset(int(offset)*15).Limit(15).Find(&messages, "`Member`.`group_id` = ?", id)
 	if selection.Error != nil {
-		return messages, selection.Error
+		return nil, selection.Error
+	}
+	var sendMessages []ws.Message
+
+	for _, msg := range messages {
+		sendMessages = append(sendMessages, ws.Message{
+			Group:   uint64(msg.Member.GroupID),
+			Member:  uint64(msg.MemberID),
+			Nick:    msg.Member.Nick,
+			When:    msg.Posted,
+			Message: msg.Text,
+		})
 	}
 
-	return messages, nil
+	return sendMessages, nil
 }
 
 func (db *Database) GetGroupMembership(group, user uint) (models.Member, error) {

@@ -18,11 +18,40 @@ const AuthMain = () => {
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
 
-    const ws = new WebSocket("ws://localhost:8081/ws")
+    useEffect(
+        () => {
+            const ws = new WebSocket("ws://localhost:8080/ws")
+
+            ws.onopen = (e) => {
+                console.log("Websocket openned");
+            };
+        
+            ws.onclose = (e) => {
+                console.log("closed");
+            }
+        
+            ws.onmessage = (e) => {
+                const msgJSON = JSON.parse(e.data);
+                console.log(msgJSON);
+                if (msgJSON.group === current) {
+                    console.log("set");
+                    setMessages([...messages, msgJSON]);
+                }
+                console.log(msgJSON);
+            }
+        },
+        []
+      )
+
+    const ws = new WebSocket("ws://localhost:8080/ws")
 
     ws.onopen = (e) => {
         console.log("Websocket openned");
     };
+
+    ws.onclose = (e) => {
+        console.log("closed");
+    }
 
     ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);

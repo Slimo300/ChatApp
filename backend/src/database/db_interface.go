@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/Slimo300/ChatApp/backend/src/ws"
 )
 
 type DBlayer interface {
@@ -14,7 +15,7 @@ type DBlayer interface {
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
 
-	GetGroupMessages(id uint, offset uint) ([]models.Message, error)
+	GetGroupMessages(id uint, offset uint) ([]ws.Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)

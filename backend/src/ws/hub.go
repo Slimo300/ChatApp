@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -33,8 +32,8 @@ func (h *Hub) Run() {
 			close(client.send)
 		case msg := <-h.forward:
 			for client := range h.clients {
-				for gr := range client.groups {
-					if gr == int(msg.Group) {
+				for _, gr := range client.groups {
+					if gr == int64(msg.Group) {
 						client.send <- msg
 					}
 				}
@@ -48,7 +47,8 @@ const (
 	messageBufferSize = 256
 )
 
-var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize,
+var upgrader = &websocket.Upgrader{
+	ReadBufferSize:  socketBufferSize,
 	WriteBufferSize: socketBufferSize,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -56,22 +56,20 @@ var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize,
 
 func ServeWebSocket(w http.ResponseWriter, req *http.Request, h *Hub, groups []int64) {
 
-	// Upgrading connection to WebSockets
 	socket, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
-		log.Fatal("ServeHTTP:", err)
 		return
 	}
 
-	// Creating a client object to represent a user in a room
 	client := &client{
 		socket: socket,
 		send:   make(chan *Message, messageBufferSize),
 		hub:    h,
 		groups: groups,
 	}
+
 	h.join <- client
 	defer func() { h.leave <- client }()
 	go client.write()
-	go client.read()
+	client.read()
 }

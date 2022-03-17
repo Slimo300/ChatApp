@@ -30,7 +30,7 @@ function RegisterForm() {
     const content = await response.json();
     console.log(content.message);
 
-    if (content.message == "success") {
+    if (content.message === "success") {
       setRedirect(true);
     }
     else {
@@ -68,7 +68,7 @@ function RegisterForm() {
             <div className="text-center">
               <button type="submit" className="btn btn-primary text-center">Submit</button>
             </div>
-            <div className="display-5 mt-4 text-center text-primary"><a href="#">or Log in</a></div>
+            <div className="display-5 mt-4 text-center text-primary"><a href="/login">or Log in</a></div>
           </form>
         </div>
       </div>

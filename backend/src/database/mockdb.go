@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/Slimo300/ChatApp/backend/src/ws"
 )
 
 type MockDB struct {
@@ -129,8 +130,8 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return []models.Group{}, nil
 }
 
-func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]models.Message, error) {
-	return []models.Message{}, nil
+func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]ws.Message, error) {
+	return nil, nil
 }
 
 func (m *MockDB) GetGroupMembership(group, user uint) (models.Member, error) {
