@@ -11,26 +11,22 @@ const Chat = (props) => {
     useEffect(()=>{
         (
             async () => {
+                if (props.group === 0) {
+                    return
+                }
                 const response = await fetch("http://localhost:8080/api/group/membership?group=" + props.group.toString(), {
                     headers: {"Content-Type": "application/json"},
                     credentials: "include",
                 });
                 const responseJSON = await response.json();
-                if (responseJSON.ID !== member) {
-                    setMember(responseJSON.ID);
-                }
+                setMember(responseJSON.ID);
             }
         )();
-    }, [props.group, member]);
+    }, [props.group]);
 
     const submit = (e) => {
         e.preventDefault();
         if (msg === "") return false;
-        if (!props.socket) {
-            alert("Error: There is no socket connection.");
-            return false;
-        }
-        console.log("send");
         props.socket.send(JSON.stringify({
             "group": props.group,
             "member": member,

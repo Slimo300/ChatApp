@@ -8,21 +8,33 @@ import RegisterForm from "./Register";
 function App() {
   
   const [name, setName] = useState('');
+  
 
-    return (
-        <div >
-          <Router>
-            <Navigation name={name} setName={setName}></Navigation>
-            <main>
-              <Routes>
-                <Route path="/" element={<Main name={name}/>}/>
-                <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
-                <Route path="/register" element={<RegisterForm/>}/>
-              </Routes>
-            </main>
-          </Router>
-        </div>
-    )
+  const ws = new WebSocket("ws://localhost:8080/ws")
+
+  ws.onopen = () => {
+      console.log("Websocket openned");
+  };
+
+  ws.onclose = () => {
+      console.log("closed");
+  }
+
+
+  return (
+      <div >
+        <Router>
+          <Navigation name={name} setName={setName}></Navigation>
+          <main>
+            <Routes>
+              <Route path="/" element={<Main name={name} ws={ws}/>}/>
+              <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
+              <Route path="/register" element={<RegisterForm/>}/>
+            </Routes>
+          </main>
+        </Router>
+      </div>
+  )
 }
 
 export default App;

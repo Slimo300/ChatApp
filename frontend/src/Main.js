@@ -6,61 +6,21 @@ const Main = (props) => {
 
     return (
         <div>
-            {props.name === ""? <Navigate to="/login" />:<AuthMain />}
+            {props.name === ""? <Navigate to="/login" />:<AuthMain ws={props.ws}/>}
         </div>
     );
 }
 
-const AuthMain = () => {
+const AuthMain = (props) => {
 
     const [groups, setGroups] = useState([]);
     const [current, setCurrent] = useState(0);
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
-
-    useEffect(
-        () => {
-            const ws = new WebSocket("ws://localhost:8080/ws")
-
-            ws.onopen = (e) => {
-                console.log("Websocket openned");
-            };
-        
-            ws.onclose = (e) => {
-                console.log("closed");
-            }
-        
-            ws.onmessage = (e) => {
-                const msgJSON = JSON.parse(e.data);
-                console.log(msgJSON);
-                if (msgJSON.group === current) {
-                    console.log("set");
-                    setMessages([...messages, msgJSON]);
-                }
-                console.log(msgJSON);
-            }
-        },
-        []
-      )
-
-    const ws = new WebSocket("ws://localhost:8080/ws")
-
-    ws.onopen = (e) => {
-        console.log("Websocket openned");
-    };
-
-    ws.onclose = (e) => {
-        console.log("closed");
-    }
-
-    ws.onmessage = (e) => {
+  
+    props.ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
-        console.log(msgJSON);
-        if (msgJSON.group === current) {
-            console.log("set");
-            setMessages([...messages, msgJSON]);
-        }
-        console.log(msgJSON);
+        setMessages([...messages, msgJSON]);
     }
 
     useEffect(()=>{
@@ -103,7 +63,7 @@ const AuthMain = () => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} groupname={groupname} socket={ws}/>
+                                <Chat messages={messages} group={current} groupname={groupname} socket={props.ws}/>
                             </div>
                         </div>
                     </div>
