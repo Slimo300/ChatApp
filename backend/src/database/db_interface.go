@@ -4,8 +4,11 @@ import (
 	"errors"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
-	"github.com/Slimo300/ChatApp/backend/src/ws"
 )
+
+const INVITE_AWAITING = 0
+const INVITE_ACCEPT = 1
+const INVITE_DECLINE = 2
 
 type DBlayer interface {
 	GetUserById(id int) (models.User, error)
@@ -15,8 +18,13 @@ type DBlayer interface {
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
 
-	GetGroupMessages(id uint, offset uint) ([]ws.Message, error)
+	GetGroupMessages(id uint, offset uint) ([]Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
+
+	// AddFriend takes "id" of an issuer and "username" of invited user
+	// AddFriend(id int, username string) (models.Invite, error)
+	// RespondInvite takes id of an invite ("id") and response of type int (1 - agree, 2 - decline)
+	// RespondInvite(id_inv, response int) (models.Group, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
 	AddUserToGroup(name string, id_group uint, id_user uint) error

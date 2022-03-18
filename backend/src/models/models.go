@@ -57,3 +57,16 @@ type Member struct {
 func (Member) TableName() string {
 	return "members"
 }
+
+type Invite struct {
+	ID       uint `gorm:"primaryKey"`
+	IssId    uint `gorm:"column:iss_id"`
+	Iss      User
+	TargetID uint `gorm:"column:target_id"`
+	Target   User
+	Status   int `gorm:"coulumn:status"`
+}
+
+func (Invite) TableName() string {
+	return "invites"
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
-import Chat from "../components/Chat"
+import Chat from "../components/Chat";
+import {ws} from "../services/ws";
 
 const Main = (props) => {
 
@@ -17,8 +18,9 @@ const AuthMain = (props) => {
     const [current, setCurrent] = useState(0);
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
-  
-    props.ws.onmessage = (e) => {
+
+    // useEffect ???
+    ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
         setMessages([...messages, msgJSON]);
     }
@@ -67,7 +69,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} groupname={groupname} socket={props.ws}/>
+                                <Chat messages={messages} group={current} groupname={groupname}/>
                             </div>
                         </div>
                     </div>

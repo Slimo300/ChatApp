@@ -20,22 +20,13 @@ function App() {
     setAddFrShow(!addFrShow);
   }
 
-  const ws = new WebSocket("ws://localhost:8080/ws")
-  ws.onopen = () => {
-      console.log("Websocket openned");
-  };
-  ws.onclose = () => {
-      console.log("closed");
-  }
-
-
   return (
       <div >
         <Router>
           <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup} toggleFrAdd={toggleAddFriend}/>
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name} ws={ws} toggleCrGroup={toggleCreateGroup}/>}/>
+              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup}/>}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
