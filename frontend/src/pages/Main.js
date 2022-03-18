@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
-import Chat from "./Chat"
+import Chat from "../components/Chat"
 
 const Main = (props) => {
 
@@ -43,7 +43,11 @@ const AuthMain = (props) => {
                         credentials: "include",
                     });
                     const responseJSON = await response.json();
-                    setMessages(responseJSON);
+                    if (responseJSON.message === "no messages") {
+                        setMessages([]);
+                    } else {
+                        setMessages(responseJSON);
+                    }
                 }
             }
         )();

@@ -165,7 +165,7 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 		return
 	}
 	if len(messages) == 0 {
-		c.JSON(http.StatusOK, gin.H{"group": group, "offset": offset, "err": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"message": "no messages"})
 		return
 	}
 

@@ -33,7 +33,15 @@ const Chat = (props) => {
             "text": msg
         }));
         console.log("sent");
+        document.getElementById("text-area").innerText = "";
     }
+
+    let nomessages = false;
+    console.log(props.messages);
+    if (props.messages === []) {
+        nomessages = true;
+    }
+
     let load;
 
     if (props.group === 0) {
@@ -46,10 +54,10 @@ const Chat = (props) => {
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box chatContainerScroll">
-                        {props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
+                        {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0" onSubmit={submit}>
-                        <textarea className="form-control" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
+                        <textarea id="text-area" className="form-control" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
                         <input type="submit" value="Send" />
                     </form>
                 </div>

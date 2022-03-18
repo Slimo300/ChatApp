@@ -25,8 +25,8 @@ const Navigation = (props) => {
         menu = (
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav mr-auto">
-                    <NavLink className="nav-item nav-link" to="/logout">Create Room</NavLink>
-                    <NavLink className="nav-item nav-link" to="/logout">Add Friend</NavLink>
+                    <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleCrGroup}>Create Room</button>
+                    <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleFrAdd}>Add Friend</button>
                 </ul>
     
                 <NavLink className="nav-item nav-link" to="/logout">Account</NavLink>
