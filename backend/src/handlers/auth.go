@@ -14,10 +14,6 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Register method
 func (s *Server) Register(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't register user"})
-		return
-	}
 	var user models.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -48,9 +44,6 @@ func (s *Server) Register(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SignIn method
 func (s *Server) SignIn(c *gin.Context) {
-	if s.DB == nil {
-		return
-	}
 	var user models.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -92,11 +85,6 @@ func (s *Server) SignIn(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // SignOutUser method
 func (s *Server) SignOutUser(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
-		return
-	}
-
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
@@ -116,10 +104,6 @@ func (s *Server) SignOutUser(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // GetUserById method
 func (s *Server) GetUser(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
-		return
-	}
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})

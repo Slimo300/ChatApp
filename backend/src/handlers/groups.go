@@ -9,10 +9,6 @@ import (
 )
 
 func (s *Server) GetUserGroups(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't create group"})
-		return
-	}
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
@@ -35,10 +31,6 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 }
 
 func (s *Server) CreateGroup(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "couldn't create group"})
-		return
-	}
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
@@ -63,10 +55,6 @@ func (s *Server) CreateGroup(c *gin.Context) {
 }
 
 func (s *Server) AddUserToGroup(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "no database connection"})
-		return
-	}
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
@@ -95,10 +83,6 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 }
 
 func (s *Server) DeleteUserFromGroup(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "problems with server, try later"})
-		return
-	}
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
@@ -125,10 +109,6 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 }
 
 func (s *Server) GetGroupMessages(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
-		return
-	}
 
 	_, err := checkTokenAndGetID(c, s)
 	if err != nil {
@@ -173,10 +153,7 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 }
 
 func (s *Server) GetGroupMembership(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
-		return
-	}
+
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})

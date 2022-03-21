@@ -2,12 +2,16 @@ package handlers
 
 import (
 	"errors"
+	"net/http"
 	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
+
+var ErrNoDatabase = errors.New("No database connection")
+var InvalidToken = errors.New("Invalid token")
 
 func isEmailValid(e string) bool {
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
@@ -35,4 +39,14 @@ func checkTokenAndGetID(c *gin.Context, s *Server) (int, error) {
 
 	return id, nil
 
+}
+
+func (s *Server) CheckDatabase() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if s.DB == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"err": ErrNoDatabase.Error()})
+			return
+		}
+		c.Next()
+	}
 }
