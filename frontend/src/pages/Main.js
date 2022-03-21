@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import Chat from "../components/Chat";
 import {ws} from "../services/ws";
+import { ModalAddFriend, ModalCreateGroup } from "../components/Modals";
 
 const Main = (props) => {
 
     return (
         <div>
-            {props.name === ""? <Navigate to="/login" />:<AuthMain ws={props.ws}/>}
+            {props.name === ""? <Navigate to="/login" />:<AuthMain {...props}/>}
         </div>
     );
 }
@@ -19,8 +20,8 @@ const AuthMain = (props) => {
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
 
-    // useEffect ???
     ws.onmessage = (e) => {
+        console.log("got message");
         const msgJSON = JSON.parse(e.data);
         setMessages([...messages, msgJSON]);
     }
@@ -36,6 +37,7 @@ const AuthMain = (props) => {
             }
         )();
     }, []);
+
     useEffect(()=>{
         (
             async () => {
@@ -75,6 +77,8 @@ const AuthMain = (props) => {
                     </div>
                 </div>
             </div>
+          <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup} groups={groups} setGroups={setGroups}/>
+          <ModalAddFriend show={props.showFrAdd} toggle={props.toggleFrAdd}/>
         </div>
     )
 }

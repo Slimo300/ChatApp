@@ -1,6 +1,8 @@
 package database
 
-import "time"
+import (
+	"time"
+)
 
 type Message struct {
 	Group   uint64    `json:"group"`

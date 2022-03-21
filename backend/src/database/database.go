@@ -92,12 +92,15 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
 	transactionFlag := false
 
+	var issuer models.User
+	db.Where(models.User{ID: id}).First(&issuer)
+
 	db.Transaction(func(tx *gorm.DB) error {
 		creation := tx.Create(&group)
 		if creation.Error != nil {
 			return creation.Error
 		}
-		member := models.Member{UserID: id, GroupID: group.ID, Adding: true, Deleting: true, Setting: true, Creator: true}
+		member := models.Member{UserID: id, GroupID: group.ID, Adding: true, Deleting: true, Setting: true, Creator: true, Nick: issuer.UserName}
 		m_create := tx.Create(&member)
 		if m_create.Error != nil {
 			return m_create.Error

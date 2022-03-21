@@ -26,13 +26,13 @@ function App() {
           <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup} toggleFrAdd={toggleAddFriend}/>
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup}/>}/>
+              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup} showCrGroup={createGrShow} toggleFrAdd={toggleAddFriend} showFrAdd={addFrShow}/>}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
           </main>
-          <ModalCreateGroup show={createGrShow} toggle={toggleCreateGroup}/>
-          <ModalAddFriend show={addFrShow} toggle={toggleAddFriend}/>
+          {/* <ModalCreateGroup show={createGrShow} toggle={toggleCreateGroup}/>
+          <ModalAddFriend show={addFrShow} toggle={toggleAddFriend}/> */}
         </Router>
       </div>
   )

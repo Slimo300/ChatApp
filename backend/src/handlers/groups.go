@@ -194,10 +194,6 @@ func (s *Server) GetGroupMembership(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
-	// if true {
-	// 	c.JSON(http.StatusOK, gin.H{"group": group_int, "user": id})
-	// 	return
-	// }
 
 	member, err := s.DB.GetGroupMembership(uint(group_int), uint(id))
 	if err != nil {

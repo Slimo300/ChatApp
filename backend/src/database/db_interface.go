@@ -20,6 +20,8 @@ type DBlayer interface {
 
 	GetGroupMessages(id uint, offset uint) ([]Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
+	// AddMessage adds a message of type Message to database
+	AddMessage(msg Message) error
 
 	// AddFriend takes "id" of an issuer and "username" of invited user
 	// AddFriend(id int, username string) (models.Invite, error)

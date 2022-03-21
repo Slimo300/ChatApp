@@ -28,7 +28,6 @@ function RegisterForm() {
         })
     });
     const content = await response.json();
-    console.log(content.message);
 
     if (content.message === "success") {
       setRedirect(true);

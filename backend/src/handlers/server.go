@@ -21,7 +21,7 @@ func NewServer(db database.DBlayer) *Server {
 		DB:     db,
 		secret: "wołowina",
 		domain: "localhost",
-		Hub:    ws.NewHub(),
+		Hub:    ws.NewHub(db),
 	}
 }
 

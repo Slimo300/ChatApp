@@ -146,3 +146,7 @@ func (m *MockDB) AddFriend(id int, username string) (models.Invite, error) {
 func (m *MockDB) RespondInvite(id_inv, response int) (models.Group, error) {
 	return models.Group{}, nil
 }
+
+func (m *MockDB) AddMessage(msg Message) error {
+	return nil
+}

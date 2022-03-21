@@ -31,13 +31,12 @@ const Chat = (props) => {
             "member": member,
             "text": msg
         }));
-        console.log("sent");
+        console.log(msg);
         document.getElementById("text-area").value = "";
         document.getElementById("text-area").focus();
     }
 
     let nomessages = false;
-    console.log(props.messages);
     if (props.messages === []) {
         nomessages = true;
     }
@@ -49,17 +48,28 @@ const Chat = (props) => {
     } else {
         load = (
             <div className="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
-                <div className="selected-user">
-                    <span className="mr-auto">To: <span className="name">{props.groupname}</span></span>
-                    <button type="button" className="btn btn-primary float-right mt-3">Settings</button>
+                <div className="selected-user row">
+                    <span className="mr-auto mt-4">To: <span className="name">{props.groupname}</span></span>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Settings
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <button class="dropdown-item" href="#">Options</button>
+                            <button class="dropdown-item" href="#">Members</button>
+                            <button class="dropdown-item" href="#">Add User</button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item" href="#">Delete Group</button>
+                        </div>
+                    </div>
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box chatContainerScroll">
                         {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
                     </ul>
-                    <form id="chatbox" className="form-group mt-3 mb-0" onSubmit={submit}>
-                        <textarea autoFocus  id="text-area" className="form-control" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
-                        <input type="submit" value="Send" />
+                    <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={submit}>
+                        <textarea autoFocus  id="text-area" className="form-control mr-1" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
+                        <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
             </div>

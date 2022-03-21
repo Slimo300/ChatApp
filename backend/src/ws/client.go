@@ -3,12 +3,13 @@ package ws
 import (
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/gorilla/websocket"
 )
 
 type client struct {
 	socket *websocket.Conn
-	send   chan *Message
+	send   chan *database.Message
 	hub    *Hub
 	groups []int64
 }
@@ -16,7 +17,7 @@ type client struct {
 func (c *client) read() {
 	defer c.socket.Close()
 	for {
-		var msg Message
+		var msg database.Message
 		if err := c.socket.ReadJSON(&msg); err != nil {
 			return
 		}

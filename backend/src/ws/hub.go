@@ -3,19 +3,22 @@ package ws
 import (
 	"net/http"
 
+	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/gorilla/websocket"
 )
 
 type Hub struct {
-	forward chan *Message
+	db      database.DBlayer
+	forward chan *database.Message
 	join    chan *client
 	leave   chan *client
 	clients map[*client]bool
 }
 
-func NewHub() *Hub {
+func NewHub(db database.DBlayer) *Hub {
 	return &Hub{
-		forward: make(chan *Message),
+		db:      db,
+		forward: make(chan *database.Message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
@@ -31,6 +34,9 @@ func (h *Hub) Run() {
 			delete(h.clients, client)
 			close(client.send)
 		case msg := <-h.forward:
+			if err := h.db.AddMessage(*msg); err != nil {
+				panic(err)
+			}
 			for client := range h.clients {
 				for _, gr := range client.groups {
 					if gr == int64(msg.Group) {
@@ -63,7 +69,7 @@ func ServeWebSocket(w http.ResponseWriter, req *http.Request, h *Hub, groups []i
 
 	client := &client{
 		socket: socket,
-		send:   make(chan *Message, messageBufferSize),
+		send:   make(chan *database.Message, messageBufferSize),
 		hub:    h,
 		groups: groups,
 	}

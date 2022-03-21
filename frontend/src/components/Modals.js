@@ -9,14 +9,14 @@ export const ModalCreateGroup = (props) => {
                     Create Group
                 </ModalHeader>
                 <ModalBody>
-                    <CreateGroupForm/>
+                    <CreateGroupForm groups={props.groups} setGroups={props.setGroups} toggle={props.toggle}/>
                 </ModalBody>
             </div>
         </Modal>
     );
 } 
 
-const CreateGroupForm = () => {
+const CreateGroupForm = (props) => {
     const [grName, setGrName] = useState("");
     const [grDesc, setGrDesc] = useState("");
     const [err, setErr] = useState("");
@@ -36,7 +36,14 @@ const CreateGroupForm = () => {
 
         if (responseJSON.err !== undefined){
             setErr(responseJSON.err);
+        } else {
+            setErr("Group created");
+            props.setGroups([...props.groups, responseJSON]);
         }
+        setTimeout(function () {    
+            props.toggle();
+            setErr("");
+        }, 1000);
     }
 
     let message = null;
