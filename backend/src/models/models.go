@@ -34,7 +34,7 @@ type Message struct {
 	Posted   time.Time `gorm:"column:posted" json:"posted"`
 	Text     string    `gorm:"column:text" json:"text"`
 	MemberID uint      `gorm:"column:id_member" json:"member_id"`
-	Member   Member
+	Member   Member    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 func (Message) TableName() string {
@@ -42,16 +42,17 @@ func (Message) TableName() string {
 }
 
 type Member struct {
-	ID       uint `gorm:"primaryKey"`
-	GroupID  uint `gorm:"column:group_id"`
-	UserID   uint `gorm:"column:user_id"`
-	User     User
-	Group    Group
+	ID       uint   `gorm:"primaryKey"`
+	GroupID  uint   `gorm:"column:group_id"`
+	UserID   uint   `gorm:"column:user_id"`
+	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Nick     string `gorm:"column:nick"`
 	Adding   bool   `gorm:"column:adding"`
 	Deleting bool   `gorm:"column:deleting"`
 	Setting  bool   `gorm:"column:setting"`
 	Creator  bool   `gorm:"column:creator"`
+	Deleted  bool   `gorm:"column:deleted"`
 }
 
 func (Member) TableName() string {

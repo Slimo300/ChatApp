@@ -150,3 +150,7 @@ func (m *MockDB) RespondInvite(id_inv, response int) (models.Group, error) {
 func (m *MockDB) AddMessage(msg Message) error {
 	return nil
 }
+
+func (m *MockDB) DeleteGroup(id_group, id_user uint) error {
+	return nil
+}

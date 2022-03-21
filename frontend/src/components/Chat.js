@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {v4 as uuidv4} from "uuid";
 import {ws} from "../services/ws"
+import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
 
     const [member, setMember] = useState(0);
     const [msg, setMsg] = useState("");
+
+    // delete group modal
+    const [delGrShow, setDelGrShow] = useState(false);
+    const toggleDelGroup = () => {
+        setDelGrShow(!delGrShow);
+    };
 
     useEffect(()=>{
         (
@@ -23,7 +30,8 @@ const Chat = (props) => {
         )();
     }, [props.group]);
 
-    const submit = (e) => {
+    // function for sending message when submit
+    const sendMessage = (e) => {
         e.preventDefault();
         if (msg === "") return false;
         ws.send(JSON.stringify({
@@ -31,7 +39,7 @@ const Chat = (props) => {
             "member": member,
             "text": msg
         }));
-        console.log(msg);
+        console.log(msg, "sent");
         document.getElementById("text-area").value = "";
         document.getElementById("text-area").focus();
     }
@@ -50,16 +58,16 @@ const Chat = (props) => {
             <div className="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
                 <div className="selected-user row">
                     <span className="mr-auto mt-4">To: <span className="name">{props.groupname}</span></span>
-                    <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <div className="dropdown">
+                        <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <button class="dropdown-item" href="#">Options</button>
-                            <button class="dropdown-item" href="#">Members</button>
-                            <button class="dropdown-item" href="#">Add User</button>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" href="#">Delete Group</button>
+                        <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <button className="dropdown-item" href="#">Options</button>
+                            <button className="dropdown-item" href="#">Members</button>
+                            <button className="dropdown-item" href="#">Add User</button>
+                            <div className="dropdown-divider"></div>
+                            <button className="dropdown-item" onClick={toggleDelGroup} >Delete Group</button>
                         </div>
                     </div>
                 </div>
@@ -67,11 +75,12 @@ const Chat = (props) => {
                     <ul className="chat-box chatContainerScroll">
                         {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
                     </ul>
-                    <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={submit}>
+                    <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
                         <textarea autoFocus  id="text-area" className="form-control mr-1" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
                         <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
+                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} groupname={props.groupname} group={props.group} setGroups={props.setGroups} />
             </div>
         );
     }

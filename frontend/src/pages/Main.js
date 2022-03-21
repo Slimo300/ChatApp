@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import Chat from "../components/Chat";
 import {ws} from "../services/ws";
-import { ModalAddFriend, ModalCreateGroup } from "../components/Modals";
+import { ModalAddFriend, ModalCreateGroup } from "../components/GroupModals";
 
 const Main = (props) => {
 
@@ -23,6 +23,7 @@ const AuthMain = (props) => {
     ws.onmessage = (e) => {
         console.log("got message");
         const msgJSON = JSON.parse(e.data);
+        console.log(msgJSON);
         setMessages([...messages, msgJSON]);
     }
 
@@ -32,8 +33,11 @@ const AuthMain = (props) => {
                 const response = await fetch('http://localhost:8080/api/group/get', {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include'});
-                const a = await response.json();
-                setGroups(a);
+                const responseJSON = await response.json();
+                console.log(responseJSON.message);
+                if (responseJSON.message === undefined) {
+                    setGroups(responseJSON);
+                }
             }
         )();
     }, []);
@@ -67,11 +71,11 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users">
-                                            {groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent} setGroupName={setGroupName}/>})}
+                                            {groups.length!==0?groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent} setGroupName={setGroupName}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} groupname={groupname}/>
+                                <Chat messages={messages} group={current} groupname={groupname} setGroups={setGroups} groups={groups}/>
                             </div>
                         </div>
                     </div>

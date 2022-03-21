@@ -15,6 +15,7 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	engine.POST("/api/group/create", server.CreateGroup)
 	engine.POST("/api/group/add", server.AddUserToGroup)
 	engine.POST("/api/group/remove", server.DeleteUserFromGroup)
+	engine.POST("/api/group/delete", server.DeleteGroup)
 	engine.GET("/api/group/get", server.GetUserGroups)
 	engine.GET("/api/group/messages", server.GetGroupMessages)
 	engine.GET("/api/group/membership", server.GetGroupMembership)

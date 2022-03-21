@@ -32,6 +32,9 @@ type DBlayer interface {
 	AddUserToGroup(name string, id_group uint, id_user uint) error
 	DeleteUserFromGroup(id_member, id_group, id_user uint) error
 	// GrantPriv(id_group, id_user int, priv models.Priv)
+
+	// DeleteGroup deletes a specified group
+	DeleteGroup(id_group, id_user uint) error
 }
 
 var ErrINVALIDPASSWORD = errors.New("invalid password")

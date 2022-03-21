@@ -180,3 +180,31 @@ func (s *Server) GetGroupMembership(c *gin.Context) {
 
 	c.JSON(http.StatusOK, member)
 }
+
+func (s *Server) DeleteGroup(c *gin.Context) {
+	// getting id from jwt
+	id, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		return
+	}
+
+	load := struct {
+		Group int `json:"group"`
+	}{}
+
+	// getting req body
+	if err := c.ShouldBindJSON(&load); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	// telling database to delete group
+	if err := s.DB.DeleteGroup(uint(load.Group), uint(id)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+
+}

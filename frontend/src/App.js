@@ -4,7 +4,6 @@ import SignInForm from './pages/Login';
 import Main from "./pages/Main";
 import Navigation from "./components/Navigation";
 import RegisterForm from "./pages/Register";
-import {ModalCreateGroup, ModalAddFriend} from "./components/Modals";
 
 function App() {
   
@@ -31,8 +30,6 @@ function App() {
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
           </main>
-          {/* <ModalCreateGroup show={createGrShow} toggle={toggleCreateGroup}/>
-          <ModalAddFriend show={addFrShow} toggle={toggleAddFriend}/> */}
         </Router>
       </div>
   )

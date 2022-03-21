@@ -1,13 +1,11 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -171,28 +169,38 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 
 func (db *Database) GetGroupMessages(id uint, offset uint) ([]Message, error) {
 	var messages []models.Message
-	selection := db.Joins("Member", db.Where(&models.Member{GroupID: id})).Offset(int(offset)*15).Limit(15).Find(&messages, "`Member`.`group_id` = ?", id)
+	selection := db.Joins("Member", db.Where(&models.Member{GroupID: id})).Order("posted desc").Offset(int(offset)*15).Limit(MESSAGE_LIMIT).Find(&messages, "`Member`.`group_id` = ?", id)
 	if selection.Error != nil {
 		return nil, selection.Error
 	}
 	var sendMessages []Message
 
-	for _, msg := range messages {
+	for i := len(messages) - 1; i >= 0; i-- {
 		sendMessages = append(sendMessages, Message{
-			Group:   uint64(msg.Member.GroupID),
-			Member:  uint64(msg.MemberID),
-			Nick:    msg.Member.Nick,
-			When:    msg.Posted,
-			Message: msg.Text,
+			Group:   uint64(messages[i].Member.GroupID),
+			Member:  uint64(messages[i].MemberID),
+			Nick:    messages[i].Member.Nick,
+			When:    messages[i].Posted,
+			Message: messages[i].Text,
 		})
 	}
+
+	// for _, msg := range messages {
+	// 	sendMessages = append(sendMessages, Message{
+	// 		Group:   uint64(msg.Member.GroupID),
+	// 		Member:  uint64(msg.MemberID),
+	// 		Nick:    msg.Member.Nick,
+	// 		When:    msg.Posted,
+	// 		Message: msg.Text,
+	// 	})
+	// }
 
 	return sendMessages, nil
 }
 
-func (db *Database) GetGroupMembership(group, user uint) (models.Member, error) {
+func (db *Database) GetGroupMembership(id_group, id_user uint) (models.Member, error) {
 	var membership models.Member
-	selection := db.Where(&models.Member{UserID: user, GroupID: group}).First(&membership)
+	selection := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership)
 	if selection.Error != nil {
 		return membership, selection.Error
 	}
@@ -200,20 +208,23 @@ func (db *Database) GetGroupMembership(group, user uint) (models.Member, error) 
 	return membership, nil
 }
 
-func hashPassword(s string) (string, error) {
-	if s == "" {
-		return "", errors.New("Reference provided for hashing password is nil")
-	}
-	sBytes := []byte(s)
-	hashedBytes, err := bcrypt.GenerateFromPassword(sBytes, bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
+// Deletes a specified group if user is authorized to do so
+func (db *Database) DeleteGroup(id_group, id_user uint) error {
+	// getting user membership to check his privilages
+	var membership models.Member
+	if err := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership).Error; err != nil {
+		return err
 	}
 
-	s = string(hashedBytes)
-	return s, nil
-}
+	// checking whether user have privilages to delete a group
+	if !membership.Creator {
+		return ErrNoPrivilages
+	}
 
-func checkPassword(existingHash, incomingPass string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(existingHash), []byte(incomingPass)) == nil
+	// deleting specified group
+	if err := db.Delete(&models.Group{ID: id_group}).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

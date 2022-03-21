@@ -38,6 +38,7 @@ const CreateGroupForm = (props) => {
             setErr(responseJSON.err);
         } else {
             setErr("Group created");
+            console.log(responseJSON);
             props.setGroups([...props.groups, responseJSON]);
         }
         setTimeout(function () {    
@@ -60,7 +61,7 @@ const CreateGroupForm = (props) => {
                     <input name="name" type="text" className="form-control" id="gr_name" onChange={(e)=>{setGrName(e.target.value)}}/>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="pass">Description:</label>
+                    <label htmlFor="text">Description:</label>
                     <input name="description" type="text" className="form-control" id="gr_desc" onChange={(e)=>{setGrDesc(e.target.value)}}/>
                 </div>
                 <div className="form-row text-center">
