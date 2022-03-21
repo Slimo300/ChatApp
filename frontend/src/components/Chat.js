@@ -80,7 +80,7 @@ const Chat = (props) => {
                         <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
-                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} groupname={props.groupname} group={props.group} setGroups={props.setGroups} />
+                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} groupname={props.groupname} group={props.group} setGroups={props.setGroups} groups={props.groups}/>
             </div>
         );
     }

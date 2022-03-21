@@ -23,6 +23,10 @@ export const ModalDeleteGroup = (props) => {
         else {
             setErr(responseJSON.err);
         }
+        setTimeout(function () {    
+            props.toggle();
+            setErr("");
+        }, 1000);
     }
 
     var message = null;
