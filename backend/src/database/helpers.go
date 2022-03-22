@@ -2,20 +2,28 @@ package database
 
 import (
 	"errors"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Message struct {
-	Group   uint64    `json:"group"`
-	Member  uint64    `json:"member"`
-	Message string    `json:"text"`
-	Nick    string    `json:"nick"`
-	When    time.Time `json:"created"`
+	Group   uint64 `json:"group"`
+	Member  uint64 `json:"member"`
+	Message string `json:"text"`
+	Nick    string `json:"nick"`
+	When    string `json:"created"`
 }
 
+const INVITE_AWAITING = 0
+const INVITE_ACCEPT = 1
+const INVITE_DECLINE = 2
+
 const MESSAGE_LIMIT = 4
+const TIME_FORMAT = "2006-02-01 15:04:05"
+
+var ErrINVALIDPASSWORD = errors.New("invalid password")
+var ErrNoPrivilages = errors.New("insufficient privilages")
+var ErrInternal = errors.New("internal transaction error")
 
 func hashPassword(s string) (string, error) {
 	if s == "" {

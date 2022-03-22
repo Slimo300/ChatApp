@@ -6,6 +6,7 @@ import { ModalDeleteGroup } from "./modals/DeleteGroup";
 const Chat = (props) => {
 
     const [member, setMember] = useState(0);
+    const [nick, setNick] = useState("");
     const [msg, setMsg] = useState("");
 
     // delete group modal
@@ -26,6 +27,7 @@ const Chat = (props) => {
                 });
                 const responseJSON = await response.json();
                 setMember(responseJSON.ID);
+                setNick(responseJSON.Nick);
             }
         )();
     }, [props.group]);
@@ -37,7 +39,8 @@ const Chat = (props) => {
         ws.send(JSON.stringify({
             "group": props.group,
             "member": member,
-            "text": msg
+            "text": msg,
+            "nick": nick
         }));
         console.log(msg, "sent");
         document.getElementById("text-area").value = "";

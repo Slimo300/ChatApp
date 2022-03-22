@@ -1,14 +1,8 @@
 package database
 
 import (
-	"errors"
-
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
-
-const INVITE_AWAITING = 0
-const INVITE_ACCEPT = 1
-const INVITE_DECLINE = 2
 
 type DBlayer interface {
 	GetUserById(id int) (models.User, error)
@@ -21,7 +15,7 @@ type DBlayer interface {
 	GetGroupMessages(id uint, offset uint) ([]Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
 	// AddMessage adds a message of type Message to database
-	AddMessage(msg Message) error
+	AddMessage(msg Message) (Message, error)
 
 	// AddFriend takes "id" of an issuer and "username" of invited user
 	// AddFriend(id int, username string) (models.Invite, error)
@@ -36,7 +30,3 @@ type DBlayer interface {
 	// DeleteGroup deletes a specified group
 	DeleteGroup(id_group, id_user uint) error
 }
-
-var ErrINVALIDPASSWORD = errors.New("invalid password")
-var ErrNoPrivilages = errors.New("insufficient privilages")
-var ErrInternal = errors.New("internal transaction error")

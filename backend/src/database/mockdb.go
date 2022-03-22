@@ -147,8 +147,8 @@ func (m *MockDB) RespondInvite(id_inv, response int) (models.Group, error) {
 	return models.Group{}, nil
 }
 
-func (m *MockDB) AddMessage(msg Message) error {
-	return nil
+func (m *MockDB) AddMessage(msg Message) (Message, error) {
+	return Message{}, nil
 }
 
 func (m *MockDB) DeleteGroup(id_group, id_user uint) error {

@@ -1,8 +1,6 @@
 package ws
 
 import (
-	"time"
-
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/gorilla/websocket"
 )
@@ -21,7 +19,6 @@ func (c *client) read() {
 		if err := c.socket.ReadJSON(&msg); err != nil {
 			return
 		}
-		msg.When = time.Now()
 		c.hub.forward <- &msg
 	}
 }

@@ -34,13 +34,15 @@ func (h *Hub) Run() {
 			delete(h.clients, client)
 			close(client.send)
 		case msg := <-h.forward:
-			if err := h.db.AddMessage(*msg); err != nil {
+			message, err := h.db.AddMessage(*msg)
+			if err != nil {
 				panic(err)
 			}
+			message.Nick = msg.Nick
 			for client := range h.clients {
 				for _, gr := range client.groups {
 					if gr == int64(msg.Group) {
-						client.send <- msg
+						client.send <- &message
 					}
 				}
 			}
