@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {v4 as uuidv4} from "uuid";
-import {ws} from "../services/ws"
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
@@ -36,7 +35,7 @@ const Chat = (props) => {
     const sendMessage = (e) => {
         e.preventDefault();
         if (msg === "") return false;
-        ws.send(JSON.stringify({
+        props.ws.send(JSON.stringify({
             "group": props.group,
             "member": member,
             "text": msg,

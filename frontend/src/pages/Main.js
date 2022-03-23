@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import Chat from "../components/Chat";
-import {ws} from "../services/ws";
 import { ModalAddFriend, ModalCreateGroup } from "../components/GroupModals";
 
 const Main = (props) => {
@@ -20,10 +19,21 @@ const AuthMain = (props) => {
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
 
+    const [ws, setWs] = useState({});
+
+    useEffect(() => {
+        let socket = new WebSocket("ws://localhost:8080/ws")
+        socket.onopen = () => {
+            console.log("Websocket openned");
+        };
+        socket.onclose = () => {
+            console.log("closed");
+        };
+        setWs(socket);
+    }, []);
+
     ws.onmessage = (e) => {
-        console.log("got message");
         const msgJSON = JSON.parse(e.data);
-        console.log(msgJSON);
         setMessages([...messages, msgJSON]);
     }
 
@@ -75,7 +85,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} groupname={groupname} setGroups={setGroups} groups={groups}/>
+                                <Chat messages={messages} group={current} groupname={groupname} setGroups={setGroups} groups={groups} ws={ws}/>
                             </div>
                         </div>
                     </div>
