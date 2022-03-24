@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"github.com/golang-jwt/jwt"
@@ -16,12 +17,12 @@ type Server struct {
 	domain string
 }
 
-func NewServer(db database.DBlayer) *Server {
+func NewServer(db database.DBlayer, ch <-chan *communication.Action) *Server {
 	return &Server{
 		DB:     db,
 		secret: "wołowina",
 		domain: "localhost",
-		Hub:    ws.NewHub(db),
+		Hub:    ws.NewHub(db, ch),
 	}
 }
 

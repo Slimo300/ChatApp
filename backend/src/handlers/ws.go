@@ -8,10 +8,6 @@ import (
 )
 
 func (s *Server) ServeWebSocket(c *gin.Context) {
-	if s.DB == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal server error"})
-		return
-	}
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
@@ -28,6 +24,6 @@ func (s *Server) ServeWebSocket(c *gin.Context) {
 		grInt = append(grInt, int64(g.ID))
 	}
 
-	ws.ServeWebSocket(c.Writer, c.Request, s.Hub, grInt)
+	ws.ServeWebSocket(c.Writer, c.Request, s.Hub, grInt, id)
 
 }

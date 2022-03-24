@@ -6,6 +6,7 @@ import (
 )
 
 type client struct {
+	id     int
 	socket *websocket.Conn
 	send   chan *database.Message
 	hub    *Hub

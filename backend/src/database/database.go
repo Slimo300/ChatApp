@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,10 +13,11 @@ import (
 
 type Database struct {
 	*gorm.DB
+	CommChan chan<- *communication.Action
 }
 
 // Setup creates Database object and initializes connection between MySQL database
-func Setup() (*Database, error) {
+func Setup(ch chan<- *communication.Action) (*Database, error) {
 	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
 		os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLDBNAME"))), &gorm.Config{
 		SkipDefaultTransaction: true,
@@ -26,7 +28,7 @@ func Setup() (*Database, error) {
 
 	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{})
 
-	return &Database{DB: db}, nil
+	return &Database{DB: db, CommChan: ch}, nil
 }
 
 //GetUserById returns a user with specified id
@@ -112,6 +114,7 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 		return models.Group{}, ErrInternal
 	}
 
+	db.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "insert"}
 	return group, nil
 }
 
@@ -195,5 +198,6 @@ func (db *Database) DeleteGroup(id_group, id_user uint) error {
 		return err
 	}
 
+	db.CommChan <- &communication.Action{User: 0, Group: int(id_group), Action: "pop"}
 	return nil
 }

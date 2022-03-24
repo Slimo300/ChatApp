@@ -17,7 +17,7 @@ import (
 func TestGetUserGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock)
+	s := handlers.NewServer(mock, nil)
 
 	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 
@@ -86,7 +86,7 @@ func TestGetUserGroups(t *testing.T) {
 func TestGetGroupMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock)
+	s := handlers.NewServer(mock, nil)
 
 	testCases := []struct {
 		desc               string
@@ -167,7 +167,7 @@ func TestGetGroupMessages(t *testing.T) {
 func TestGetMembership(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock)
+	s := handlers.NewServer(mock, nil)
 
 	testCases := []struct {
 		desc               string
