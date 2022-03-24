@@ -4,7 +4,8 @@ import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
 
-    const [member, setMember] = useState({});
+    const [member, setMember] = useState(0);
+    const [nick, setNick] = useState("");
     const [msg, setMsg] = useState("");
 
     // delete group modal
@@ -24,7 +25,8 @@ const Chat = (props) => {
                     credentials: "include",
                 });
                 const responseJSON = await response.json();
-                setMember(responseJSON);
+                setMember(responseJSON.ID);
+                setNick(responseJSON.Nick);
             }
         )();
     }, [props.group]);
@@ -37,7 +39,7 @@ const Chat = (props) => {
             "group": props.group,
             "member": member,
             "text": msg,
-            "nick": member.nick
+            "nick": nick
         }));
         console.log(msg, "sent");
         document.getElementById("text-area").value = "";
@@ -72,7 +74,7 @@ const Chat = (props) => {
                     </div>
                 </div>
                 <div className="chat-container">
-                    <ul className="chat-box chatContainerScroll" style={{height: "70vh", overflow: "scroll"}}>
+                    <ul className="chat-box chatContainerScroll">
                         {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
@@ -89,7 +91,7 @@ const Chat = (props) => {
 
 const Message = (props) => {
     const right = (
-        <li className="chat-right mt-5">
+        <li className="chat-right">
             <div className="chat-hour">{props.time} <span className="fa fa-check-circle"></span></div>
             <div className="chat-text">{props.message}</div>
             <div className="chat-avatar">
