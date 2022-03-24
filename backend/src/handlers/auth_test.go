@@ -71,12 +71,10 @@ func TestRegister(t *testing.T) {
 			if response.StatusCode != tC.expectedStatusCode {
 				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
 			}
-			var respBody interface{}
 			var errmsg gin.H
 			json.NewDecoder(response.Body).Decode(&errmsg)
-			respBody = errmsg
-			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
-				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
+			if !reflect.DeepEqual(errmsg, tC.expectedResponse) {
+				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", errmsg, tC.expectedResponse)
 			}
 		})
 	}

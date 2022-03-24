@@ -43,16 +43,16 @@ func (Message) TableName() string {
 
 type Member struct {
 	ID       uint   `gorm:"primaryKey"`
-	GroupID  uint   `gorm:"column:group_id"`
-	UserID   uint   `gorm:"column:user_id"`
+	GroupID  uint   `gorm:"column:group_id" json:"group_id"`
+	UserID   uint   `gorm:"column:user_id" json:"user_id"`
 	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Nick     string `gorm:"column:nick"`
-	Adding   bool   `gorm:"column:adding"`
-	Deleting bool   `gorm:"column:deleting"`
-	Setting  bool   `gorm:"column:setting"`
-	Creator  bool   `gorm:"column:creator"`
-	Deleted  bool   `gorm:"column:deleted"`
+	Nick     string `gorm:"column:nick" json:"nick"`
+	Adding   bool   `gorm:"column:adding" json:"adding"`
+	Deleting bool   `gorm:"column:deleting" json:"deleting"`
+	Setting  bool   `gorm:"column:setting" json:"setting" `
+	Creator  bool   `gorm:"column:creator" json:"creator"`
+	Deleted  bool   `gorm:"column:deleted" json:"deleted"`
 }
 
 func (Member) TableName() string {

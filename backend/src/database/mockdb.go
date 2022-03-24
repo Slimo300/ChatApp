@@ -10,7 +10,10 @@ import (
 )
 
 type MockDB struct {
-	Users []models.User
+	Users    []models.User
+	Groups   []models.Group
+	Members  []models.Member
+	Messages []models.Message
 }
 
 func NewMockDB() *MockDB {
@@ -43,21 +46,84 @@ func NewMockDB() *MockDB {
 				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
 				"logged": false
 		}
-	]
-	`
+	]`
+
+	GROUPS := `[
+		{
+			"ID": 1,
+			"name": "New Group",
+			"desc": "totally new group",
+			"created": "2019-01-13T08:47:44Z"
+		}	
+	]`
+
+	MEMBERS := `[
+		{
+			"ID": 1,
+			"group_id": 1,
+			"user_id": 1,
+			"nick": "Mal",
+			"adding": true,
+			"deleting": true,
+			"setting": true,
+			"creator": true,
+			"deleted": false
+		},
+		{
+			"ID": 2,
+			"group_id": 1,
+			"user_id": 2,
+			"nick": "River",
+			"adding": false,
+			"deleting": false,
+			"setting": false,
+			"creator": false,
+			"deleted": false
+		}
+	]`
+
+	MESSAGES := `[
+		{
+			"ID": 1,
+			"posted": "2019-01-13T22:00:45Z",
+			"text": "elo",
+			"member_id": 1
+		},
+		{
+			"ID": 2,
+			"posted": "2019-01-15T22:00:45Z",
+			"text": "siema",
+			"member_id": 2
+		}, 
+		{
+			"ID": 3,
+			"posted": "2019-01-16T22:00:45Z",
+			"text": "elo elo",
+			"member_id": 1
+		},
+		{
+			"ID": 4,
+			"posted": "2019-01-17T22:00:45Z",
+			"text": "siema siema",
+			"member_id": 2
+		}
+	]`
 
 	var users []models.User
 	json.Unmarshal([]byte(USERS), &users)
 
+	var groups []models.Group
+	json.Unmarshal([]byte(GROUPS), &groups)
+
+	var members []models.Member
+	json.Unmarshal([]byte(MEMBERS), &members)
+
+	var messages []models.Message
+	json.Unmarshal([]byte(MESSAGES), &messages)
+
 	// add data
-	return &MockDB{Users: users}
+	return &MockDB{Users: users, Groups: groups, Members: members, Messages: messages}
 }
-
-// GetUserById(id int) (models.User, error)
-// RegisterUser(models.User) (models.User, error)
-
-// SignInUser(name string, pass string) (models.User, error)
-// SignOutUser(email string) error
 
 func (m *MockDB) GetUserById(id int) (models.User, error) {
 	for _, user := range m.Users {
@@ -114,27 +180,92 @@ func (m *MockDB) SignOutUser(id uint) error {
 }
 
 func (m *MockDB) CreateGroup(id uint, name, desc string) (models.Group, error) {
-	return models.Group{}, nil
-}
+	newGroup := models.Group{
+		ID:      uint(len(m.Groups) + 1),
+		Name:    name,
+		Desc:    desc,
+		Created: time.Now(),
+	}
+	m.Groups = append(m.Groups, newGroup)
 
-func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) error {
-	return nil
-}
-
-func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
-	return nil
+	return newGroup, nil
 }
 
 func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
-	return []models.Group{}, nil
+	var groups []models.Group
+	for _, member := range m.Members {
+		if member.UserID == id {
+			for _, group := range m.Groups {
+				if member.GroupID == group.ID {
+					groups = append(groups, group)
+				}
+			}
+		}
+	}
+	return groups, nil
 }
 
 func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]Message, error) {
-	return nil, nil
+	var messages []Message
+	for _, member := range m.Members {
+		if member.GroupID == id {
+			for _, message := range m.Messages {
+				if member.ID == message.MemberID {
+					messages = append(messages, Message{
+						Group:   uint64(id),
+						Member:  uint64(member.ID),
+						Message: message.Text,
+						Nick:    member.Nick,
+						When:    message.Posted.Format(TIME_FORMAT),
+					})
+				}
+			}
+		}
+	}
+	return messages, nil
 }
 
 func (m *MockDB) GetGroupMembership(group, user uint) (models.Member, error) {
-	return models.Member{}, nil
+	for _, member := range m.Members {
+		if member.GroupID == group && member.UserID == user {
+			return member, nil
+		}
+	}
+	return models.Member{}, errors.New("Err no record")
+}
+
+func (m *MockDB) AddMessage(msg Message) (Message, error) {
+	msgTime := time.Now()
+	m.Messages = append(m.Messages, models.Message{
+		ID:       uint(len(m.Messages) + 1),
+		Posted:   msgTime,
+		Text:     msg.Message,
+		MemberID: uint(msg.Member),
+	})
+
+	msg.When = msgTime.Format(TIME_FORMAT)
+	return msg, nil
+}
+
+func (m *MockDB) DeleteGroup(id_group, id_user uint) error {
+	groupDel := false
+	for _, group := range m.Groups {
+		if group.ID == id_group {
+			for i, member := range m.Members {
+				if member.GroupID == id_group && member.UserID == id_user && member.Creator {
+					m.Groups = append(m.Groups[:i], m.Groups[i+1:]...)
+				}
+			}
+		}
+	}
+	if groupDel {
+		for i, member := range m.Members {
+			if member.GroupID == id_group {
+				m.Members = append(m.Members[:i], m.Members[i+1:]...)
+			}
+		}
+	}
+	return errors.New("Couldn't delete group")
 }
 
 // func AddFriend takes "id" which is id of issuer and username of invited user
@@ -147,10 +278,10 @@ func (m *MockDB) RespondInvite(id_inv, response int) (models.Group, error) {
 	return models.Group{}, nil
 }
 
-func (m *MockDB) AddMessage(msg Message) (Message, error) {
-	return Message{}, nil
+func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) error {
+	return nil
 }
 
-func (m *MockDB) DeleteGroup(id_group, id_user uint) error {
+func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
 	return nil
 }

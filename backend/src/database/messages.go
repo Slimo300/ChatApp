@@ -45,15 +45,5 @@ func (db *Database) GetGroupMessages(id uint, offset uint) ([]Message, error) {
 		})
 	}
 
-	// for _, msg := range messages {
-	// 	sendMessages = append(sendMessages, Message{
-	// 		Group:   uint64(msg.Member.GroupID),
-	// 		Member:  uint64(msg.MemberID),
-	// 		Nick:    msg.Member.Nick,
-	// 		When:    msg.Posted,
-	// 		Message: msg.Text,
-	// 	})
-	// }
-
 	return sendMessages, nil
 }
