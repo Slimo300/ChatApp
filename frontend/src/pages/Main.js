@@ -80,7 +80,7 @@ const AuthMain = (props) => {
                             <div className="row no-gutters">
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
-                                        <ul className="users">
+                                        <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
                                             {groups.length!==0?groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent} setGroupName={setGroupName}/>}):null}
                                         </ul>
                                     </div>

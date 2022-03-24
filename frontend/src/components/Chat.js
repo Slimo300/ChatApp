@@ -74,7 +74,7 @@ const Chat = (props) => {
                     </div>
                 </div>
                 <div className="chat-container">
-                    <ul className="chat-box chatContainerScroll">
+                    <ul className="chat-box chatContainerScroll" style={{height: '70vh', overflow: 'scroll'}}>
                         {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
