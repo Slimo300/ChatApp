@@ -58,14 +58,19 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 		return user, ErrINVALIDPASSWORD
 	}
 	user.Pass = ""
-	err = result.Update("logged", 1).Error
-	if err != nil {
+	// Updating logged field
+	if err = result.Update("logged", 1).Error; err != nil {
+		return user, err
+	}
+	// Updating activity field
+	if err = result.Update("activity", time.Now()).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
+// SignOutUser updates user "logged" field
 func (db *Database) SignOutUser(id uint) error {
 	user := db.Table("users").First(&models.User{ID: id})
 	if user.Error != nil {
@@ -160,18 +165,18 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 		return selection.Error
 	}
 
-	deletion := db.Delete(del_member)
+	deletion := db.Delete(&del_member)
 	if deletion.Error != nil {
 		return deletion.Error
 	}
 	return nil
 }
 
+// GetGroupMembership returns Member model stating user and group relation and user rights in it
 func (db *Database) GetGroupMembership(id_group, id_user uint) (models.Member, error) {
 	var membership models.Member
-	selection := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership)
-	if selection.Error != nil {
-		return membership, selection.Error
+	if err := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership).Error; err != nil {
+		return membership, err
 	}
 
 	return membership, nil
