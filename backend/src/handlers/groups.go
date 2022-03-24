@@ -110,7 +110,7 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 
 func (s *Server) GetGroupMessages(c *gin.Context) {
 
-	_, err := checkTokenAndGetID(c, s)
+	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
 		return
@@ -139,7 +139,7 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 		}
 	}
 
-	messages, err := s.DB.GetGroupMessages(uint(group_int), uint(offset_int))
+	messages, err := s.DB.GetGroupMessages(uint(id), uint(group_int), uint(offset_int))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return

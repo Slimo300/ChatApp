@@ -12,7 +12,7 @@ type DBlayer interface {
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
 
-	GetGroupMessages(id uint, offset uint) ([]Message, error)
+	GetGroupMessages(id_user, id_group, offset uint) ([]Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
 	// AddMessage adds a message of type Message to database
 	AddMessage(msg Message) (Message, error)

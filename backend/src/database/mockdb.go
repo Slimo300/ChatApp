@@ -205,23 +205,30 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return groups, nil
 }
 
-func (m *MockDB) GetGroupMessages(id uint, offset uint) ([]Message, error) {
+func (m *MockDB) GetGroupMessages(id_user, id_group, offset uint) ([]Message, error) {
 	var messages []Message
+
 	for _, member := range m.Members {
-		if member.GroupID == id {
-			for _, message := range m.Messages {
-				if member.ID == message.MemberID {
-					messages = append(messages, Message{
-						Group:   uint64(id),
-						Member:  uint64(member.ID),
-						Message: message.Text,
-						Nick:    member.Nick,
-						When:    message.Posted.Format(TIME_FORMAT),
-					})
-				}
+		if member.GroupID == id_group && member.UserID == id_user {
+			break
+		}
+		return nil, errors.New("User cannot request from this group")
+	}
+
+	for _, message := range m.Messages {
+		for _, member := range m.Members {
+			if message.MemberID == member.ID && member.GroupID == id_group {
+				messages = append(messages, Message{
+					Group:   uint64(id_group),
+					Member:  uint64(member.ID),
+					Message: message.Text,
+					Nick:    member.Nick,
+					When:    message.Posted.Format(TIME_FORMAT),
+				})
 			}
 		}
 	}
+
 	return messages, nil
 }
 
