@@ -256,23 +256,29 @@ func (m *MockDB) AddMessage(msg Message) (Message, error) {
 
 func (m *MockDB) DeleteGroup(id_group, id_user uint) error {
 	groupDel := false
-	for _, group := range m.Groups {
+	for i, group := range m.Groups {
 		if group.ID == id_group {
-			for i, member := range m.Members {
+			for _, member := range m.Members {
 				if member.GroupID == id_group && member.UserID == id_user && member.Creator {
 					m.Groups = append(m.Groups[:i], m.Groups[i+1:]...)
+					groupDel = true
+					break
 				}
+				return errors.New("Couldn't delete group")
 			}
+			break
 		}
 	}
 	if groupDel {
-		for i, member := range m.Members {
-			if member.GroupID == id_group {
-				m.Members = append(m.Members[:i], m.Members[i+1:]...)
+		var newMembers []models.Member
+		for _, member := range m.Members {
+			if member.GroupID != id_group {
+				newMembers = append(newMembers, member)
 			}
 		}
+		m.Members = newMembers
 	}
-	return errors.New("Couldn't delete group")
+	return nil
 }
 
 // func AddFriend takes "id" which is id of issuer and username of invited user

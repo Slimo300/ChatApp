@@ -44,6 +44,14 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
+	if group.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "bad name"})
+		return
+	}
+	if group.Desc == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "bad description"})
+		return
+	}
 
 	group, err = s.DB.CreateGroup(uint(id), group.Name, group.Desc)
 	if err != nil {
@@ -196,6 +204,10 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 	// getting req body
 	if err := c.ShouldBindJSON(&load); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+	if load.Group == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
 		return
 	}
 
