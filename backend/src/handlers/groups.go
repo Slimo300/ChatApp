@@ -174,7 +174,7 @@ func (s *Server) GetGroupMembership(c *gin.Context) {
 
 	member, err := s.DB.GetGroupMembership(uint(group_int), uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
 		return
 	}
 
