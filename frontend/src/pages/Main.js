@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import Chat from "../components/Chat";
-import { ModalAddFriend, ModalCreateGroup } from "../components/GroupModals";
+import { GroupLabel } from "../components/GroupLabel";
+import { ModalAddFriend } from "../components/modals/AddFriend";
+import { ModalCreateGroup } from "../components/modals/CreateGroup";
 
 const Main = (props) => {
 
@@ -18,9 +20,9 @@ const AuthMain = (props) => {
     const [current, setCurrent] = useState(0);
     const [messages, setMessages] = useState([]);
     const [groupname, setGroupName] = useState("");
-
     const [ws, setWs] = useState({});
 
+    // Effect starting websocket connection
     useEffect(() => {
         let socket = new WebSocket("ws://localhost:8080/ws")
         socket.onopen = () => {
@@ -37,6 +39,7 @@ const AuthMain = (props) => {
         setMessages([...messages, msgJSON]);
     }
 
+    // effect getting groups in which user has membership
     useEffect(()=>{
         (
             async () => {
@@ -52,6 +55,7 @@ const AuthMain = (props) => {
         )();
     }, []);
 
+    // getting messages from specific group
     useEffect(()=>{
         (
             async () => {
@@ -96,23 +100,4 @@ const AuthMain = (props) => {
         </div>
     )
 }
-
-const GroupLabel = (props) => {
-    const change = () => {
-        props.setCurrent(props.id);
-        props.setGroupName(props.name);
-    };
-    return (
-        <li className="person" onClick={change}>
-            <div className="user">
-                <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/>
-                <span className={"status" + props.status}></span>
-            </div>
-            <p className="name-time">
-                <span className="name">{props.name}</span>
-            </p>
-        </li>
-    );
-}
-
 export default Main;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {v4 as uuidv4} from "uuid";
+import GroupMenu from "./GroupMenu";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
@@ -64,13 +65,7 @@ const Chat = (props) => {
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <button className="dropdown-item" href="#">Options</button>
-                            <button className="dropdown-item" href="#">Members</button>
-                            <button className="dropdown-item" href="#">Add User</button>
-                            <div className="dropdown-divider"></div>
-                            <button className="dropdown-item" onClick={toggleDelGroup} >Delete Group</button>
-                        </div>
+                        <GroupMenu toggle={toggleDelGroup} />
                     </div>
                 </div>
                 <div className="chat-container">
