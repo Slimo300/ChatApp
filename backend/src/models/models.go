@@ -23,6 +23,7 @@ type Group struct {
 	Name    string    `gorm:"column:name" json:"name"`
 	Desc    string    `gorm:"column:desc" json:"desc"`
 	Created time.Time `gorm:"column:created" json:"created"`
+	Members []Member  `gorm:"foreignKey:GroupID"`
 }
 
 func (Group) TableName() string {

@@ -82,11 +82,13 @@ func (db *Database) SignOutUser(id uint) error {
 
 // GetUserGroups returns a slice of Groups of which user is a member
 func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
-	return groups, db.Table("`groups`").Select("`groups`.*").
-		Joins("join `members` on `groups`.id = `members`.group_id").
-		Joins("join `users` on `users`.id = `members`.user_id").
-		Where("user_id=?", id).Scan(&groups).Error
+	return groups, db.Preload("Members").Find(&groups).Error
 }
+
+//  db.Table("`groups`").Select("`groups`.*").
+// 		Joins("join `members` on `groups`.id = `members`.group_id").
+// 		Joins("join `users` on `users`.id = `members`.user_id").
+// 		Where("user_id=?", id).Scan(&groups).Error
 
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
 	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
