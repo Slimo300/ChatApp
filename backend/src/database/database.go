@@ -141,6 +141,7 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 		return creation.Error
 	}
 
+	db.CommChan <- &communication.Action{Group: int(id_group), User: int(user.ID), Action: "insert"}
 	return nil
 }
 

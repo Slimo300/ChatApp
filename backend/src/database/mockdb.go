@@ -291,10 +291,64 @@ func (m *MockDB) RespondInvite(id_inv, response int) (models.Group, error) {
 	return models.Group{}, nil
 }
 
+// Adding user to a group
 func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) error {
+
+	var added models.User // user who is added by his username
+
+	// finding issuer and added
+	for _, user := range m.Users {
+		if user.UserName == username {
+			added = user
+		}
+	}
+	if added.ID == 0 {
+		return errors.New("row not found")
+	}
+
+	var membership models.Member
+	// getting issuer membership
+	for _, mem := range m.Members {
+		if mem.UserID == id_user && mem.GroupID == id_group {
+			membership = mem
+		}
+	}
+	if (!membership.Creator && !membership.Adding) || membership.ID == 0 {
+		return ErrNoPrivilages
+	}
+
+	m.Members = append(m.Members, models.Member{ID: uint(len(m.Members) + 1), GroupID: id_group, UserID: added.ID, Nick: username, Adding: false,
+		Deleting: false, Setting: false, Creator: false, Deleted: false})
+
 	return nil
 }
 
 func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
+
+	var membership models.Member
+	// Checking issuer privilages
+	for _, mem := range m.Members {
+		if mem.UserID == id_user && mem.GroupID == id_group {
+			membership = mem
+		}
+	}
+	if (!membership.Deleting && !membership.Creator) || membership.ID == 0 {
+		return ErrNoPrivilages
+	}
+
+	deleted := false
+
+	// iterating and searching for membership
+	for _, mem := range m.Members {
+		if mem.ID == id_member {
+			mem.Deleted = true
+			deleted = true
+		}
+	}
+	// checking whether some action in a loop was performed (if row was found)
+	if !deleted {
+		return errors.New("row not found")
+	}
+
 	return nil
 }
