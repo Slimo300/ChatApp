@@ -196,6 +196,10 @@ func (db *Database) DeleteGroup(id_group, id_user uint) error {
 		return ErrNoPrivilages
 	}
 
+	// deleting memberships
+	if err := db.Where(models.Member{GroupID: id_group}).Delete(&models.Member{}).Error; err != nil {
+		return err
+	}
 	// deleting specified group
 	if err := db.Delete(&models.Group{ID: id_group}).Error; err != nil {
 		return err

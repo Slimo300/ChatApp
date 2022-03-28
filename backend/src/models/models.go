@@ -44,8 +44,8 @@ func (Message) TableName() string {
 
 type Member struct {
 	ID       uint   `gorm:"primaryKey"`
-	GroupID  uint   `gorm:"column:group_id" json:"group_id"`
-	UserID   uint   `gorm:"column:user_id" json:"user_id"`
+	GroupID  uint   `gorm:"column:group_id;unique_index:idx_first" json:"group_id"`
+	UserID   uint   `gorm:"column:user_id;unique_index:idx_first" json:"user_id"`
 	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Nick     string `gorm:"column:nick" json:"nick"`

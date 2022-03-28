@@ -75,14 +75,12 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 		Group    int    `json:"group"`
 	}{}
 
-	err = c.ShouldBindJSON(&load)
-	if err != nil {
+	if err = c.ShouldBindJSON(&load); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
-	err = s.DB.AddUserToGroup(load.Username, uint(load.Group), uint(id))
-	if err != nil {
+	if err = s.DB.AddUserToGroup(load.Username, uint(load.Group), uint(id)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {v4 as uuidv4} from "uuid";
 import GroupMenu from "./GroupMenu";
+import { ModalAddUser } from "./modals/AddUser";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
@@ -8,6 +9,11 @@ const Chat = (props) => {
     const [member, setMember] = useState({});
     const [msg, setMsg] = useState("");
 
+    // add user to group modal
+    const [addUserShow, setAddUserShow] = useState(false);
+    const toggleAddUser = () => {
+        setAddUserShow(!addUserShow);
+    };
     // delete group modal
     const [delGrShow, setDelGrShow] = useState(false);
     const toggleDelGroup = () => {
@@ -64,7 +70,7 @@ const Chat = (props) => {
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <GroupMenu toggle={toggleDelGroup} />
+                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser}/>
                     </div>
                 </div>
                 <div className="chat-container">
@@ -76,7 +82,8 @@ const Chat = (props) => {
                         <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
-                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} groupname={props.groupname} group={props.group} setGroups={props.setGroups} groups={props.groups}/>
+                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setGroups={props.setGroups} groups={props.groups}/>
+                <ModalAddUser show={addUserShow} toggle={toggleAddUser} group={props.group}/>
             </div>
         );
     }

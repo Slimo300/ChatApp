@@ -11,14 +11,14 @@ export const ModalDeleteGroup = (props) => {
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
             body: JSON.stringify({
-                "group": props.group
+                "group": props.group.ID
             })
         });
 
         const responseJSON = await response.json()
 
         if (responseJSON.message === "ok") {
-            props.setGroups(props.groups.filter((item)=> { return item.ID !== props.group }));
+            props.setGroups(props.groups.filter((item)=> { return item.ID !== props.group.ID }));
         }
         else {
             setErr(responseJSON.err);
@@ -44,7 +44,7 @@ export const ModalDeleteGroup = (props) => {
                     <div>
                         {message}
                         <div className='form-group'>
-                            <label>Are you sure you want to delete group {props.groupname}?</label>
+                            <label>Are you sure you want to delete group {props.group.name}?</label>
                         </div>
                         <div className="form-row text-center">
                             <div className="col-12 mt-2">

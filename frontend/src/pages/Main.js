@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import Chat from "../components/Chat";
 import { GroupLabel } from "../components/GroupLabel";
-import { ModalAddFriend } from "../components/modals/AddFriend";
+import { ModalAddUser } from "../components/modals/AddUser";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
 
 const Main = (props) => {
@@ -95,7 +95,7 @@ const AuthMain = (props) => {
                 </div>
             </div>
           <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup} groups={groups} setGroups={setGroups}/>
-          <ModalAddFriend show={props.showFrAdd} toggle={props.toggleFrAdd}/>
+          <ModalAddUser show={props.showFrAdd} toggle={props.toggleFrAdd}/>
         </div>
     )
 }
