@@ -85,11 +85,6 @@ func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
 	return groups, db.Preload("Members").Find(&groups).Error
 }
 
-//  db.Table("`groups`").Select("`groups`.*").
-// 		Joins("join `members` on `groups`.id = `members`.group_id").
-// 		Joins("join `users` on `users`.id = `members`.user_id").
-// 		Where("user_id=?", id).Scan(&groups).Error
-
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
 	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
 	transactionFlag := false
@@ -150,26 +145,22 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
 
 	var member models.Member
-	db.Table("`members`").Select("`members`.*").
+	if err := db.Table("`members`").Select("`members`.*").
 		Joins("inner join `users` on `users`.id = `members`.user_id").
 		Joins("inner join `groups` on `groups`.id = `members`.group_id").
 		Where("`users`.id = ?", id_user).
-		Where("`groups`.id = ?", id_group).Scan(&member)
+		Where("`groups`.id = ?", id_group).Scan(&member).Error; err != nil {
+		return err
+	}
 
 	if !member.Deleting {
 		return ErrNoPrivilages
 	}
 
-	var del_member models.Member
-	selection := db.Where(&models.Member{ID: id_member}).First(&del_member)
-	if selection.Error != nil {
-		return selection.Error
+	if err := db.Where(&models.Member{ID: id_member}).Update("deleted", true).Error; err != nil {
+		return err
 	}
 
-	deletion := db.Delete(del_member)
-	if deletion.Error != nil {
-		return deletion.Error
-	}
 	return nil
 }
 

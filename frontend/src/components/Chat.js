@@ -3,6 +3,7 @@ import {v4 as uuidv4} from "uuid";
 import GroupMenu from "./GroupMenu";
 import { ModalAddUser } from "./modals/AddUser";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
+import { ModalMembers } from "./modals/GroupMembers";
 
 const Chat = (props) => {
 
@@ -18,6 +19,11 @@ const Chat = (props) => {
     const [delGrShow, setDelGrShow] = useState(false);
     const toggleDelGroup = () => {
         setDelGrShow(!delGrShow);
+    };
+    // members modal
+    const [membersShow, setMembersShow] = useState(false);
+    const toggleMembers = () => {
+        setMembersShow(!membersShow);
     };
 
     // getting group membership
@@ -47,7 +53,6 @@ const Chat = (props) => {
             "text": msg,
             "nick": member.nick
         }));
-        console.log(msg, "sent");
         document.getElementById("text-area").value = "";
         document.getElementById("text-area").focus();
     }
@@ -58,7 +63,6 @@ const Chat = (props) => {
     }
 
     let load;
-
     if (props.group.ID === undefined) {
         load = <h1>Select a group to chat!</h1>;
     } else {
@@ -70,7 +74,7 @@ const Chat = (props) => {
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser}/>
+                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser} toggleMembers={toggleMembers}/>
                     </div>
                 </div>
                 <div className="chat-container">
@@ -84,6 +88,7 @@ const Chat = (props) => {
                 </div>
                 <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setGroups={props.setGroups} groups={props.groups}/>
                 <ModalAddUser show={addUserShow} toggle={toggleAddUser} group={props.group}/>
+                <ModalMembers show={membersShow} toggle={toggleMembers} group={props.group} />
             </div>
         );
     }

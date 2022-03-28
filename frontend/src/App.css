@@ -129,6 +129,14 @@
     position: relative;
     margin-right: 10px;
 }
+/* my code :( */
+tr img {
+    width: 48px;
+    height: 48px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    border-radius: 50px;
+}
 
 .users .person .user img {
     width: 48px;

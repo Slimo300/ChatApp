@@ -111,7 +111,7 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
 func (s *Server) GetGroupMessages(c *gin.Context) {
