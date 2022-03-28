@@ -5,8 +5,7 @@ import { ModalDeleteGroup } from "./modals/DeleteGroup";
 
 const Chat = (props) => {
 
-    const [member, setMember] = useState(0);
-    const [nick, setNick] = useState("");
+    const [member, setMember] = useState({});
     const [msg, setMsg] = useState("");
 
     // delete group modal
@@ -15,19 +14,19 @@ const Chat = (props) => {
         setDelGrShow(!delGrShow);
     };
 
+    // getting group membership
     useEffect(()=>{
         (
             async () => {
-                if (props.group === 0) {
+                if (props.group.ID === undefined) {
                     return
                 }
-                const response = await fetch("http://localhost:8080/api/group/membership?group=" + props.group.toString(), {
+                const response = await fetch("http://localhost:8080/api/group/membership?group=" + props.group.ID.toString(), {
                     headers: {"Content-Type": "application/json"},
                     credentials: "include",
                 });
                 const responseJSON = await response.json();
-                setMember(responseJSON.ID);
-                setNick(responseJSON.Nick);
+                setMember(responseJSON);
             }
         )();
     }, [props.group]);
@@ -37,10 +36,10 @@ const Chat = (props) => {
         e.preventDefault();
         if (msg === "") return false;
         props.ws.send(JSON.stringify({
-            "group": props.group,
-            "member": member,
+            "group": props.group.ID,
+            "member": member.ID,
             "text": msg,
-            "nick": nick
+            "nick": member.nick
         }));
         console.log(msg, "sent");
         document.getElementById("text-area").value = "";
@@ -54,13 +53,13 @@ const Chat = (props) => {
 
     let load;
 
-    if (props.group === 0) {
+    if (props.group.ID === undefined) {
         load = <h1>Select a group to chat!</h1>;
     } else {
         load = (
             <div className="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
                 <div className="selected-user row">
-                    <span className="mr-auto mt-4">To: <span className="name">{props.groupname}</span></span>
+                    <span className="mr-auto mt-4">To: <span className="name">{props.group.name}</span></span>
                     <div className="dropdown">
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
@@ -70,7 +69,7 @@ const Chat = (props) => {
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box chatContainerScroll" style={{height: '70vh', overflow: 'scroll'}}>
-                        {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member}/>})}
+                        {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID}/>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
                         <textarea autoFocus  id="text-area" className="form-control mr-1" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>

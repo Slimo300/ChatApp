@@ -17,9 +17,8 @@ const Main = (props) => {
 const AuthMain = (props) => {
 
     const [groups, setGroups] = useState([]);
-    const [current, setCurrent] = useState(0);
     const [messages, setMessages] = useState([]);
-    const [groupname, setGroupName] = useState("");
+    const [current, setCurrent] = useState({});
     const [ws, setWs] = useState({});
 
     // Effect starting websocket connection
@@ -59,8 +58,8 @@ const AuthMain = (props) => {
     useEffect(()=>{
         (
             async () => {
-                if (current !== 0) {
-                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.toString(), {
+                if (current.ID !== undefined) {
+                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString(), {
                         headers: {"Content-Type": "application/json"},
                         credentials: "include",
                     });
@@ -85,11 +84,11 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {groups.length!==0?groups.map(item => {return <GroupLabel name={item.name} key={item.ID} id={item.ID} setCurrent={setCurrent} setGroupName={setGroupName}/>}):null}
+                                            {groups.length!==0?groups.map(item => {return <GroupLabel key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} groupname={groupname} setGroups={setGroups} groups={groups} ws={ws}/>
+                                <Chat messages={messages} group={current} setGroups={setGroups} groups={groups} ws={ws}/>
                             </div>
                         </div>
                     </div>
