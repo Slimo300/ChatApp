@@ -45,6 +45,15 @@ func NewMockDB() *MockDB {
 				"email": "john.doe@bla.com",
 				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
 				"logged": false
+		},
+		{
+				"ID": 4,
+				"username": "Kal",
+				"signup": "2019-01-13T08:53:44Z",
+				"active": "2019-01-13T15:52:25Z",
+				"email": "kal.doe@bla.com",
+				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
+				"logged": false
 		}
 	]`
 
@@ -79,6 +88,17 @@ func NewMockDB() *MockDB {
 			"setting": false,
 			"creator": false,
 			"deleted": false
+		},
+		{
+			"ID": 4,
+			"group_id": 1,
+			"user_id": 4,
+			"nick": "Kal",
+			"adding": false,
+			"deleting": false,
+			"setting": false,
+			"creator": false,
+			"deleted": true
 		}
 	]`
 
@@ -325,40 +345,70 @@ func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) er
 
 func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) error {
 
-	group := 0
-	for _, mem := range m.Members {
+	// Getting member to be deleted
+	var member *models.Member
+	for i, mem := range m.Members {
 		if mem.ID == id_member {
-			group = int(mem.GroupID)
+			member = &m.Members[i]
 		}
 	}
-	if group == 0 {
+	if member == nil {
 		return errors.New("row not found")
 	}
-
-	var membership models.Member
 	// Checking issuer privilages
+	var issuer models.Member
 	for _, mem := range m.Members {
-		if mem.UserID == id_user && mem.GroupID == uint(group) {
-			membership = mem
+		if mem.UserID == id_user && mem.GroupID == member.GroupID {
+			issuer = mem
 		}
 	}
-	if (!membership.Deleting && !membership.Creator) || membership.ID == 0 {
+	if issuer.ID == 0 {
+		return errors.New("row not found")
+	}
+	if !issuer.Deleting && !issuer.Creator {
 		return ErrNoPrivilages
 	}
 
-	deleted := false
+	member.Deleted = false
 
-	// iterating and searching for membership
-	for _, mem := range m.Members {
-		if mem.ID == id_member {
-			mem.Deleted = true
-			deleted = true
+	return nil
+}
+
+func (m *MockDB) GrantPriv(id_mem, id uint, adding, deleting, setting bool) error {
+	// getting member to be changed
+	var member *models.Member
+	for i, mem := range m.Members {
+		if mem.ID == id_mem {
+			member = &m.Members[i]
 		}
 	}
-	// checking whether some action in a loop was performed (if row was found)
-	if !deleted {
+	if member == nil {
 		return errors.New("row not found")
 	}
+	if member.Deleted {
+		return errors.New("member deleted")
+	}
+	if member.Creator {
+		return errors.New("creator can't be modified")
+	}
+	// getting issuer
+	var issuer models.Member
+	for _, mem := range m.Members {
+		if mem.GroupID == member.GroupID && mem.UserID == id {
+			issuer = mem
+		}
+	}
+	// returning errors
+	if issuer.ID == 0 {
+		return errors.New("row not found")
+	}
+	if !issuer.Setting {
+		return ErrNoPrivilages
+	}
+	// making changes via pointer
+	member.Adding = adding
+	member.Deleting = deleting
+	member.Setting = setting
 
 	return nil
 }

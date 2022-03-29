@@ -117,7 +117,7 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
 		return
 	}
 
@@ -161,7 +161,7 @@ func (s *Server) GetGroupMembership(c *gin.Context) {
 
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
 		return
 	}
 
@@ -190,7 +190,7 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 	// getting id from jwt
 	id, err := checkTokenAndGetID(c, s)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
 		return
 	}
 
@@ -216,4 +216,35 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 
+}
+
+func (s *Server) GrantPriv(c *gin.Context) {
+	id, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
+		return
+	}
+
+	load := struct {
+		Member   int   `json:"member" binding:"required"`
+		Adding   *bool `json:"adding" binding:"required"`
+		Deleting *bool `json:"deleting" binding:"required"`
+		Setting  *bool `json:"setting" binding:"required"`
+	}{}
+
+	if err := c.ShouldBindJSON(&load); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "bad request, all 3 fields must be present"})
+		return
+	}
+
+	if err := s.DB.GrantPriv(uint(load.Member), uint(id), *load.Adding, *load.Deleting, *load.Setting); err != nil {
+		if err.Error() == "creator can't be modified" {
+			c.JSON(http.StatusForbidden, gin.H{"err": "creator can't be modified"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }

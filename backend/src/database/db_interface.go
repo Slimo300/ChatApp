@@ -25,7 +25,7 @@ type DBlayer interface {
 	CreateGroup(id uint, name, desc string) (models.Group, error)
 	AddUserToGroup(name string, id_group uint, id_user uint) error
 	DeleteUserFromGroup(id_member, id_user uint) error
-	// GrantPriv(id_group, id_user int, priv models.Priv)
+	GrantPriv(id_member, id_user uint, adding, deleting, setting bool) error
 
 	// DeleteGroup deletes a specified group
 	DeleteGroup(id_group, id_user uint) error

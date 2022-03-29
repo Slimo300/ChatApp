@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -231,5 +232,36 @@ func (db *Database) DeleteGroup(id_group, id_user uint) error {
 	}
 
 	db.CommChan <- &communication.Action{User: 0, Group: int(id_group), Action: "pop"}
+	return nil
+}
+
+// Updates user rights to a group
+func (db *Database) GrantPriv(id_mem, id uint, adding, deleting, setting bool) error {
+
+	var member models.Member
+	if err := db.First(&member, id_mem).Error; err != nil {
+		return err
+	}
+	// can't modify deleted member nor a creator one
+	if member.Deleted {
+		return errors.New("member deleted")
+	}
+	if member.Creator {
+		return errors.New("creator can't be modified")
+	}
+
+	// checking membership of an issuer
+	var issuer models.Member
+	if err := db.Where(models.Member{UserID: id, GroupID: member.GroupID}).First(&issuer).Error; err != nil {
+		return err
+	}
+	if !issuer.Setting {
+		return ErrNoPrivilages
+	}
+
+	if err := db.Model(member).Updates(models.Member{Adding: adding, Deleting: deleting, Setting: setting}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
