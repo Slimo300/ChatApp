@@ -188,7 +188,7 @@ func (db *Database) DeleteUserFromGroup(id_member, id_user uint) error {
 		return err
 	}
 
-	if !issuer_member.Deleting && !issuer_member.Creator {
+	if !issuer_member.Deleting {
 		return ErrNoPrivilages
 	}
 

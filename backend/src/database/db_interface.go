@@ -18,7 +18,7 @@ type DBlayer interface {
 	AddMessage(msg Message) (Message, error)
 
 	// AddFriend takes "id" of an issuer and "username" of invited user
-	// AddFriend(id int, username string) (models.Invite, error)
+	AddFriend(id int, username string) (models.Group, error)
 	// RespondInvite takes id of an invite ("id") and response of type int (1 - agree, 2 - decline)
 	// RespondInvite(id_inv, response int) (models.Group, error)
 
