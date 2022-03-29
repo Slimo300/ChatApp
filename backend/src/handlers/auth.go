@@ -17,7 +17,7 @@ func (s *Server) Register(c *gin.Context) {
 	var user models.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err0": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 	}
 	if !isEmailValid(user.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
@@ -34,11 +34,14 @@ func (s *Server) Register(c *gin.Context) {
 
 	user, err = s.DB.RegisterUser(user)
 	if err != nil {
+		if err.Error() == "email taken" || err.Error() == "username taken" {
+			c.JSON(http.StatusConflict, gin.H{"err": err.Error()})
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusCreated, gin.H{"message": "success"})
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,11 +58,15 @@ func (s *Server) SignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
 		return
 	}
-
+	email := user.Email
 	user, err = s.DB.SignInUser(user.Email, user.Pass)
 	if err != nil {
 		if err == database.ErrINVALIDPASSWORD {
-			c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
+			return
+		}
+		if err.Error() == "No email "+email+" in database" {
+			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
 			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
@@ -92,6 +99,10 @@ func (s *Server) SignOutUser(c *gin.Context) {
 	}
 
 	if err = s.DB.SignOutUser(uint(id)); err != nil {
+		if err.Error() == "No user with id: "+strconv.Itoa(id) {
+			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
@@ -112,7 +123,7 @@ func (s *Server) GetUser(c *gin.Context) {
 
 	user, err := s.DB.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "no such user"})
+		c.JSON(http.StatusNotFound, gin.H{"err": "no such user"})
 		return
 	}
 	user.Pass = ""

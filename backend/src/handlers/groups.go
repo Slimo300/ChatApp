@@ -22,7 +22,7 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 		return
 	}
 	if len(groups) == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "You don't have any group"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "You don't have any group"})
 		return
 	}
 
@@ -55,11 +55,11 @@ func (s *Server) CreateGroup(c *gin.Context) {
 
 	group, err = s.DB.CreateGroup(uint(id), group.Name, group.Desc)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, group)
+	c.JSON(http.StatusCreated, group)
 }
 
 func (s *Server) AddUserToGroup(c *gin.Context) {
@@ -81,11 +81,19 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 	}
 
 	if err = s.DB.AddUserToGroup(load.Username, uint(load.Group), uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		if err.Error() == "insufficient privilages" {
+			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
+			return
+		}
+		if err.Error() == "row not found" {
+			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+	c.JSON(http.StatusCreated, gin.H{"message": "ok"})
 }
 
 func (s *Server) DeleteUserFromGroup(c *gin.Context) {
@@ -146,6 +154,9 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 
 	messages, err := s.DB.GetGroupMessages(uint(id), uint(group_int), uint(offset_int))
 	if err != nil {
+		if err.Error() == "User cannot request from this group" {
+			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
@@ -210,7 +221,11 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 
 	// telling database to delete group
 	if err := s.DB.DeleteGroup(uint(load.Group), uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		if err.Error() == "Couldn't delete group" {
+			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 

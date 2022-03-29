@@ -27,13 +27,13 @@ func TestRegister(t *testing.T) {
 		{
 			desc:               "registersuccess",
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
-			expectedStatusCode: http.StatusOK,
+			expectedStatusCode: http.StatusCreated,
 			expectedResponse:   gin.H{"message": "success"},
 		},
 		{
 			desc:               "registeremailtaken",
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
-			expectedStatusCode: http.StatusInternalServerError,
+			expectedStatusCode: http.StatusConflict,
 			expectedResponse:   gin.H{"err": "email taken"},
 		},
 		{
@@ -105,13 +105,13 @@ func TestSignIn(t *testing.T) {
 		{
 			desc:               "logininvalidpass",
 			data:               map[string]string{"email": "mal.zein@email.com", "password": "t2est"},
-			expectedStatusCode: http.StatusForbidden,
+			expectedStatusCode: http.StatusUnauthorized,
 			expectedResponse:   gin.H{"err": "invalid password"},
 		},
 		{
 			desc:               "loginnosuchuser",
 			data:               map[string]string{"email": "mal2.zein@email.com", "password": "test"},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "No email mal2.zein@email.com in database"},
 		},
 	}
@@ -158,7 +158,7 @@ func TestSignOut(t *testing.T) {
 		{
 			desc:               "logoutnouser",
 			id:                 1000,
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "No user with id: 1000"},
 		},
 	}

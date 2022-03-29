@@ -40,7 +40,7 @@ func TestGetUserGroups(t *testing.T) {
 			desc:               "getgroupsnone",
 			data:               3,
 			returnVal:          false,
-			expectedStatusCode: http.StatusOK,
+			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"message": "You don't have any group"},
 		},
 	}
@@ -113,11 +113,11 @@ func TestGetGroupMessages(t *testing.T) {
 			data:               3,
 			returnVal:          false,
 			query:              "?group=1",
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusUnauthorized,
 			expectedResponse:   gin.H{"err": "User cannot request from this group"},
 		},
 		{
-			desc:               "getmessagesunauthorized",
+			desc:               "getmessagesnogroup",
 			data:               1,
 			returnVal:          false,
 			query:              "",
@@ -260,7 +260,7 @@ func TestDeleteGroup(t *testing.T) {
 			desc:               "deletegroupnosuccess",
 			ID:                 3,
 			data:               map[string]interface{}{"group": 1},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "Couldn't delete group"},
 		},
 		// user is dumb and hasn't specified a group in a query
@@ -289,12 +289,12 @@ func TestDeleteGroup(t *testing.T) {
 				t.Error("error when creating signed token")
 			}
 			requestBody, _ := json.Marshal(tC.data)
-			req, _ := http.NewRequest("POST", "/api/group/delete", bytes.NewBuffer(requestBody))
+			req, _ := http.NewRequest("DELETE", "/api/group/delete", bytes.NewBuffer(requestBody))
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodPost, "/api/group/delete", s.DeleteGroup)
+			engine.Handle(http.MethodDelete, "/api/group/delete", s.DeleteGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
@@ -349,7 +349,7 @@ func TestCreateGroup(t *testing.T) {
 			ID:                 3,
 			data:               map[string]interface{}{"name": "ng1", "desc": "ng1"},
 			returnVal:          true,
-			expectedStatusCode: http.StatusOK,
+			expectedStatusCode: http.StatusCreated,
 			expectedResponse:   models.Group{ID: 2, Name: "ng1", Desc: "ng1"},
 		},
 	}
@@ -410,7 +410,7 @@ func TestAddUser(t *testing.T) {
 			desc:               "addusersuccess",
 			ID:                 1,
 			data:               map[string]interface{}{"username": "John", "group": 1},
-			expectedStatusCode: http.StatusOK,
+			expectedStatusCode: http.StatusCreated,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
 		// no name provided in request body
@@ -418,7 +418,7 @@ func TestAddUser(t *testing.T) {
 			desc:               "addusernoname",
 			ID:                 1,
 			data:               map[string]interface{}{"group": 1},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "row not found"},
 		},
 		// no group provided in request body
@@ -426,7 +426,7 @@ func TestAddUser(t *testing.T) {
 			desc:               "addusernogroup",
 			ID:                 1,
 			data:               map[string]interface{}{"username": "John"},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusUnauthorized,
 			expectedResponse:   gin.H{"err": "insufficient privilages"},
 		},
 		// user has no privilages to add to group
@@ -434,7 +434,7 @@ func TestAddUser(t *testing.T) {
 			desc:               "addusernopriv",
 			ID:                 2,
 			data:               map[string]interface{}{"username": "John", "group": 1},
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusUnauthorized,
 			expectedResponse:   gin.H{"err": "insufficient privilages"},
 		},
 	}
@@ -515,12 +515,12 @@ func TestDeleteUser(t *testing.T) {
 				t.Error("error when creating signed token")
 			}
 			requestBody, _ := json.Marshal(tC.data)
-			req, _ := http.NewRequest("POST", "/api/group/remove", bytes.NewBuffer(requestBody))
+			req, _ := http.NewRequest("PUT", "/api/group/remove", bytes.NewBuffer(requestBody))
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodPost, "/api/group/remove", s.DeleteUserFromGroup)
+			engine.Handle(http.MethodPut, "/api/group/remove", s.DeleteUserFromGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
@@ -597,12 +597,12 @@ func TestGrantPriv(t *testing.T) {
 				t.Error("error when creating signed token")
 			}
 			requestBody, _ := json.Marshal(tC.data)
-			req, _ := http.NewRequest("POST", "/api/group/rights", bytes.NewBuffer(requestBody))
+			req, _ := http.NewRequest("PUT", "/api/group/rights", bytes.NewBuffer(requestBody))
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodPost, "/api/group/rights", s.GrantPriv)
+			engine.Handle(http.MethodPut, "/api/group/rights", s.GrantPriv)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 

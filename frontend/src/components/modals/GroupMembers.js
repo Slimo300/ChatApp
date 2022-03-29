@@ -55,7 +55,7 @@ const Member = (props) => {
     const deleteMember = async() => {
 
         const response = await fetch('http://localhost:8080/api/group/remove', {
-            method: 'POST',
+            method: 'PUT',
             headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify({
@@ -85,7 +85,7 @@ const Member = (props) => {
         }
 
         const response = await fetch('http://localhost:8080/api/group/rights', {
-            method: 'POST',
+            method: 'PUT',
             headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify({

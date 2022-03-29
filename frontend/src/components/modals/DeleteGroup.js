@@ -7,7 +7,7 @@ export const ModalDeleteGroup = (props) => {
 
     const submit = async() => {
         const response = await fetch('http://localhost:8080/api/group/delete', {
-            method: "POST",
+            method: "DELETE",
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
             body: JSON.stringify({
