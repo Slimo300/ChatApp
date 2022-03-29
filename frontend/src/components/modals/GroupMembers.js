@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {v4 as uuidv4} from "uuid";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 
@@ -8,7 +8,7 @@ export const ModalMembers = (props) => {
 
     let message = null;
     if (err !== "") {
-        message = err
+        message = <h5 className='text-danger'>{err}</h5>
     }
 
     let nogroup = false;
@@ -27,7 +27,7 @@ export const ModalMembers = (props) => {
                         <div className='form-group'>
                             <table className="table">
                                 <tbody>
-                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} member={item} setErr={setErr} toggle={props.toggle}/>})}
+                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} member={item} setErr={setErr} toggle={props.toggle} user={props.member}/>})}
                                 </tbody>
                             </table>
                         </div>
@@ -74,7 +74,38 @@ const Member = (props) => {
         setTimeout(function () {    
             props.toggle();
             props.setErr("");
-        }, 1000);
+        }, 2000);
+
+    }
+
+    const setRights = async() => {
+
+        if (adding === props.member.adding && deleting === props.member.deleting && setting === props.member.setting) {
+            return
+        }
+
+        const response = await fetch('http://localhost:8080/api/group/member/rights', {
+            method: 'POST',
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({
+                "member": props.member.ID,
+                "adding": adding,
+                "deleting": deleting,
+                "setting": setting,
+            })
+        });
+
+        const responseJSON = await response.json();
+
+        if (responseJSON.message === "ok") {
+            props.setErr("Rights changed");
+        } else {
+            props.setErr(responseJSON.err);
+        }
+        setTimeout(function () {
+            props.setErr("");
+        }, 2000);
 
     }
 
@@ -82,20 +113,20 @@ const Member = (props) => {
         <tr className="chat-avatar">
             <td className='pr-3'><img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/></td>
             <td className="chat-name pr-3 align-middle">{props.member.nick}</td>
-            <td className='align-middle'>
+            {props.user.setting?<td className='align-middle'>
                 <input className="form-check-input" type="checkbox" id="inlineCheckbox1" checked={adding} disabled={props.member.creator} onChange={toggleAdding}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox1">Adding</label>
-            </td>
-            <td className='align-middle'>
+            </td>:null}
+            {props.user.setting?<td className='align-middle'>
                 <input className="form-check-input" type="checkbox" id="inlineCheckbox2" checked={deleting} disabled={props.member.creator} onChange={toggleDeleting}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox2">Deleting</label>
-            </td>
-            <td className='align-middle'>
+            </td>:null}
+            {props.user.setting?<td className='align-middle'>
                 <input className="form-check-input" type="checkbox" id="inlineCheckbox3" checked={setting} disabled={props.member.creator} onChange={toggleSetting}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox3">Setting</label>
-            </td>
-            <td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} >Set rights</button></td>
-            <td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} onClick={deleteMember}>Delete</button></td>
+            </td>:null}
+            {props.user.setting?<td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} onClick={setRights}>Set rights</button></td>:null}
+            {props.user.deleting?<td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} onClick={deleteMember}>Delete</button></td>:null}
         </tr>
     );
 };

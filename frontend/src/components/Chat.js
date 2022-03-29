@@ -74,7 +74,7 @@ const Chat = (props) => {
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser} toggleMembers={toggleMembers}/>
+                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser} toggleMembers={toggleMembers} member={member}/>
                     </div>
                 </div>
                 <div className="chat-container">
@@ -86,9 +86,9 @@ const Chat = (props) => {
                         <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
-                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setGroups={props.setGroups} groups={props.groups}/>
+                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setGroups={props.setGroups} groups={props.groups} setCurrent={props.setCurrent}/>
                 <ModalAddUser show={addUserShow} toggle={toggleAddUser} group={props.group}/>
-                <ModalMembers show={membersShow} toggle={toggleMembers} group={props.group} />
+                <ModalMembers show={membersShow} toggle={toggleMembers} group={props.group} member={member} />
             </div>
         );
     }

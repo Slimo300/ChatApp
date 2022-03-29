@@ -88,7 +88,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} setGroups={setGroups} groups={groups} ws={ws}/>
+                                <Chat messages={messages} group={current} setGroups={setGroups} groups={groups} ws={ws} setCurrent={setCurrent}/>
                             </div>
                         </div>
                     </div>

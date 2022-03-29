@@ -17,8 +17,12 @@ export const ModalDeleteGroup = (props) => {
 
         const responseJSON = await response.json()
 
+        let flag = false;
+
         if (responseJSON.message === "ok") {
             props.setGroups(props.groups.filter((item)=> { return item.ID !== props.group.ID }));
+            setErr("Group Deleted");
+            flag = true;
         }
         else {
             setErr(responseJSON.err);
@@ -26,12 +30,15 @@ export const ModalDeleteGroup = (props) => {
         setTimeout(function () {    
             props.toggle();
             setErr("");
+            if (flag) {
+                props.setCurrent({});
+            }
         }, 1000);
     }
 
     var message = null;
     if (err !== "") {
-        message = <h5 className="mb-4 text-danger">Couldn't delete group</h5>
+        message = <h5 className="mb-4 text-danger">{err}</h5>
     }
 
     return (

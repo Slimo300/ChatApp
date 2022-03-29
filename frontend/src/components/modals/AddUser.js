@@ -38,6 +38,8 @@ export const ModalAddUser = (props) => {
 
         if (responseJSON.err !== undefined) {
             setErr(responseJSON.err);
+        } else {
+            setErr("User added");
         }
         setTimeout(function () {    
             props.toggle();
