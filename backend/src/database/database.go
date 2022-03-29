@@ -82,7 +82,22 @@ func (db *Database) SignOutUser(id uint) error {
 
 // GetUserGroups returns a slice of Groups of which user is a member
 func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
-	return groups, db.Preload("Members").Find(&groups).Error
+
+	// Getting ids of groups in which user has membership
+	var usergroups []uint
+	if err := db.Table("`groups`").Select("`groups`.id").
+		Joins("inner join `members` on `members`.group_id = `groups`.id").
+		Joins("inner join `users` on `users`.id = `members`.user_id").
+		Where("`members`.deleted = false").
+		Where("`users`.id = ?", id).Scan(&usergroups).Error; err != nil {
+		return groups, err
+	}
+
+	// Getting full groups data with its members
+	if err := db.Where("id in (?)", usergroups).Preload("Members", "deleted is false").Find(&groups).Error; err != nil {
+		return groups, err
+	}
+	return groups, nil
 }
 
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
@@ -118,34 +133,7 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) error {
 
 	var member models.Member
-	db.Table("`members`").Select("members.*").
-		Joins("inner join `users` on `users`.id = `members`.user_id").
-		Joins("inner join `groups` on `groups`.id = `members`.group_id").
-		Where("`users`.id = ?", id_user).
-		Where("`groups`.id = ?", id_group).Scan(&member)
-
-	if !member.Adding {
-		return ErrNoPrivilages
-	}
-	var user models.User
-	selection := db.Where(&models.User{UserName: username}).First(&user)
-	if selection.Error != nil {
-		return selection.Error
-	}
-	member = models.Member{UserID: user.ID, Nick: user.UserName, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
-	creation := db.Create(&member)
-	if creation.Error != nil {
-		return creation.Error
-	}
-
-	db.CommChan <- &communication.Action{Group: int(id_group), User: int(user.ID), Action: "insert"}
-	return nil
-}
-
-func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
-
-	var member models.Member
-	if err := db.Table("`members`").Select("`members`.*").
+	if err := db.Table("`members`").Select("members.*").
 		Joins("inner join `users` on `users`.id = `members`.user_id").
 		Joins("inner join `groups` on `groups`.id = `members`.group_id").
 		Where("`users`.id = ?", id_user).
@@ -153,11 +141,57 @@ func (db *Database) DeleteUserFromGroup(id_member, id_group, id_user uint) error
 		return err
 	}
 
-	if !member.Deleting {
+	if !member.Adding {
 		return ErrNoPrivilages
 	}
 
-	if err := db.Where(&models.Member{ID: id_member}).Update("deleted", true).Error; err != nil {
+	var user models.User
+	if err := db.Where(&models.User{UserName: username}).First(&user).Error; err != nil {
+		return err
+	}
+
+	var member2 models.Member
+	if err := db.Where(&models.Member{UserID: user.ID, GroupID: id_group}).First(&member2).Error; err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	// if member does not exist member.Deleted is false
+	if member2.Deleted == true {
+		if err := db.Model(member2).Update("deleted", false).Error; err != nil {
+			return err
+		}
+		return nil
+	}
+
+	member = models.Member{UserID: user.ID, Nick: user.UserName, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
+	if err := db.Create(&member).Error; err != nil {
+		return err
+	}
+
+	db.CommChan <- &communication.Action{Group: int(id_group), User: int(user.ID), Action: "insert"}
+	return nil
+}
+
+func (db *Database) DeleteUserFromGroup(id_member, id_user uint) error {
+
+	var deleted_member models.Member
+	if err := db.Where(models.Member{ID: id_member}).First(&deleted_member).Error; err != nil {
+		return err
+	}
+
+	var issuer_member models.Member
+	if err := db.Table("`members`").Select("`members`.*").
+		Joins("inner join `users` on `users`.id = `members`.user_id").
+		Joins("inner join `groups` on `groups`.id = `members`.group_id").
+		Where("`users`.id = ?", id_user).
+		Where("`groups`.id = ?", deleted_member.GroupID).Scan(&issuer_member).Error; err != nil {
+		return err
+	}
+
+	if !issuer_member.Deleting && !issuer_member.Creator {
+		return ErrNoPrivilages
+	}
+
+	if err := db.Model(&models.Member{ID: id_member}).Update("deleted", true).Error; err != nil {
 		return err
 	}
 

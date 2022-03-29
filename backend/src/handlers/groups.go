@@ -97,7 +97,6 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 	}
 
 	load := struct {
-		Group  int `json:"group"`
 		Member int `json:"member"`
 	}{}
 
@@ -106,7 +105,7 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 		return
 	}
 
-	if err = s.DB.DeleteUserFromGroup(uint(load.Member), uint(load.Group), uint(id)); err != nil {
+	if err = s.DB.DeleteUserFromGroup(uint(load.Member), uint(id)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}

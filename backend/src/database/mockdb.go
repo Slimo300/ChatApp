@@ -323,12 +323,22 @@ func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) er
 	return nil
 }
 
-func (m *MockDB) DeleteUserFromGroup(id_member, id_group, id_user uint) error {
+func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) error {
+
+	group := 0
+	for _, mem := range m.Members {
+		if mem.ID == id_member {
+			group = int(mem.GroupID)
+		}
+	}
+	if group == 0 {
+		return errors.New("row not found")
+	}
 
 	var membership models.Member
 	// Checking issuer privilages
 	for _, mem := range m.Members {
-		if mem.UserID == id_user && mem.GroupID == id_group {
+		if mem.UserID == id_user && mem.GroupID == uint(group) {
 			membership = mem
 		}
 	}

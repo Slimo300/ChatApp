@@ -487,7 +487,7 @@ func TestDeleteUser(t *testing.T) {
 			ID:                 1,
 			data:               map[string]interface{}{"member": 2, "group": 1},
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   gin.H{"message": "success"},
+			expectedResponse:   gin.H{"message": "ok"},
 		},
 		// no member provided in request body
 		{
@@ -496,14 +496,6 @@ func TestDeleteUser(t *testing.T) {
 			data:               map[string]interface{}{"group": 1},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "row not found"},
-		},
-		// no member provided in request body
-		{
-			desc:               "deletenogroup",
-			ID:                 1,
-			data:               map[string]interface{}{"member": 2},
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "insufficient privilages"},
 		},
 		// issuer has no right to add
 		{

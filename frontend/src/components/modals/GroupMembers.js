@@ -1,10 +1,15 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {v4 as uuidv4} from "uuid";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 export const ModalMembers = (props) => {
-    
+
+    const [err, setErr] = useState("");
+
     let message = null;
+    if (err !== "") {
+        message = err
+    }
 
     let nogroup = false;
     if (props.group.Members === null) {
@@ -22,7 +27,7 @@ export const ModalMembers = (props) => {
                         <div className='form-group'>
                             <table className="table">
                                 <tbody>
-                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} member={item}/>})}
+                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} member={item} setErr={setErr} toggle={props.toggle}/>})}
                                 </tbody>
                             </table>
                         </div>
@@ -34,15 +39,15 @@ export const ModalMembers = (props) => {
 } 
 
 const Member = (props) => {
-    const [adding, setAdding] = useState(false);
+    const [adding, setAdding] = useState(props.member.adding);
     const toggleAdding = () => {
         setAdding(!adding);
     }
-    const [deleting, setDeleting] = useState(false);
+    const [deleting, setDeleting] = useState(props.member.deleting);
     const toggleDeleting = () => {
         setDeleting(!deleting);
     }
-    const [setting, setSetting] = useState(false);
+    const [setting, setSetting] = useState(props.member.setting);
     const toggleSetting = () => {
         setSetting(!setting);
     }
@@ -54,7 +59,6 @@ const Member = (props) => {
             headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify({
-                "group": props.group.ID,
                 "member": props.member.ID
             })
         });
@@ -62,10 +66,15 @@ const Member = (props) => {
         const responseJSON = await response.json();
 
         if (responseJSON.message === "ok") {
-            // do stuff
+            props.setErr("Member deleted");
         } else {
-            // other stuff
+            props.setErr(responseJSON.err);
+            console.log(responseJSON.err);
         }
+        setTimeout(function () {    
+            props.toggle();
+            props.setErr("");
+        }, 1000);
 
     }
 
@@ -74,19 +83,19 @@ const Member = (props) => {
             <td className='pr-3'><img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/></td>
             <td className="chat-name pr-3 align-middle">{props.member.nick}</td>
             <td className='align-middle'>
-                <input className="form-check-input" type="checkbox" id="inlineCheckbox1" onChange={toggleAdding}/>
+                <input className="form-check-input" type="checkbox" id="inlineCheckbox1" checked={adding} disabled={props.member.creator} onChange={toggleAdding}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox1">Adding</label>
             </td>
             <td className='align-middle'>
-                <input className="form-check-input" type="checkbox" id="inlineCheckbox2" onChange={toggleDeleting}/>
+                <input className="form-check-input" type="checkbox" id="inlineCheckbox2" checked={deleting} disabled={props.member.creator} onChange={toggleDeleting}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox2">Deleting</label>
             </td>
             <td className='align-middle'>
-                <input className="form-check-input" type="checkbox" id="inlineCheckbox3" onChange={toggleSetting}/>
+                <input className="form-check-input" type="checkbox" id="inlineCheckbox3" checked={setting} disabled={props.member.creator} onChange={toggleSetting}/>
                 <label className="form-check-label" htmlFor="inlineCheckbox3">Setting</label>
             </td>
-            <td className='pr-3'><button className='btn-primary btn'>Set rights</button></td>
-            <td className='pr-3'><button className='btn-primary btn' onClick={deleteMember}>Delete</button></td>
+            <td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} >Set rights</button></td>
+            <td className='pr-3'><button className='btn-primary btn' disabled={props.member.creator} onClick={deleteMember}>Delete</button></td>
         </tr>
     );
 };
