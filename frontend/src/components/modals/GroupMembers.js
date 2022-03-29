@@ -84,7 +84,7 @@ const Member = (props) => {
             return
         }
 
-        const response = await fetch('http://localhost:8080/api/group/member/rights', {
+        const response = await fetch('http://localhost:8080/api/group/rights', {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             credentials: "include",
