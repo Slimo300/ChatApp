@@ -1,1 +1,23 @@
 # ChatApp
+
+This is a chatting app, which consists of React on frontend and Golang on the backend.
+
+## Used tech
+- Go
+- React
+- Gin Framework
+- GORM
+- Websockets with gorilla package
+
+## Implemented functionality
+- Sending messages via websocket connection
+- Authentication using jwt
+- REST API for creating, updating and deleting groups
+- Adding and removing members from group
+- Changing members rights in a group (to delete and add members)
+
+## Things to implement
+- Updating websocket connection when adding or deleting from group
+- Handling messages from other groups on frontend
+- Email user verification and password reset
+- Profile pictures
