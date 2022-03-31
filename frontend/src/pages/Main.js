@@ -17,6 +17,7 @@ const Main = (props) => {
 const AuthMain = (props) => {
 
     const [groups, setGroups] = useState([]);
+    const [counter, setCounter] = useState({});
     const [messages, setMessages] = useState([]);
     const [current, setCurrent] = useState({});
     const [ws, setWs] = useState({});
@@ -35,7 +36,14 @@ const AuthMain = (props) => {
 
     ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
-        setMessages([...messages, msgJSON]);
+        if (msgJSON.group === current.ID) {
+            setMessages([...messages, msgJSON]);
+        } else {
+            let newCounter = counter;
+            newCounter[msgJSON.group]++;
+            setCounter(newCounter);
+            console.log(counter);
+        }
     }
 
     // effect getting groups in which user has membership
@@ -45,9 +53,17 @@ const AuthMain = (props) => {
                 const response = await fetch('http://localhost:8080/api/group/get', {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include'});
+                if (response.status !== 200 && response.status != 204 ) {
+                    // error handling
+                    return
+                }
                 const responseJSON = await response.json();
-                console.log(responseJSON.message);
                 if (responseJSON.message === undefined) {
+                    let newCounter = {};
+                    for (let i = 0; i < responseJSON.length; i++) {
+                        newCounter[responseJSON[i].ID] = 0;
+                    }
+                    setCounter(newCounter);
                     setGroups(responseJSON);
                 }
             }
@@ -84,7 +100,7 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {groups.length!==0?groups.map(item => {return <GroupLabel key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
+                                            {groups.length!==0?groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>

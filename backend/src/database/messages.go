@@ -17,8 +17,13 @@ func (db *Database) AddMessage(msg Message) (Message, error) {
 		return Message{}, err
 	}
 
+	var member models.Member
+	if err := db.First(&member, message.MemberID).Error; err != nil {
+		return Message{}, err
+	}
+
 	return Message{
-		Group:   uint64(message.Member.GroupID),
+		Group:   uint64(member.GroupID),
 		Member:  uint64(message.MemberID),
 		Message: message.Text,
 		Nick:    message.Member.Nick,
