@@ -10,7 +10,7 @@ type Sender interface {
 	Send(*websocket.Conn) error
 }
 
-// Action represents type for signalizing changes to frontend
+// Action represents type for signalizing changes to hub and further to frontend
 type Action struct {
 	Action string        `json:"action"` // pop or insert
 	Group  int           `json:"group"`  // id_group

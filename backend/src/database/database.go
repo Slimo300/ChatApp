@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,11 +13,10 @@ import (
 
 type Database struct {
 	*gorm.DB
-	CommChan chan<- *communication.Action
 }
 
 // Setup creates Database object and initializes connection between MySQL database
-func Setup(ch chan<- *communication.Action) (*Database, error) {
+func Setup() (*Database, error) {
 	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
 		os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLDBNAME"))), &gorm.Config{
 		SkipDefaultTransaction: true,
@@ -29,7 +27,7 @@ func Setup(ch chan<- *communication.Action) (*Database, error) {
 
 	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{})
 
-	return &Database{DB: db, CommChan: ch}, nil
+	return &Database{DB: db}, nil
 }
 
 //GetUserById returns a user with specified id
@@ -127,11 +125,10 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 		return models.Group{}, ErrInternal
 	}
 
-	db.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "insert"}
 	return group, nil
 }
 
-func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) error {
+func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) (models.Member, error) {
 
 	var member models.Member
 	if err := db.Table("`members`").Select("members.*").
@@ -139,44 +136,43 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 		Joins("inner join `groups` on `groups`.id = `members`.group_id").
 		Where("`users`.id = ?", id_user).
 		Where("`groups`.id = ?", id_group).Scan(&member).Error; err != nil {
-		return err
+		return models.Member{}, err
 	}
 
 	if !member.Adding {
-		return ErrNoPrivilages
+		return models.Member{}, ErrNoPrivilages
 	}
 
 	var user models.User
 	if err := db.Where(&models.User{UserName: username}).First(&user).Error; err != nil {
-		return err
+		return models.Member{}, err
 	}
 
 	var member2 models.Member
 	if err := db.Where(&models.Member{UserID: user.ID, GroupID: id_group}).First(&member2).Error; err != nil && err != gorm.ErrRecordNotFound {
-		return err
+		return models.Member{}, err
 	}
 	// if member does not exist member.Deleted is false
 	if member2.Deleted == true {
 		if err := db.Model(member2).Update("deleted", false).Error; err != nil {
-			return err
+			return models.Member{}, err
 		}
-		return nil
+		return models.Member{}, nil
 	}
 
 	member = models.Member{UserID: user.ID, Nick: user.UserName, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}
 	if err := db.Create(&member).Error; err != nil {
-		return err
+		return models.Member{}, err
 	}
 
-	db.CommChan <- &communication.Action{Group: int(id_group), User: int(user.ID), Action: "insert"}
-	return nil
+	return member, nil
 }
 
-func (db *Database) DeleteUserFromGroup(id_member, id_user uint) error {
+func (db *Database) DeleteUserFromGroup(id_member, id_user uint) (models.Member, error) {
 
 	var deleted_member models.Member
-	if err := db.Where(models.Member{ID: id_member}).First(&deleted_member).Error; err != nil {
-		return err
+	if err := db.First(&deleted_member, id_member).Error; err != nil {
+		return models.Member{}, err
 	}
 
 	var issuer_member models.Member
@@ -185,18 +181,18 @@ func (db *Database) DeleteUserFromGroup(id_member, id_user uint) error {
 		Joins("inner join `groups` on `groups`.id = `members`.group_id").
 		Where("`users`.id = ?", id_user).
 		Where("`groups`.id = ?", deleted_member.GroupID).Scan(&issuer_member).Error; err != nil {
-		return err
+		return models.Member{}, err
 	}
 
 	if !issuer_member.Deleting {
-		return ErrNoPrivilages
+		return models.Member{}, ErrNoPrivilages
 	}
 
-	if err := db.Model(&models.Member{ID: id_member}).Update("deleted", true).Error; err != nil {
-		return err
+	if err := db.Model(&deleted_member).Update("deleted", true).Error; err != nil {
+		return models.Member{}, err
 	}
 
-	return nil
+	return deleted_member, nil
 }
 
 func (db *Database) GetGroupMembership(id_group, id_user uint) (models.Member, error) {
@@ -210,29 +206,29 @@ func (db *Database) GetGroupMembership(id_group, id_user uint) (models.Member, e
 }
 
 // Deletes a specified group if user is authorized to do so
-func (db *Database) DeleteGroup(id_group, id_user uint) error {
+func (db *Database) DeleteGroup(id_group, id_user uint) (models.Group, error) {
 	// getting user membership to check his privilages
 	var membership models.Member
 	if err := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership).Error; err != nil {
-		return err
+		return models.Group{}, err
 	}
 
 	// checking whether user have privilages to delete a group
 	if !membership.Creator {
-		return ErrNoPrivilages
+		return models.Group{}, ErrNoPrivilages
 	}
 
 	// deleting memberships
 	if err := db.Where(models.Member{GroupID: id_group}).Delete(&models.Member{}).Error; err != nil {
-		return err
+		return models.Group{}, err
 	}
 	// deleting specified group
-	if err := db.Delete(&models.Group{ID: id_group}).Error; err != nil {
-		return err
+	group := models.Group{ID: id_group}
+	if err := db.Delete(&group).Error; err != nil {
+		return models.Group{}, err
 	}
 
-	db.CommChan <- &communication.Action{User: 0, Group: int(id_group), Action: "pop"}
-	return nil
+	return group, nil
 }
 
 // Updates user rights to a group

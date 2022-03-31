@@ -11,18 +11,20 @@ import (
 )
 
 type Server struct {
-	DB     database.DBlayer
-	Hub    *ws.Hub
-	secret string
-	domain string
+	DB       database.DBlayer
+	Hub      *ws.Hub
+	CommChan chan<- *communication.Action
+	secret   string
+	domain   string
 }
 
-func NewServer(db database.DBlayer, ch <-chan *communication.Action) *Server {
+func NewServer(db database.DBlayer, ch chan *communication.Action) *Server {
 	return &Server{
-		DB:     db,
-		secret: "wołowina",
-		domain: "localhost",
-		Hub:    ws.NewHub(db, ch),
+		DB:       db,
+		secret:   "wołowina",
+		domain:   "localhost",
+		CommChan: ch,
+		Hub:      ws.NewHub(db, ch),
 	}
 }
 

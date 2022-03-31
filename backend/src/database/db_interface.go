@@ -24,10 +24,10 @@ type DBlayer interface {
 	// RespondInvite(id_inv, response int) (models.Group, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
-	AddUserToGroup(name string, id_group uint, id_user uint) error
-	DeleteUserFromGroup(id_member, id_user uint) error
+	AddUserToGroup(name string, id_group uint, id_user uint) (models.Member, error)
+	DeleteUserFromGroup(id_member, id_user uint) (models.Member, error)
 	GrantPriv(id_member, id_user uint, adding, deleting, setting bool) error
 
 	// DeleteGroup deletes a specified group
-	DeleteGroup(id_group, id_user uint) error
+	DeleteGroup(id_group, id_user uint) (models.Group, error)
 }

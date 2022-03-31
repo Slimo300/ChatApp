@@ -13,7 +13,7 @@ import (
 func main() {
 	engine := gin.Default()
 	commChan := make(chan *communication.Action)
-	db, err := database.Setup(commChan)
+	db, err := database.Setup()
 	if err != nil {
 		log.Fatal(err)
 	}

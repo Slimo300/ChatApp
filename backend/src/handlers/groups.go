@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
+	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
@@ -59,6 +61,8 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		return
 	}
 
+	s.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "insert"}
+
 	c.JSON(http.StatusCreated, group)
 }
 
@@ -80,7 +84,8 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 		return
 	}
 
-	if err = s.DB.AddUserToGroup(load.Username, uint(load.Group), uint(id)); err != nil {
+	member, err := s.DB.AddUserToGroup(load.Username, uint(load.Group), uint(id))
+	if err != nil {
 		if err.Error() == "insufficient privilages" {
 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
 			return
@@ -92,6 +97,8 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
+
+	s.CommChan <- &communication.Action{Group: int(member.GroupID), User: int(member.UserID), Action: "insert"}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "ok"})
 }
@@ -113,7 +120,9 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 		return
 	}
 
-	if err = s.DB.DeleteUserFromGroup(uint(load.Member), uint(id)); err != nil {
+	// TODO channel to hub
+	_, err = s.DB.DeleteUserFromGroup(uint(load.Member), uint(id))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
@@ -220,15 +229,20 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 	}
 
 	// telling database to delete group
-	if err := s.DB.DeleteGroup(uint(load.Group), uint(id)); err != nil {
+	group, err := s.DB.DeleteGroup(uint(load.Group), uint(id))
+	if err != nil {
 		if err.Error() == "Couldn't delete group" {
 			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
 			return
+		}
+		if err == database.ErrNoPrivilages {
+			c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
+	s.CommChan <- &communication.Action{User: 0, Group: int(group.ID), Action: "pop"}
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 
 }

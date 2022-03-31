@@ -247,7 +247,17 @@ func TestGetMembership(t *testing.T) {
 func TestDeleteGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+
+	// mocking channel
+	channel := make(chan *communication.Action)
+	go func() {
+		for {
+			<-channel
+		}
+	}()
+	defer close(channel)
+
+	s := handlers.NewServer(mock, channel)
 
 	testCases := []struct {
 		desc               string
@@ -261,8 +271,8 @@ func TestDeleteGroup(t *testing.T) {
 			desc:               "deletegroupnosuccess",
 			ID:                 3,
 			data:               map[string]interface{}{"group": 1},
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"err": "Couldn't delete group"},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "insufficient privilages"},
 		},
 		// user is dumb and hasn't specified a group in a query
 		{
@@ -316,7 +326,17 @@ func TestDeleteGroup(t *testing.T) {
 func TestCreateGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+
+	// mocking channel
+	channel := make(chan *communication.Action)
+	go func() {
+		for {
+			<-channel
+		}
+	}()
+	defer close(channel)
+
+	s := handlers.NewServer(mock, channel)
 
 	testCases := []struct {
 		desc               string
@@ -398,7 +418,17 @@ func TestCreateGroup(t *testing.T) {
 func TestAddUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+
+	// mocking channel
+	channel := make(chan *communication.Action)
+	go func() {
+		for {
+			<-channel
+		}
+	}()
+	defer close(channel)
+
+	s := handlers.NewServer(mock, channel)
 
 	testCases := []struct {
 		desc               string

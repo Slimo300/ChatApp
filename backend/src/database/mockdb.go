@@ -275,35 +275,31 @@ func (m *MockDB) AddMessage(msg communication.Message) (communication.Message, e
 	return msg, nil
 }
 
-func (m *MockDB) DeleteGroup(id_group, id_user uint) error {
-	groupDel := false
-	for i, group := range m.Groups {
-		if group.ID == id_group {
-			for _, member := range m.Members {
-				if member.GroupID == id_group && member.UserID == id_user && member.Creator {
-					m.Groups = append(m.Groups[:i], m.Groups[i+1:]...)
-					groupDel = true
-					break
-				}
-				return errors.New("Couldn't delete group")
-			}
+func (m *MockDB) DeleteGroup(id_group, id_user uint) (models.Group, error) {
+
+	var issuer models.Member
+	for _, member := range m.Members {
+		if member.GroupID == id_group && member.UserID == id_user {
+			issuer = member
 			break
 		}
 	}
-	if groupDel {
-		var newMembers []models.Member
-		for _, member := range m.Members {
-			if member.GroupID != id_group {
-				newMembers = append(newMembers, member)
-			}
-		}
-		m.Members = newMembers
+	if !issuer.Creator {
+		return models.Group{}, ErrNoPrivilages
 	}
-	return nil
+	var deleted_group models.Group
+	for i, group := range m.Groups {
+		if group.ID == id_group {
+			deleted_group = group
+			m.Groups = append(m.Groups[:i], m.Groups[i+1:]...)
+			break
+		}
+	}
+	return deleted_group, nil
 }
 
 // Adding user to a group
-func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) error {
+func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) (models.Member, error) {
 
 	var added models.User // user who is added by his username
 
@@ -314,7 +310,7 @@ func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) er
 		}
 	}
 	if added.ID == 0 {
-		return errors.New("row not found")
+		return models.Member{}, errors.New("row not found")
 	}
 
 	var membership models.Member
@@ -325,16 +321,18 @@ func (m *MockDB) AddUserToGroup(username string, id_group uint, id_user uint) er
 		}
 	}
 	if (!membership.Creator && !membership.Adding) || membership.ID == 0 {
-		return ErrNoPrivilages
+		return models.Member{}, ErrNoPrivilages
 	}
 
-	m.Members = append(m.Members, models.Member{ID: uint(len(m.Members) + 1), GroupID: id_group, UserID: added.ID, Nick: username, Adding: false,
-		Deleting: false, Setting: false, Creator: false, Deleted: false})
+	member := models.Member{ID: uint(len(m.Members) + 1), GroupID: id_group, UserID: added.ID, Nick: username, Adding: false,
+		Deleting: false, Setting: false, Creator: false, Deleted: false}
 
-	return nil
+	m.Members = append(m.Members, member)
+
+	return member, nil
 }
 
-func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) error {
+func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) (models.Member, error) {
 
 	// Getting member to be deleted
 	var member *models.Member
@@ -344,7 +342,7 @@ func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) error {
 		}
 	}
 	if member == nil {
-		return errors.New("row not found")
+		return models.Member{}, errors.New("row not found")
 	}
 	// Checking issuer privilages
 	var issuer models.Member
@@ -354,15 +352,15 @@ func (m *MockDB) DeleteUserFromGroup(id_member, id_user uint) error {
 		}
 	}
 	if issuer.ID == 0 {
-		return errors.New("row not found")
+		return models.Member{}, errors.New("row not found")
 	}
-	if !issuer.Deleting && !issuer.Creator {
-		return ErrNoPrivilages
+	if !issuer.Deleting {
+		return models.Member{}, ErrNoPrivilages
 	}
 
-	member.Deleted = false
+	member.Deleted = true
 
-	return nil
+	return *member, nil
 }
 
 func (m *MockDB) GrantPriv(id_mem, id uint, adding, deleting, setting bool) error {
