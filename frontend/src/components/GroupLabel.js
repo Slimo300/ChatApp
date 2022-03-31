@@ -7,7 +7,7 @@ export const GroupLabel = (props) => {
         newCounter[props.group.ID] = 0;
         props.setCounter(newCounter);
     };
-    console.log(props.counter[props.group.ID]);
+    
     return (
         <li className="person" onClick={change}>
             <div className="user">

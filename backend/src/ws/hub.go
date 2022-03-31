@@ -9,22 +9,22 @@ import (
 )
 
 type Hub struct {
-	db      database.DBlayer
-	dbconn  <-chan *communication.Action
-	forward chan *communication.Message
-	join    chan *client
-	leave   chan *client
-	clients map[*client]bool
+	db         database.DBlayer
+	serverconn <-chan *communication.Action
+	forward    chan *communication.Message
+	join       chan *client
+	leave      chan *client
+	clients    map[*client]bool
 }
 
 func NewHub(db database.DBlayer, ch <-chan *communication.Action) *Hub {
 	return &Hub{
-		db:      db,
-		dbconn:  ch,
-		forward: make(chan *communication.Message),
-		join:    make(chan *client),
-		leave:   make(chan *client),
-		clients: make(map[*client]bool),
+		db:         db,
+		serverconn: ch,
+		forward:    make(chan *communication.Message),
+		join:       make(chan *client),
+		leave:      make(chan *client),
+		clients:    make(map[*client]bool),
 	}
 }
 
@@ -49,32 +49,16 @@ func (h *Hub) Run() {
 					}
 				}
 			}
-		case msg := <-h.dbconn:
+		case msg := <-h.serverconn:
 			switch msg.Action {
-			case "pop":
-				for client := range h.clients {
-					if client.id == msg.User || msg.User == 0 {
-						for i, gr := range client.groups {
-							if gr == int64(msg.Group) {
-								client.groups = append(client.groups[:i], client.groups[:i+1]...)
-							}
-						}
-					}
-				}
-			case "insert":
-				for client := range h.clients {
-					if client.id == msg.User || msg.User == 0 {
-						client.groups = append(client.groups, int64(msg.Group))
-					}
-				}
-			case "add":
-				for client := range h.clients {
-					for _, gr := range client.groups {
-						if gr == int64(msg.Group) {
-							client.send <- &communication.Message{}
-						}
-					}
-				}
+			case "DELETE_GROUP":
+				h.GroupDeleted(msg.Group)
+			case "CREATE_GROUP":
+				h.GroupCreated(msg.User, msg.Group)
+			case "ADD_MEMBER":
+				h.MemberAdded(msg.Member)
+			case "DELETE_MEMBER":
+				h.MemberDeleted(msg.Member)
 			}
 		}
 	}

@@ -22,6 +22,11 @@ const AuthMain = (props) => {
     const [current, setCurrent] = useState({});
     const [ws, setWs] = useState({});
 
+    const handleGroupDelete = (id) => {
+        let newGroups = groups.filter((item)=>{return item.ID != id})
+        setGroups(newGroups);
+    };
+
     // Effect starting websocket connection
     useEffect(() => {
         let socket = new WebSocket("ws://localhost:8080/ws")
@@ -36,6 +41,13 @@ const AuthMain = (props) => {
 
     ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
+        console.log(msgJSON);
+        if (msgJSON.action !== undefined) {
+            switch (msgJSON.action) {
+                case "DELETE_GROUP":
+                    handleGroupDelete(msgJSON.group);
+            }
+        }
         if (msgJSON.group === current.ID) {
             setMessages([...messages, msgJSON]);
         } else {

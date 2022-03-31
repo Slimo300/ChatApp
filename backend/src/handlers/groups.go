@@ -60,7 +60,7 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	s.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "insert"}
+	s.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "CREATE_GROUP"}
 
 	c.JSON(http.StatusCreated, group)
 }
@@ -101,7 +101,7 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	s.CommChan <- &communication.Action{User: 0, Group: int(group.ID), Action: "pop"}
+	s.CommChan <- &communication.Action{Group: int(group.ID), Action: "DELETE_GROUP"}
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 
 }

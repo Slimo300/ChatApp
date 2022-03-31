@@ -103,7 +103,7 @@ func (s *Server) AddUserToGroup(c *gin.Context) {
 		return
 	}
 
-	s.CommChan <- &communication.Action{Group: int(member.GroupID), User: int(member.UserID), Action: "insert"}
+	s.CommChan <- &communication.Action{Action: "ADD_MEMBER", Member: member}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "ok"})
 }
@@ -128,11 +128,13 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 	}
 
 	// TODO channel to hub
-	_, err = s.DB.DeleteUserFromGroup(uint(load.Member), uint(id))
+	member, err := s.DB.DeleteUserFromGroup(uint(load.Member), uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
+
+	s.CommChan <- &communication.Action{Action: "DELETE_MEMBER", Member: member}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
