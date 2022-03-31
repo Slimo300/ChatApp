@@ -31,9 +31,5 @@ func (c *client) write() {
 		if err := msg.Send(c.socket); err != nil {
 			break
 		}
-		// err := c.socket.WriteJSON(msg)
-		// if err != nil {
-		// 	break
-		// }
 	}
 }
