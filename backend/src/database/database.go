@@ -130,16 +130,16 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 
 func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint) (models.Member, error) {
 
-	var member models.Member
+	var issuer models.Member
 	if err := db.Table("`members`").Select("members.*").
 		Joins("inner join `users` on `users`.id = `members`.user_id").
 		Joins("inner join `groups` on `groups`.id = `members`.group_id").
 		Where("`users`.id = ?", id_user).
-		Where("`groups`.id = ?", id_group).Scan(&member).Error; err != nil {
+		Where("`groups`.id = ?", id_group).Scan(&issuer).Error; err != nil {
 		return models.Member{}, err
 	}
 
-	if !member.Adding {
+	if !issuer.Adding {
 		return models.Member{}, ErrNoPrivilages
 	}
 
@@ -148,16 +148,16 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 		return models.Member{}, err
 	}
 
-	var member2 models.Member
-	if err := db.Where(&models.Member{UserID: user.ID, GroupID: id_group}).First(&member2).Error; err != nil && err != gorm.ErrRecordNotFound {
+	var member models.Member
+	if err := db.Where(&models.Member{UserID: user.ID, GroupID: id_group}).First(&member).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return models.Member{}, err
 	}
 	// if member does not exist member.Deleted is false
-	if member2.Deleted == true {
-		if err := db.Model(member2).Update("deleted", false).Error; err != nil {
+	if member.Deleted == true {
+		if err := db.Model(&member).Update("deleted", false).Error; err != nil {
 			return models.Member{}, err
 		}
-		return models.Member{}, nil
+		return member, nil
 	}
 
 	member = models.Member{UserID: user.ID, Nick: user.UserName, GroupID: id_group, Adding: false, Deleting: false, Setting: false, Creator: false}

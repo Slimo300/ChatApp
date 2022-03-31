@@ -41,6 +41,7 @@ func checkTokenAndGetID(c *gin.Context, s *Server) (int, error) {
 
 }
 
+// middleware for checking database connection
 func (s *Server) CheckDatabase() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if s.DB == nil {

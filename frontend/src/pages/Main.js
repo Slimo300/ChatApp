@@ -23,9 +23,30 @@ const AuthMain = (props) => {
     const [ws, setWs] = useState({});
 
     const handleGroupDelete = (id) => {
-        let newGroups = groups.filter((item)=>{return item.ID != id})
+        let newGroups = groups.filter((item)=>{return item.ID !== id})
         setGroups(newGroups);
     };
+
+    const handleMemberDelete = (member) => {
+        let newGroups = groups;
+        for (let i = 0; i < newGroups.length; i++) {
+            if (newGroups[i].ID === member.group_id) {
+                newGroups[i].Members = newGroups[i].Members.filter((item)=>{return item.ID !== member.ID});
+                setGroups(newGroups);
+            }
+        }
+    }
+
+    const handleMemberAdd = (member) => {
+        let newGroups = groups;
+        for (let i = 0; i < groups.length; i++) {
+            if (newGroups[i].ID === member.group_id) {
+                newGroups[i].Members.push(member);
+                console.log(newGroups);
+                setGroups(newGroups);
+            }
+        }
+    }
 
     // Effect starting websocket connection
     useEffect(() => {
@@ -41,12 +62,22 @@ const AuthMain = (props) => {
 
     ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
-        console.log(msgJSON);
         if (msgJSON.action !== undefined) {
             switch (msgJSON.action) {
                 case "DELETE_GROUP":
                     handleGroupDelete(msgJSON.group);
+                    break;
+                case "DELETE_MEMBER":
+                    handleMemberDelete(msgJSON.member);
+                    break;
+                case "ADD_MEMBER":
+                    console.log("ADD_MEMBER");
+                    handleMemberAdd(msgJSON.member);
+                    break;
+                default:
+                    console.log("Unexpected action from websocket: ", msgJSON.action);
             }
+            return;
         }
         if (msgJSON.group === current.ID) {
             setMessages([...messages, msgJSON]);
@@ -54,7 +85,6 @@ const AuthMain = (props) => {
             let newCounter = counter;
             newCounter[msgJSON.group]++;
             setCounter(newCounter);
-            console.log(counter);
         }
     }
 
@@ -65,7 +95,7 @@ const AuthMain = (props) => {
                 const response = await fetch('http://localhost:8080/api/group/get', {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include'});
-                if (response.status !== 200 && response.status != 204 ) {
+                if (response.status !== 200 && response.status !== 204 ) {
                     // error handling
                     return
                 }
