@@ -6,14 +6,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Message struct {
-	Group   uint64 `json:"group"`
-	Member  uint64 `json:"member"`
-	Message string `json:"text"`
-	Nick    string `json:"nick"`
-	When    string `json:"created"`
-}
-
 const INVITE_AWAITING = 0
 const INVITE_ACCEPT = 1
 const INVITE_DECLINE = 2

@@ -1,14 +1,14 @@
 package ws
 
 import (
-	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gorilla/websocket"
 )
 
 type client struct {
 	id     int
 	socket *websocket.Conn
-	send   chan *database.Message
+	send   chan communication.Sender
 	hub    *Hub
 	groups []int64
 }
@@ -16,7 +16,8 @@ type client struct {
 func (c *client) read() {
 	defer c.socket.Close()
 	for {
-		var msg database.Message
+		// socket can read only communication message
+		var msg communication.Message
 		if err := c.socket.ReadJSON(&msg); err != nil {
 			return
 		}
@@ -27,9 +28,12 @@ func (c *client) read() {
 func (c *client) write() {
 	defer c.socket.Close()
 	for msg := range c.send {
-		err := c.socket.WriteJSON(msg)
-		if err != nil {
+		if err := msg.Send(c.socket); err != nil {
 			break
 		}
+		// err := c.socket.WriteJSON(msg)
+		// if err != nil {
+		// 	break
+		// }
 	}
 }

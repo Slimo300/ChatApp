@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
@@ -225,8 +226,8 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return groups, nil
 }
 
-func (m *MockDB) GetGroupMessages(id_user, id_group, offset uint) ([]Message, error) {
-	var messages []Message
+func (m *MockDB) GetGroupMessages(id_user, id_group, offset uint) ([]communication.Message, error) {
+	var messages []communication.Message
 
 	for _, member := range m.Members {
 		if member.GroupID == id_group && member.UserID == id_user {
@@ -238,7 +239,7 @@ func (m *MockDB) GetGroupMessages(id_user, id_group, offset uint) ([]Message, er
 	for _, message := range m.Messages {
 		for _, member := range m.Members {
 			if message.MemberID == member.ID && member.GroupID == id_group {
-				messages = append(messages, Message{
+				messages = append(messages, communication.Message{
 					Group:   uint64(id_group),
 					Member:  uint64(member.ID),
 					Message: message.Text,
@@ -261,7 +262,7 @@ func (m *MockDB) GetGroupMembership(group, user uint) (models.Member, error) {
 	return models.Member{}, errors.New("Err no record")
 }
 
-func (m *MockDB) AddMessage(msg Message) (Message, error) {
+func (m *MockDB) AddMessage(msg communication.Message) (communication.Message, error) {
 	msgTime := time.Now()
 	m.Messages = append(m.Messages, models.Message{
 		ID:       uint(len(m.Messages) + 1),

@@ -11,7 +11,7 @@ import (
 type Hub struct {
 	db      database.DBlayer
 	dbconn  <-chan *communication.Action
-	forward chan *database.Message
+	forward chan *communication.Message
 	join    chan *client
 	leave   chan *client
 	clients map[*client]bool
@@ -21,7 +21,7 @@ func NewHub(db database.DBlayer, ch <-chan *communication.Action) *Hub {
 	return &Hub{
 		db:      db,
 		dbconn:  ch,
-		forward: make(chan *database.Message),
+		forward: make(chan *communication.Message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
@@ -50,17 +50,29 @@ func (h *Hub) Run() {
 				}
 			}
 		case msg := <-h.dbconn:
-			for client := range h.clients {
-				if client.id == msg.User || msg.User == 0 {
-					switch msg.Action {
-					case "pop":
+			switch msg.Action {
+			case "pop":
+				for client := range h.clients {
+					if client.id == msg.User || msg.User == 0 {
 						for i, gr := range client.groups {
 							if gr == int64(msg.Group) {
 								client.groups = append(client.groups[:i], client.groups[:i+1]...)
 							}
 						}
-					case "insert":
+					}
+				}
+			case "insert":
+				for client := range h.clients {
+					if client.id == msg.User || msg.User == 0 {
 						client.groups = append(client.groups, int64(msg.Group))
+					}
+				}
+			case "add":
+				for client := range h.clients {
+					for _, gr := range client.groups {
+						if gr == int64(msg.Group) {
+							client.send <- &communication.Message{}
+						}
 					}
 				}
 			}
@@ -90,7 +102,7 @@ func ServeWebSocket(w http.ResponseWriter, req *http.Request, h *Hub, groups []i
 	client := &client{
 		id:     id_user,
 		socket: socket,
-		send:   make(chan *database.Message, messageBufferSize),
+		send:   make(chan communication.Sender, messageBufferSize),
 		hub:    h,
 		groups: groups,
 	}

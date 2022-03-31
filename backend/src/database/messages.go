@@ -3,10 +3,11 @@ package database
 import (
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
-func (db *Database) AddMessage(msg Message) (Message, error) {
+func (db *Database) AddMessage(msg communication.Message) (communication.Message, error) {
 	message := models.Message{
 		Posted:   time.Now(),
 		Text:     msg.Message,
@@ -14,15 +15,15 @@ func (db *Database) AddMessage(msg Message) (Message, error) {
 	}
 
 	if err := db.Create(&message).Error; err != nil {
-		return Message{}, err
+		return communication.Message{}, err
 	}
 
 	var member models.Member
 	if err := db.First(&member, message.MemberID).Error; err != nil {
-		return Message{}, err
+		return communication.Message{}, err
 	}
 
-	return Message{
+	return communication.Message{
 		Group:   uint64(member.GroupID),
 		Member:  uint64(message.MemberID),
 		Message: message.Text,
@@ -33,7 +34,7 @@ func (db *Database) AddMessage(msg Message) (Message, error) {
 }
 
 // GetGroupMessages gets last messages sent to group, offset is a variable stating how many of messages it should omit (in case some are already loaded)
-func (db *Database) GetGroupMessages(id_user, id_group, offset uint) ([]Message, error) {
+func (db *Database) GetGroupMessages(id_user, id_group, offset uint) ([]communication.Message, error) {
 
 	if err := db.Where(models.Member{GroupID: id_group, UserID: id_user}).First(&models.Member{}).Error; err != nil {
 		return nil, err
@@ -44,10 +45,10 @@ func (db *Database) GetGroupMessages(id_user, id_group, offset uint) ([]Message,
 	if selection.Error != nil {
 		return nil, selection.Error
 	}
-	var sendMessages []Message
+	var sendMessages []communication.Message
 
 	for i := len(messages) - 1; i >= 0; i-- {
-		sendMessages = append(sendMessages, Message{
+		sendMessages = append(sendMessages, communication.Message{
 			Group:   uint64(messages[i].Member.GroupID),
 			Member:  uint64(messages[i].MemberID),
 			Nick:    messages[i].Member.Nick,

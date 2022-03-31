@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
@@ -12,10 +13,10 @@ type DBlayer interface {
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
 
-	GetGroupMessages(id_user, id_group, offset uint) ([]Message, error)
+	GetGroupMessages(id_user, id_group, offset uint) ([]communication.Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
 	// AddMessage adds a message of type Message to database
-	AddMessage(msg Message) (Message, error)
+	AddMessage(msg communication.Message) (communication.Message, error)
 
 	// AddFriend takes "id" of an issuer and "username" of invited user
 	AddFriend(id int, username string) (models.Group, error)

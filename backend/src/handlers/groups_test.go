@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/models"
@@ -103,7 +104,7 @@ func TestGetGroupMessages(t *testing.T) {
 			returnVal:          true,
 			query:              "?group=1",
 			expectedStatusCode: http.StatusOK,
-			expectedResponse: []database.Message{{Group: 1, Member: 1, Message: "elo", Nick: "Mal", When: "2019-13-01 22:00:45"},
+			expectedResponse: []communication.Message{{Group: 1, Member: 1, Message: "elo", Nick: "Mal", When: "2019-13-01 22:00:45"},
 				{Group: 1, Member: 2, Message: "siema", Nick: "River", When: "2019-15-01 22:00:45"},
 				{Group: 1, Member: 1, Message: "elo elo", Nick: "Mal", When: "2019-16-01 22:00:45"},
 				{Group: 1, Member: 2, Message: "siema siema", Nick: "River", When: "2019-17-01 22:00:45"}},
@@ -148,7 +149,7 @@ func TestGetGroupMessages(t *testing.T) {
 			}
 			var respBody interface{}
 			if tC.returnVal {
-				groups := []database.Message{}
+				groups := []communication.Message{}
 				json.NewDecoder(response.Body).Decode(&groups)
 				respBody = groups
 			} else {
