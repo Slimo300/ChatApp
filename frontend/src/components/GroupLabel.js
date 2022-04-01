@@ -3,7 +3,9 @@ import React from "react";
 export const GroupLabel = (props) => {
     const change = () => {
         props.setCurrent(props.group);
-        let newCounter = props.counter;
+        let newCounter = {
+            ...props.counter
+        };
         newCounter[props.group.ID] = 0;
         props.setCounter(newCounter);
     };

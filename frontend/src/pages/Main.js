@@ -82,7 +82,9 @@ const AuthMain = (props) => {
         if (msgJSON.group === current.ID) {
             setMessages([...messages, msgJSON]);
         } else {
-            let newCounter = counter;
+            let newCounter = {
+                ...counter
+              };
             newCounter[msgJSON.group]++;
             setCounter(newCounter);
         }
