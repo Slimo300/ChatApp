@@ -119,7 +119,7 @@ const AuthMain = (props) => {
         (
             async () => {
                 if (current.ID !== undefined) {
-                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString(), {
+                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=4", {
                         headers: {"Content-Type": "application/json"},
                         credentials: "include",
                     });

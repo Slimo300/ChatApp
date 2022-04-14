@@ -6,22 +6,6 @@ export const ModalAddUser = (props) => {
     const [username, setUsername] = useState("");
     const [err, setErr] = useState("");
 
-    // const submitFriend = async() => {
-    //     const response = await fetch('http://localhost:8080/api/group/add', {
-    //         method: "POST",
-    //         headers: {'Content-Type': 'application/json'},
-    //         credentials: 'include',
-    //         body: {
-    //             "name": username,
-    //         }
-    //     });
-    //     const responseJSON = await response.json();
-
-    //     if (responseJSON.err !== undefined) {
-    //         setErr(responseJSON.err)
-    //     }
-    // }
-
     const submitAddToGroup = async(e) => {
         e.preventDefault();
         const response = await fetch('http://localhost:8080/api/group/add', {

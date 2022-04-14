@@ -265,7 +265,15 @@ func TestAddMember(t *testing.T) {
 func TestDeleteMember(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+
+	channel := make(chan *communication.Action)
+	go func() {
+		for {
+			<-channel
+		}
+	}()
+	defer close(channel)
+	s := handlers.NewServer(mock, channel)
 
 	testCases := []struct {
 		desc               string

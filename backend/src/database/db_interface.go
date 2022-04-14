@@ -13,21 +13,14 @@ type DBlayer interface {
 	SignInUser(name string, pass string) (models.User, error)
 	SignOutUser(id uint) error
 
-	GetGroupMessages(id_user, id_group, offset uint) ([]communication.Message, error)
+	GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error)
 	GetGroupMembership(id_group, id_user uint) (models.Member, error)
-	// AddMessage adds a message of type Message to database
 	AddMessage(msg communication.Message) (communication.Message, error)
-
-	// AddFriend takes "id" of an issuer and "username" of invited user
-	AddFriend(id int, username string) (models.Group, error)
-	// RespondInvite takes id of an invite ("id") and response of type int (1 - agree, 2 - decline)
-	// RespondInvite(id_inv, response int) (models.Group, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
 	AddUserToGroup(name string, id_group uint, id_user uint) (models.Member, error)
 	DeleteUserFromGroup(id_member, id_user uint) (models.Member, error)
 	GrantPriv(id_member, id_user uint, adding, deleting, setting bool) error
 
-	// DeleteGroup deletes a specified group
 	DeleteGroup(id_group, id_user uint) (models.Group, error)
 }

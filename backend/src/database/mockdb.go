@@ -226,7 +226,7 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return groups, nil
 }
 
-func (m *MockDB) GetGroupMessages(id_user, id_group, offset uint) ([]communication.Message, error) {
+func (m *MockDB) GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error) {
 	var messages []communication.Message
 
 	for _, member := range m.Members {
@@ -400,36 +400,4 @@ func (m *MockDB) GrantPriv(id_mem, id uint, adding, deleting, setting bool) erro
 	member.Setting = setting
 
 	return nil
-}
-
-func (m *MockDB) AddFriend(id int, username string) (models.Group, error) {
-	newGroup := models.Group{
-		ID:      uint(len(m.Groups) + 1),
-		Name:    "",
-		Desc:    "",
-		Created: time.Now(),
-	}
-	m.Groups = append(m.Groups, newGroup)
-
-	var user1 models.User
-	for _, user := range m.Users {
-		if user.ID == uint(id) {
-			user1 = user
-		}
-	}
-
-	var user2 models.User
-	for _, user := range m.Users {
-		if user.UserName == username {
-			user2 = user
-		}
-	}
-	if user1 == user2 {
-		return models.Group{}, errors.New("Cannot invite yourself")
-	}
-
-	m.Members = append(m.Members, models.Member{ID: uint(len(m.Members) + 1), UserID: user1.ID, GroupID: newGroup.ID, Nick: user1.UserName, Adding: false, Deleting: false, Setting: false, Creator: true})
-	m.Members = append(m.Members, models.Member{ID: uint(len(m.Members) + 1), UserID: user2.ID, GroupID: newGroup.ID, Nick: user2.UserName, Adding: false, Deleting: false, Setting: false, Creator: true})
-
-	return newGroup, nil
 }

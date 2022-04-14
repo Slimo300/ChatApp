@@ -9,20 +9,15 @@ function App() {
   
   const [name, setName] = useState('');
   const [createGrShow, setCreateGrShow] = useState(false);
-  const [addFrShow, setAddFrShow] = useState(false);
 
   const toggleCreateGroup = () => {
     setCreateGrShow(!createGrShow);
-  }
-  
-  const toggleAddFriend = () => {
-    setAddFrShow(!addFrShow);
   }
 
   return (
       <div >
         <Router>
-          <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup} toggleFrAdd={toggleAddFriend}/>
+          <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup}/>
           <main>
             <Routes>
               <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup} showCrGroup={createGrShow} toggleFrAdd={toggleAddFriend} showFrAdd={addFrShow}/>}/>

@@ -61,12 +61,16 @@ func (Member) TableName() string {
 }
 
 type Invite struct {
-	ID       uint `gorm:"primaryKey"`
-	IssId    uint `gorm:"column:iss_id"`
-	Iss      User
-	TargetID uint `gorm:"column:target_id"`
-	Target   User
-	Status   int `gorm:"coulumn:status"`
+	ID       uint      `gorm:"primaryKey"`
+	IssId    uint      `gorm:"column:iss_id"`
+	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	TargetID uint      `gorm:"column:target_id"`
+	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Status   int       `gorm:"column:status"`
+	GroupID  uint      `gorm:"column:group_id"`
+	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Created  time.Time `gorm:"column:created"`
+	Modified time.Time `gorm:"column:modified"`
 }
 
 func (Invite) TableName() string {
