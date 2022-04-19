@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {v4 as uuidv4} from "uuid";
+import { StorageContext } from "../ChatStorage";
 import GroupMenu from "./GroupMenu";
 import { ModalAddUser } from "./modals/AddUser";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
@@ -7,8 +8,10 @@ import { ModalMembers } from "./modals/GroupMembers";
 
 const Chat = (props) => {
 
-    const [member, setMember] = useState({});
-    const [msg, setMsg] = useState("");
+    const [state, dispatch] = useContext(StorageContext);
+
+    const [member, setMember] = useState({}); // membership of a group fetched everytime current group changes (TODO: cache)
+    const [msg, setMsg] = useState(""); // currently typed message
 
     // add user to group modal
     const [addUserShow, setAddUserShow] = useState(false);
@@ -33,12 +36,13 @@ const Chat = (props) => {
                 if (props.group.ID === undefined) {
                     return
                 }
-                const response = await fetch("http://localhost:8080/api/group/membership?group=" + props.group.ID.toString(), {
-                    headers: {"Content-Type": "application/json"},
-                    credentials: "include",
-                });
-                const responseJSON = await response.json();
-                setMember(responseJSON);
+                for (let i = 0; i < props.group.Members.length; i++) {
+                    if (props.group.Members[i].user_id === state.user.ID ) {
+                        setMember(props.group.Members[i]);
+                        return;
+                    }
+                }
+                throw new Error("No member matches user");
             }
         )();
     }, [props.group]);
@@ -86,7 +90,7 @@ const Chat = (props) => {
                         <input className="btn btn-primary" type="submit" value="Send" />
                     </form>
                 </div>
-                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setGroups={props.setGroups} groups={props.groups} setCurrent={props.setCurrent}/>
+                <ModalDeleteGroup show={delGrShow} toggle={toggleDelGroup} group={props.group} setCurrent={props.setCurrent}/>
                 <ModalAddUser show={addUserShow} toggle={toggleAddUser} group={props.group}/>
                 <ModalMembers show={membersShow} toggle={toggleMembers} group={props.group} member={member} />
             </div>

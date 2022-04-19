@@ -1,7 +1,10 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { actionTypes, StorageContext } from '../../ChatStorage';
 
 export const ModalDeleteGroup = (props) => {
+
+    const [, dispatch] = useContext(StorageContext);
 
     const [err, setErr] = useState("");
 
@@ -20,7 +23,7 @@ export const ModalDeleteGroup = (props) => {
         let flag = false;
 
         if (responseJSON.message === "ok") {
-            props.setGroups(props.groups.filter((item)=> { return item.ID !== props.group.ID }));
+            dispatch({type: actionTypes.DELETE_GROUP, payload: props.group.ID})
             setErr("Group Deleted");
             flag = true;
         }

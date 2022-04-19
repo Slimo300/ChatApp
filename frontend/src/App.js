@@ -4,6 +4,7 @@ import SignInForm from './pages/Login';
 import Main from "./pages/Main";
 import Navigation from "./components/Navigation";
 import RegisterForm from "./pages/Register";
+import ChatStorage from "./ChatStorage";
 
 function App() {
   
@@ -16,16 +17,18 @@ function App() {
 
   return (
       <div >
+        <ChatStorage>
         <Router>
           <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup}/>
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup} showCrGroup={createGrShow} toggleFrAdd={toggleAddFriend} showFrAdd={addFrShow}/>}/>
+              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup} showCrGroup={createGrShow}/>}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
           </main>
         </Router>
+        </ChatStorage>
       </div>
   )
 }

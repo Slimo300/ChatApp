@@ -1,7 +1,11 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { actionTypes, StorageContext } from '../../ChatStorage';
 
 export const ModalCreateGroup = (props) => {
+
+    const [, dispatch] = useContext(StorageContext);
+
     const [grName, setGrName] = useState("");
     const [grDesc, setGrDesc] = useState("");
     const [err, setErr] = useState("");
@@ -24,7 +28,7 @@ export const ModalCreateGroup = (props) => {
         } else {
             setErr("Group created");
             console.log(responseJSON);
-            props.setGroups([...props.groups, responseJSON]);
+            dispatch({type: actionTypes.NEW_GROUP, payload: responseJSON});
         }
         setTimeout(function () {    
             props.toggle();

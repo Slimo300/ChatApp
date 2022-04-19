@@ -127,7 +127,6 @@ func (s *Server) GetUser(c *gin.Context) {
 		return
 	}
 	user.Pass = ""
-	user.ID = 0
 
 	c.JSON(http.StatusOK, user)
 }

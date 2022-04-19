@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
+import { actionTypes, StorageContext } from "../ChatStorage";
 import Chat from "../components/Chat";
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalAddUser } from "../components/modals/AddUser";
@@ -16,37 +17,29 @@ const Main = (props) => {
 
 const AuthMain = (props) => {
 
-    const [groups, setGroups] = useState([]);
-    const [counter, setCounter] = useState({});
-    const [messages, setMessages] = useState([]);
-    const [current, setCurrent] = useState({});
-    const [ws, setWs] = useState({});
+    const [state, dispatch] = useContext(StorageContext);
+    const [counter, setCounter] = useState({}); // object mapping group_id to unread messages
+    const [messages, setMessages] = useState([]); // list of messages for current group
+    const [current, setCurrent] = useState({}); // current group
+    const [ws, setWs] = useState({}); // websocket connection
 
-    const handleGroupDelete = (id) => {
-        let newGroups = groups.filter((item)=>{return item.ID !== id})
-        setGroups(newGroups);
-    };
-
-    const handleMemberDelete = (member) => {
-        let newGroups = groups;
-        for (let i = 0; i < newGroups.length; i++) {
-            if (newGroups[i].ID === member.group_id) {
-                newGroups[i].Members = newGroups[i].Members.filter((item)=>{return item.ID !== member.ID});
-                setGroups(newGroups);
+    // Effect getting user info
+    useEffect(() => {
+        (
+            async () => {
+                const response = await fetch('http://localhost:8080/api/user', {
+                    method: 'GET',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'});
+                if (response.status !== 200) {
+                    throw new Error("couldn't get user");
+                }
+                const responseJSON = await response.json()
+                dispatch({type: actionTypes.LOGIN, payload: responseJSON})
             }
-        }
-    }
-
-    const handleMemberAdd = (member) => {
-        let newGroups = groups;
-        for (let i = 0; i < groups.length; i++) {
-            if (newGroups[i].ID === member.group_id) {
-                newGroups[i].Members.push(member);
-                console.log(newGroups);
-                setGroups(newGroups);
-            }
-        }
-    }
+        )();
+        
+    }, [dispatch]);
 
     // Effect starting websocket connection
     useEffect(() => {
@@ -65,14 +58,13 @@ const AuthMain = (props) => {
         if (msgJSON.action !== undefined) {
             switch (msgJSON.action) {
                 case "DELETE_GROUP":
-                    handleGroupDelete(msgJSON.group);
+                    dispatch({type: actionTypes.DELETE_GROUP, payload: msgJSON.group.ID});
                     break;
                 case "DELETE_MEMBER":
-                    handleMemberDelete(msgJSON.member);
+                    dispatch({type: actionTypes.DELETE_MEMBER, payload: msgJSON.member});
                     break;
                 case "ADD_MEMBER":
-                    console.log("ADD_MEMBER");
-                    handleMemberAdd(msgJSON.member);
+                    dispatch({type: actionTypes.ADD_MEMBER, payload: msgJSON.member});
                     break;
                 default:
                     console.log("Unexpected action from websocket: ", msgJSON.action);
@@ -90,7 +82,7 @@ const AuthMain = (props) => {
         }
     }
 
-    // effect getting groups in which user has membership
+    // effect getting groups of which user is a member
     useEffect(()=>{
         (
             async () => {
@@ -98,8 +90,7 @@ const AuthMain = (props) => {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include'});
                 if (response.status !== 200 && response.status !== 204 ) {
-                    // error handling
-                    return
+                    throw new Error("Invalid response when requesting user groups");
                 }
                 const responseJSON = await response.json();
                 if (responseJSON.message === undefined) {
@@ -108,7 +99,7 @@ const AuthMain = (props) => {
                         newCounter[responseJSON[i].ID] = 0;
                     }
                     setCounter(newCounter);
-                    setGroups(responseJSON);
+                    dispatch({type: actionTypes.SET_GROUPS, payload: responseJSON});
                 }
             }
         )();
@@ -144,17 +135,17 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {groups.length!==0?groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
+                                            {state.groups.length!==0?state.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} setGroups={setGroups} groups={groups} ws={ws} setCurrent={setCurrent}/>
+                                <Chat messages={messages} group={current} ws={ws} setCurrent={setCurrent}/>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-          <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup} groups={groups} setGroups={setGroups}/>
+          <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup}/>
           <ModalAddUser show={props.showFrAdd} toggle={props.toggleFrAdd}/>
         </div>
     )
