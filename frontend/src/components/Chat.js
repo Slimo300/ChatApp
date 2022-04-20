@@ -11,7 +11,7 @@ const Chat = (props) => {
 
     const [state, dispatch] = useContext(StorageContext);
 
-    const [member, setMember] = useState({}); // membership of a group fetched everytime current group changes (TODO: cache)
+    const [member, setMember] = useState({});
     const [msg, setMsg] = useState(""); // currently typed message
 
     const scrollRef = useRef();
@@ -106,7 +106,7 @@ const Chat = (props) => {
                     </div>
                 </div>
                 <div className="chat-container">
-                    <ul className="chat-box chatContainerScroll" style={{height: '70vh', overflow: 'scroll'}}>
+                    <ul className="chat-box" style={{height: '70vh', overflow: 'scroll'}}>
                         <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
                         {nomessages?null:props.group.messages.map(item => {
                         return <div ref={scrollRef}>

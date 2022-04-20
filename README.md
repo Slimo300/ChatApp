@@ -15,9 +15,5 @@ This is a chatting app, which consists of React on frontend and Golang on the ba
 - REST API for creating, updating and deleting groups
 - Adding and removing members from group
 - Changing members rights in a group (to delete and add members)
-
-## Things to implement
 - Updating websocket connection when adding or deleting from group
 - Handling messages from other groups on frontend
-- Email user verification and password reset
-- Profile pictures

@@ -8,48 +8,6 @@
 /*************** 2.Mixins ***************/
 
 
-/************************************************
-    ************************************************
-										Search Box
-	************************************************
-************************************************/
-
-.chat-search-box {
-    -webkit-border-radius: 3px 0 0 0;
-    -moz-border-radius: 3px 0 0 0;
-    border-radius: 3px 0 0 0;
-    padding: .75rem 1rem;
-}
-
-.chat-search-box .input-group .form-control {
-    -webkit-border-radius: 2px 0 0 2px;
-    -moz-border-radius: 2px 0 0 2px;
-    border-radius: 2px 0 0 2px;
-    border-right: 0;
-}
-
-.chat-search-box .input-group .form-control:focus {
-    border-right: 0;
-}
-
-.chat-search-box .input-group .input-group-btn .btn {
-    -webkit-border-radius: 0 2px 2px 0;
-    -moz-border-radius: 0 2px 2px 0;
-    border-radius: 0 2px 2px 0;
-    margin: 0;
-}
-
-.chat-search-box .input-group .input-group-btn .btn i {
-    font-size: 1.2rem;
-    line-height: 100%;
-    vertical-align: middle;
-}
-
-@media (max-width: 767px) {
-    .chat-search-box {
-        display: none;
-    }
-}
 
 
 /************************************************
@@ -102,22 +60,6 @@
     background-image: -o-linear-gradient(right, #e9eff5, #ffffff);
     /* Opera 11.10+ */
     background-image: linear-gradient(right, #e9eff5, #ffffff);
-}
-
-.users .person.active-user {
-    background-color: #ffffff;
-    /* Fallback Color */
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#f7f9fb), to(#ffffff));
-    /* Saf4+, Chrome */
-    background-image: -webkit-linear-gradient(right, #f7f9fb, #ffffff);
-    /* Chrome 10+, Saf5.1+, iOS 5+ */
-    background-image: -moz-linear-gradient(right, #f7f9fb, #ffffff);
-    /* FF3.6 */
-    background-image: -ms-linear-gradient(right, #f7f9fb, #ffffff);
-    /* IE10 */
-    background-image: -o-linear-gradient(right, #f7f9fb, #ffffff);
-    /* Opera 11.10+ */
-    background-image: linear-gradient(right, #f7f9fb, #ffffff);
 }
 
 .users .person:last-child {
