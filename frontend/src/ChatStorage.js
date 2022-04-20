@@ -8,7 +8,10 @@ export const actionTypes = {
     NEW_GROUP: "NEW_GROUP",
     DELETE_GROUP: "DELETE_GROUP",
     ADD_MEMBER: "ADD_MEMBER",
-    DELETE_MEMBER: "DELETE_MEMBER"
+    DELETE_MEMBER: "DELETE_MEMBER",
+    SET_MESSAGES: "SET_MESSAGES",
+    ADD_MESSAGE: "ADD_MESSAGE",
+    ADD_MESSAGES: "ADD_MESSAGES"
 }
 
 function reducer(state, action) {
@@ -47,7 +50,34 @@ function reducer(state, action) {
                     return newState
                 }
             }
-            break;
+            throw new Error("Member to be deleted not found");
+        case actionTypes.SET_MESSAGES:
+            newState = {...state};
+            for (let i = 0; i < newState.groups.length; i++) {
+                if (newState.groups[i].ID === action.payload.group) {
+                    newState.groups[i].messages = action.payload.messages
+                    return newState;
+                }
+            }
+            throw new Error("Received messages don't belong to any of your groups");
+        case actionTypes.ADD_MESSAGE:
+            newState = {...state};
+            for (let i = 0; i < newState.groups.length; i++) {
+                if (newState.groups[i].ID === action.payload.group) {
+                    newState.groups[i].messages = [...newState.groups[i].messages, action.payload];
+                    return newState;
+                }
+            }
+            throw new Error("Received message don't belong to any of your groups");
+        case actionTypes.ADD_MESSAGES:
+            newState = {...state};
+            for (let i = 0; i < newState.groups.length; i++) {
+                if (newState.groups[i].ID === action.payload.group) {
+                    newState.groups[i].messages = [...action.payload.messages, ...newState.groups[i].messages];
+                    return newState;
+                }
+            }
+            throw new Error("Received messages don't belong to any of your groups");
         default:
             throw new Error("Action not specified");
     }
@@ -65,30 +95,3 @@ const ChatStorage = ({children}) => {
 }
 
 export default ChatStorage;
-
-
-// const handleGroupDelete = (id) => {
-//     let newGroups = groups.filter((item)=>{return item.ID !== id})
-//     setGroups(newGroups);
-// };
-
-// const handleMemberDelete = (member) => {
-//     let newGroups = groups;
-//     for (let i = 0; i < newGroups.length; i++) {
-//         if (newGroups[i].ID === member.group_id) {
-//             newGroups[i].Members = newGroups[i].Members.filter((item)=>{return item.ID !== member.ID});
-//             setGroups(newGroups);
-//         }
-//     }
-// }
-
-// const handleMemberAdd = (member) => {
-//     let newGroups = groups;
-//     for (let i = 0; i < groups.length; i++) {
-//         if (newGroups[i].ID === member.group_id) {
-//             newGroups[i].Members.push(member);
-//             console.log(newGroups);
-//             setGroups(newGroups);
-//         }
-//     }
-// }

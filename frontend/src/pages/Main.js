@@ -19,8 +19,11 @@ const AuthMain = (props) => {
 
     const [state, dispatch] = useContext(StorageContext);
     const [counter, setCounter] = useState({}); // object mapping group_id to unread messages
-    const [messages, setMessages] = useState([]); // list of messages for current group
     const [current, setCurrent] = useState({}); // current group
+    const [toggler, setToggler] = useState(false); // toggler for scrollRef
+    function toggleToggler(){
+        setToggler(!toggler);
+    }
     const [ws, setWs] = useState({}); // websocket connection
 
     // Effect getting user info
@@ -71,8 +74,9 @@ const AuthMain = (props) => {
             }
             return;
         }
-        if (msgJSON.group === current.ID) {
-            setMessages([...messages, msgJSON]);
+        if (msgJSON.group === current.ID) { // add message to state
+            dispatch({type: actionTypes.ADD_MESSAGE, payload: msgJSON})
+            toggleToggler();
         } else {
             let newCounter = {
                 ...counter
@@ -109,17 +113,23 @@ const AuthMain = (props) => {
     useEffect(()=>{
         (
             async () => {
-                if (current.ID !== undefined) {
-                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=4", {
+                if (current.messages === undefined) {
+                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=8", {
                         headers: {"Content-Type": "application/json"},
                         credentials: "include",
                     });
-                    const responseJSON = await response.json();
-                    if (responseJSON.message === "no messages") {
-                        setMessages([]);
-                    } else {
-                        setMessages(responseJSON);
+                    let messages;
+                    if (response.status === 200) {
+                        messages = await response.json();
                     }
+                    else if (response.status === 204) {
+                        messages = [];
+                    } 
+                    else {
+                        throw new Error("getting messages failed with status code: ", response.status);
+                    } 
+                    dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: messages, group: current.ID}});
+                    toggleToggler();
                 }
             }
         )();
@@ -139,7 +149,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat messages={messages} group={current} ws={ws} setCurrent={setCurrent}/>
+                                <Chat group={current} ws={ws} setCurrent={setCurrent} toggler={toggler}/>
                             </div>
                         </div>
                     </div>

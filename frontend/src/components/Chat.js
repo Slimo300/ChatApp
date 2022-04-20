@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {v4 as uuidv4} from "uuid";
-import { StorageContext } from "../ChatStorage";
+import { StorageContext, actionTypes } from "../ChatStorage";
 import GroupMenu from "./GroupMenu";
+import Message from "./Message";
 import { ModalAddUser } from "./modals/AddUser";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
 import { ModalMembers } from "./modals/GroupMembers";
@@ -12,6 +13,11 @@ const Chat = (props) => {
 
     const [member, setMember] = useState({}); // membership of a group fetched everytime current group changes (TODO: cache)
     const [msg, setMsg] = useState(""); // currently typed message
+
+    const scrollRef = useRef();
+    useEffect( () => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [props.toggler] );
 
     // add user to group modal
     const [addUserShow, setAddUserShow] = useState(false);
@@ -45,12 +51,12 @@ const Chat = (props) => {
                 throw new Error("No member matches user");
             }
         )();
-    }, [props.group]);
+    }, [props.group.ID]);
 
     // function for sending message when submit
     const sendMessage = (e) => {
         e.preventDefault();
-        if (msg === "") return false;
+        if (msg.trim() === "") return false;
         props.ws.send(JSON.stringify({
             "group": props.group.ID,
             "member": member.ID,
@@ -61,8 +67,26 @@ const Chat = (props) => {
         document.getElementById("text-area").focus();
     }
 
+    const loadMessages = async() => {
+        const response = await fetch("http://localhost:8080/api/group/messages?group=" + props.group.ID.toString() + "&num=8&offset=" + props.group.messages.length, {
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+        });
+        let messages;
+        if (response.status === 200) {
+            messages = await response.json();
+        }
+        else if (response.status === 204) {
+            messages = [];
+        } 
+        else {
+            throw new Error("getting messages failed with status code: ", response.status);
+        } 
+        dispatch({type: actionTypes.ADD_MESSAGES, payload: {messages: messages, group: props.group.ID}});
+    }
+
     let nomessages = false;
-    if (props.messages === []) {
+    if (props.group.messages === undefined) {
         nomessages = true;
     }
 
@@ -83,7 +107,11 @@ const Chat = (props) => {
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box chatContainerScroll" style={{height: '70vh', overflow: 'scroll'}}>
-                        {nomessages?null:props.messages.map(item => {return <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID}/>})}
+                        <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
+                        {nomessages?null:props.group.messages.map(item => {
+                        return <div ref={scrollRef}>
+                                <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
+                            </div>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
                         <textarea autoFocus  id="text-area" className="form-control mr-1" rows="3" placeholder="Type your message here..." onChange={(e)=>{setMsg(e.target.value)}}></textarea>
@@ -97,36 +125,6 @@ const Chat = (props) => {
         );
     }
     return load;
-}
-
-const Message = (props) => {
-    const right = (
-        <li className="chat-right">
-            <div className="chat-hour">{props.time} <span className="fa fa-check-circle"></span></div>
-            <div className="chat-text">{props.message}</div>
-            <div className="chat-avatar">
-                <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/>
-                <div className="chat-name">{props.name}</div>
-            </div>
-        </li>
-    );
-
-    const left = (
-        <li className="chat-left">
-            <div className="chat-avatar">
-                <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/>
-                <div className="chat-name">{props.name}</div>
-            </div>
-            <div className="chat-text">{props.message}</div>
-            <div className="chat-hour">{props.time} <span className="fa fa-check-circle"></span></div>
-        </li>
-    )
-
-    return (
-        <div>
-            {props.member===props.user?right:left}
-        </div>
-    )
 }
 
 export default Chat;
