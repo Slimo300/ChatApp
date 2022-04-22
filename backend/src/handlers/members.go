@@ -2,41 +2,10 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
 )
-
-// handler for obtaining user membership for specified group
-func (s *Server) GetGroupMembership(c *gin.Context) {
-
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
-		return
-	}
-
-	group := c.Query("group")
-	if group == "" || group == "0" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Select a group"})
-		return
-	}
-
-	group_int, err := strconv.Atoi(group)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
-		return
-	}
-
-	member, err := s.DB.GetGroupMembership(uint(group_int), uint(id))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, member)
-}
 
 // handler for setting member privilages in his group
 func (s *Server) GrantPriv(c *gin.Context) {

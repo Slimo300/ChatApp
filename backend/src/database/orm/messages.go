@@ -1,9 +1,10 @@
-package database
+package orm
 
 import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
+	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
@@ -28,7 +29,7 @@ func (db *Database) AddMessage(msg communication.Message) (communication.Message
 		Member:  uint64(message.MemberID),
 		Message: message.Text,
 		Nick:    message.Member.Nick,
-		When:    message.Posted.Format(TIME_FORMAT),
+		When:    message.Posted.Format(database.TIME_FORMAT),
 	}, nil
 
 }
@@ -52,7 +53,7 @@ func (db *Database) GetGroupMessages(id_user, id_group uint, offset, num int) ([
 			Group:   uint64(messages[i].Member.GroupID),
 			Member:  uint64(messages[i].MemberID),
 			Nick:    messages[i].Member.Nick,
-			When:    messages[i].Posted.Format(TIME_FORMAT),
+			When:    messages[i].Posted.Format(database.TIME_FORMAT),
 			Message: messages[i].Text,
 		})
 	}

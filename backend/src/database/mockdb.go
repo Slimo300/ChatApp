@@ -160,7 +160,7 @@ func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false
-	pass, err := hashPassword(user.Pass)
+	pass, err := HashPassword(user.Pass)
 	user.Pass = pass
 	if err != nil {
 		return models.User{}, errors.New("couldn't register user")
@@ -179,7 +179,7 @@ func (m *MockDB) SignInUser(name, pass string) (models.User, error) {
 		if !(user.Email == name) {
 			continue
 		}
-		if checkPassword(user.Pass, pass) {
+		if CheckPassword(user.Pass, pass) {
 			user.LoggedIn = true
 			return user, nil
 		} else {
@@ -251,15 +251,6 @@ func (m *MockDB) GetGroupMessages(id_user, id_group uint, offset, num int) ([]co
 	}
 
 	return messages, nil
-}
-
-func (m *MockDB) GetGroupMembership(group, user uint) (models.Member, error) {
-	for _, member := range m.Members {
-		if member.GroupID == group && member.UserID == user {
-			return member, nil
-		}
-	}
-	return models.Member{}, errors.New("Err no record")
 }
 
 func (m *MockDB) AddMessage(msg communication.Message) (communication.Message, error) {

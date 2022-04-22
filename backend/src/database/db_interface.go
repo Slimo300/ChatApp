@@ -14,7 +14,6 @@ type DBlayer interface {
 	SignOutUser(id uint) error
 
 	GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error)
-	GetGroupMembership(id_group, id_user uint) (models.Member, error)
 	AddMessage(msg communication.Message) (communication.Message, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/database/orm"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/routes"
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ import (
 func main() {
 	engine := gin.Default()
 	commChan := make(chan *communication.Action)
-	db, err := database.Setup()
+	db, err := orm.Setup()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -18,7 +18,6 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	engine.DELETE("/api/group/delete", server.DeleteGroup)
 	engine.GET("/api/group/get", server.GetUserGroups)
 	engine.GET("/api/group/messages", server.GetGroupMessages)
-	engine.GET("/api/group/membership", server.GetGroupMembership)
 	engine.GET("/ws", server.ServeWebSocket)
 	engine.PUT("/api/group/rights", server.GrantPriv)
 }

@@ -1,4 +1,4 @@
-package database
+package orm
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -25,7 +26,7 @@ func Setup() (*Database, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{})
+	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{}, models.Invite{}, models.FriendsInvite{})
 
 	return &Database{DB: db}, nil
 }
@@ -37,7 +38,7 @@ func (db *Database) GetUserById(id int) (user models.User, err error) {
 
 //RegisterUser adds a new user to database
 func (db *Database) RegisterUser(user models.User) (models.User, error) {
-	pass, err := hashPassword(user.Pass)
+	pass, err := database.HashPassword(user.Pass)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -55,8 +56,8 @@ func (db *Database) SignInUser(email, pass string) (user models.User, err error)
 	if err != nil {
 		return user, err
 	}
-	if !checkPassword(user.Pass, pass) {
-		return user, ErrINVALIDPASSWORD
+	if !database.CheckPassword(user.Pass, pass) {
+		return user, database.ErrINVALIDPASSWORD
 	}
 	user.Pass = ""
 	err = result.Update("logged", 1).Error
@@ -101,12 +102,11 @@ func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
 
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
 	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
-	transactionFlag := false
 
 	var issuer models.User
 	db.Where(models.User{ID: id}).First(&issuer)
 
-	db.Transaction(func(tx *gorm.DB) error {
+	if err := db.Transaction(func(tx *gorm.DB) error {
 		creation := tx.Create(&group)
 		if creation.Error != nil {
 			return creation.Error
@@ -116,13 +116,10 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 		if m_create.Error != nil {
 			return m_create.Error
 		}
-		transactionFlag = true
 
 		return nil
-	})
-
-	if transactionFlag == false {
-		return models.Group{}, ErrInternal
+	}); err != nil {
+		return models.Group{}, err
 	}
 
 	return group, nil
@@ -140,7 +137,7 @@ func (db *Database) AddUserToGroup(username string, id_group uint, id_user uint)
 	}
 
 	if !issuer.Adding {
-		return models.Member{}, ErrNoPrivilages
+		return models.Member{}, database.ErrNoPrivilages
 	}
 
 	var user models.User
@@ -185,7 +182,7 @@ func (db *Database) DeleteUserFromGroup(id_member, id_user uint) (models.Member,
 	}
 
 	if !issuer_member.Deleting {
-		return models.Member{}, ErrNoPrivilages
+		return models.Member{}, database.ErrNoPrivilages
 	}
 
 	if err := db.Model(&deleted_member).Update("deleted", true).Error; err != nil {
@@ -193,16 +190,6 @@ func (db *Database) DeleteUserFromGroup(id_member, id_user uint) (models.Member,
 	}
 
 	return deleted_member, nil
-}
-
-func (db *Database) GetGroupMembership(id_group, id_user uint) (models.Member, error) {
-	var membership models.Member
-	selection := db.Where(&models.Member{UserID: id_user, GroupID: id_group}).First(&membership)
-	if selection.Error != nil {
-		return membership, selection.Error
-	}
-
-	return membership, nil
 }
 
 // Deletes a specified group if user is authorized to do so
@@ -215,7 +202,7 @@ func (db *Database) DeleteGroup(id_group, id_user uint) (models.Group, error) {
 
 	// checking whether user have privilages to delete a group
 	if !membership.Creator {
-		return models.Group{}, ErrNoPrivilages
+		return models.Group{}, database.ErrNoPrivilages
 	}
 
 	// deleting memberships
@@ -252,7 +239,7 @@ func (db *Database) GrantPriv(id_mem, id uint, adding, deleting, setting bool) e
 		return err
 	}
 	if !issuer.Setting {
-		return ErrNoPrivilages
+		return database.ErrNoPrivilages
 	}
 
 	if err := db.Model(member).Updates(models.Member{Adding: adding, Deleting: deleting, Setting: setting}).Error; err != nil {
