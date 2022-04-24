@@ -37,35 +37,34 @@ func TestSendGroupInvite(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
-		// {
-		// 	desc:               "invitesuccess",
-		// 	id:                 1,
-		// 	data:               map[string]interface{}{"group": 1, "target": "Kel"},
-		// 	expectedStatusCode: http.StatusCreated,
-		// 	expectedResponse:   gin.H{"message": "invite sent"},
-		// },
-		// {
-		// 	desc:               "invitenosuchuser",
-		// 	id:                 1,
-		// 	data:               map[string]interface{}{"group": 1, "target": "Raul"},
-		// 	expectedStatusCode: http.StatusNotFound,
-		// 	expectedResponse:   gin.H{"err": "user not found"},
-		// },
-		// {
-		// 	desc:               "invitenoprivilages",
-		// 	id:                 2,
-		// 	data:               map[string]interface{}{"group": 1, "target": "Kel"},
-		// 	returnVal:          false,
-		// 	expectedStatusCode: http.StatusForbidden,
-		// 	expectedResponse:   gin.H{"err": "insufficient privilages"},
-		// },
-		// {
-		// 	desc:               "inviteuserismember",
-		// 	id:                 1,
-		// 	data:               map[string]interface{}{"group": 1, "target": "River"},
-		// 	expectedStatusCode: http.StatusForbidden,
-		// 	expectedResponse:   gin.H{"err": "user already in a group"},
-		// },
+		{
+			desc:               "invitesuccess",
+			id:                 1,
+			data:               map[string]interface{}{"group": 1, "target": "Kel"},
+			expectedStatusCode: http.StatusCreated,
+			expectedResponse:   gin.H{"message": "invite sent"},
+		},
+		{
+			desc:               "invitenosuchuser",
+			id:                 1,
+			data:               map[string]interface{}{"group": 1, "target": "Raul"},
+			expectedStatusCode: http.StatusNotFound,
+			expectedResponse:   gin.H{"err": "user not found"},
+		},
+		{
+			desc:               "invitenoprivilages",
+			id:                 2,
+			data:               map[string]interface{}{"group": 1, "target": "Kel"},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "insufficient privilages"},
+		},
+		{
+			desc:               "inviteuserismember",
+			id:                 1,
+			data:               map[string]interface{}{"group": 1, "target": "River"},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "user already in a group"},
+		},
 		{
 			desc:               "invitealreadyindatabase",
 			id:                 1,

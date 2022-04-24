@@ -6,7 +6,6 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func (s *Server) SendGroupInvite(c *gin.Context) {
@@ -38,7 +37,7 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 
 	invite, err := s.DB.SendGroupInvite(uint(id), uint(load.Group), load.Target)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if err.Error() == "user not found" {
 			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
 			return
 		}
