@@ -15,46 +15,56 @@ type MockDB struct {
 	Groups   []models.Group
 	Members  []models.Member
 	Messages []models.Message
+	Invites  []models.Invite
 }
 
 func NewMockDB() *MockDB {
 
 	USERS := `[
 		{
-				"ID": 1,
-				"signup": "2018-08-14T07:52:54Z",
-				"active": "2019-01-13T22:00:45Z",
-				"username": "Mal",
-				"email": "mal.zein@email.com",
-				"password": "$2a$10$6BSuuiaPdRJJF2AygYAfnOGkrKLY2o0wDWbEpebn.9Rk0O95D3hW.",
-				"logged": true
+			"ID": 1,
+			"signup": "2018-08-14T07:52:54Z",
+			"active": "2019-01-13T22:00:45Z",
+			"username": "Mal",
+			"email": "mal.zein@email.com",
+			"password": "$2a$10$6BSuuiaPdRJJF2AygYAfnOGkrKLY2o0wDWbEpebn.9Rk0O95D3hW.",
+			"logged": true
 		},
 		{
-				"ID": 2,
-				"signup": "2018-08-14T07:52:55Z",
-				"active": "2019-01-12T22:39:01Z",
-				"username": "River",
-				"email": "river.sam@email.com",
-				"password": "$2a$10$BvQjoN.PH8FkVPV3ZMBK1O.3LGhrF/RhZ2kM/h9M3jPA1d2lZkL.C",
-				"logged": false
+			"ID": 2,
+			"signup": "2018-08-14T07:52:55Z",
+			"active": "2019-01-12T22:39:01Z",
+			"username": "River",
+			"email": "river.sam@email.com",
+			"password": "$2a$10$BvQjoN.PH8FkVPV3ZMBK1O.3LGhrF/RhZ2kM/h9M3jPA1d2lZkL.C",
+			"logged": false
 		},
 		{
-				"ID": 3,
-				"username": "John",
-				"signup": "2019-01-13T08:43:44Z",
-				"active": "2019-01-13T15:12:25Z",
-				"email": "john.doe@bla.com",
-				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
-				"logged": false
+			"ID": 3,
+			"username": "John",
+			"signup": "2019-01-13T08:43:44Z",
+			"active": "2019-01-13T15:12:25Z",
+			"email": "john.doe@bla.com",
+			"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
+			"logged": false
 		},
 		{
-				"ID": 4,
-				"username": "Kal",
-				"signup": "2019-01-13T08:53:44Z",
-				"active": "2019-01-13T15:52:25Z",
-				"email": "kal.doe@bla.com",
-				"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
-				"logged": false
+			"ID": 4,
+			"username": "Kal",
+			"signup": "2019-01-13T08:53:44Z",
+			"active": "2019-01-13T15:52:25Z",
+			"email": "kal.doe@bla.com",
+			"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
+			"logged": false
+		},
+		{
+			"ID": 5,
+			"username": "Kel",
+			"signup": "2019-01-12T08:53:44Z",
+			"active": "2019-01-12T15:52:25Z",
+			"email": "kel.doa@bla.com",
+			"password": "$2a$10$T4c8rmpbgKrUA0sIqtHCaO0g2XGWWxFY4IGWkkpVQOD/iuBrwKrZu",
+			"logged": false
 		}
 	]`
 
@@ -130,6 +140,18 @@ func NewMockDB() *MockDB {
 		}
 	]`
 
+	INVITES := `[
+		{
+			"ID": 1,
+			"issID": 1,
+			"targetID": 3,
+			"groupID": 1,
+			"status": 0,
+			"created": "2019-03-17T22:04:45Z",
+			"modified": "2019-03-17T22:04:45Z"
+		}
+	]`
+
 	var users []models.User
 	json.Unmarshal([]byte(USERS), &users)
 
@@ -142,8 +164,11 @@ func NewMockDB() *MockDB {
 	var messages []models.Message
 	json.Unmarshal([]byte(MESSAGES), &messages)
 
+	var invites []models.Invite
+	json.Unmarshal([]byte(INVITES), &invites)
+
 	// add data
-	return &MockDB{Users: users, Groups: groups, Members: members, Messages: messages}
+	return &MockDB{Users: users, Groups: groups, Members: members, Messages: messages, Invites: invites}
 }
 
 func (m *MockDB) GetUserById(id int) (models.User, error) {
@@ -391,4 +416,48 @@ func (m *MockDB) GrantPriv(id_mem, id uint, adding, deleting, setting bool) erro
 	member.Setting = setting
 
 	return nil
+}
+
+func (m *MockDB) SendGroupInvite(issID, group uint, targetName string) (models.Invite, error) {
+	ErrFlag := false
+	for _, mem := range m.Members {
+		if mem.GroupID == group && mem.UserID == issID && mem.Adding {
+			ErrFlag = true
+			break
+		}
+	}
+	if !ErrFlag {
+		return models.Invite{}, ErrNoPrivilages
+	}
+
+	var user models.User
+	ErrFlag = false
+	for i, u := range m.Users {
+		if u.UserName == targetName {
+			user = m.Users[i]
+			ErrFlag = true
+		}
+	}
+	if !ErrFlag {
+		return models.Invite{}, errors.New("user not found")
+	}
+
+	// checking if user is not already in a group
+	for _, mem := range m.Members {
+		if mem.UserID == user.ID && mem.GroupID == group {
+			return models.Invite{}, errors.New("user already in a group")
+		}
+	}
+
+	// checking if invite is not a duplicate
+	for _, inv := range m.Invites {
+		if inv.GroupID == group && inv.TargetID == user.ID && inv.Status == INVITE_AWAITING {
+			return models.Invite{}, errors.New("invite already sent")
+		}
+	}
+
+	invite := models.Invite{ID: uint(len(m.Invites) + 1), IssId: issID, TargetID: user.ID, GroupID: group, Status: 0, Created: time.Now(), Modified: time.Now()}
+	m.Invites = append(m.Invites, invite)
+	return invite, nil
+
 }

@@ -57,3 +57,12 @@ func (h *Hub) MemberDeleted(member models.Member) {
 		}
 	}
 }
+
+// Sends invite to specified user
+func (h *Hub) SendGroupInvite(invite models.Invite) {
+	for client := range h.clients {
+		if client.id == int(invite.TargetID) {
+			client.send <- &communication.Action{Action: "SEND_INVITE", Invite: invite}
+		}
+	}
+}

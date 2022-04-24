@@ -16,6 +16,7 @@ type Action struct {
 	Group  int           `json:"group"`  // id_group
 	User   int           `json:"-"`      // id_user
 	Member models.Member `json:"member"` // member info for updates
+	Invite models.Invite `json:"invite"` // invite
 }
 
 // Send sends itself through websocket connection

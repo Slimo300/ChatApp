@@ -59,6 +59,8 @@ func (h *Hub) Run() {
 				h.MemberAdded(msg.Member)
 			case "DELETE_MEMBER":
 				h.MemberDeleted(msg.Member)
+			case "SEND_INVITE":
+				h.SendGroupInvite(msg.Invite)
 			}
 		}
 	}

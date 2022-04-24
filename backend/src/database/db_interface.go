@@ -22,4 +22,6 @@ type DBlayer interface {
 	GrantPriv(id_member, id_user uint, adding, deleting, setting bool) error
 
 	DeleteGroup(id_group, id_user uint) (models.Group, error)
+
+	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)
 }

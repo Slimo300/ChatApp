@@ -26,7 +26,7 @@ func Setup() (*Database, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{}, models.Invite{}, models.FriendsInvite{})
+	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{}, models.Invite{})
 
 	return &Database{DB: db}, nil
 }

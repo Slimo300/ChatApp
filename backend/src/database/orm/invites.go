@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/database"
@@ -8,18 +9,33 @@ import (
 	"gorm.io/gorm"
 )
 
-func (db *Database) SendGroupInvite(issID, group uint, targetName string) (models.Invite, error) {
+func (db *Database) SendGroupInvite(issID, group uint, targetName string) (invite models.Invite, err error) {
 
+	// checking whether issuer has rights to add to group
+	if err = db.Where(models.Member{GroupID: group, UserID: issID, Adding: true}).First(&models.Member{}).Error; err != nil {
+		err = database.ErrNoPrivilages
+		return
+	}
 	// Finding new user by username
 	var target models.User
-	if err := db.Where(&models.User{UserName: targetName}).First(&target).Error; err != nil {
-		return models.Invite{}, err
+	if err = db.Where(&models.User{UserName: targetName}).First(&target).Error; err != nil {
+		return
+	}
+	// checking if target isn't already in a group
+	if err = db.Where(&models.Member{GroupID: group, UserID: target.ID}).First(models.Member{}).Error; err != nil {
+		err = errors.New("user already in a group")
+		return
+	}
+	// checking if target isn't already invited
+	if err = db.Where(&models.Invite{GroupID: group, TargetID: target.ID}).Error; err != nil {
+		err = errors.New("invite already sent")
+		return
 	}
 	// Creating invite
-	invite := models.Invite{IssId: issID, TargetID: target.ID, GroupID: group, Created: time.Now(), Modified: time.Now(), Status: database.INVITE_AWAITING}
+	invite = models.Invite{IssId: issID, TargetID: target.ID, GroupID: group, Created: time.Now(), Modified: time.Now(), Status: database.INVITE_AWAITING}
 	// Saving invite to database
-	if err := db.Create(&invite).Error; err != nil {
-		return models.Invite{}, err
+	if err = db.Create(&invite).Error; err != nil {
+		return
 	}
 
 	return invite, nil
@@ -57,64 +73,6 @@ func (db *Database) RespondGroupInvite(userID, inviteID uint, response bool) (mo
 		}
 	} else { // user declines invite
 		if err := db.Model(&invite).Updates(models.Invite{Status: database.INVITE_DECLINE, Modified: time.Now()}).Error; err != nil {
-			return models.Group{}, err
-		}
-	}
-
-	return group, nil
-}
-
-func (db *Database) SendFriendsInvite(issuerID uint, targetName string) (models.FriendsInvite, error) {
-
-	var target models.User
-
-	if err := db.Where(models.User{UserName: targetName}).First(&target).Error; err != nil {
-		return models.FriendsInvite{}, err
-	}
-
-	invite := models.FriendsInvite{IssId: issuerID, TargetID: target.ID, Status: database.INVITE_AWAITING, Created: time.Now(), Modified: time.Now()}
-
-	if err := db.Create(&invite).Error; err != nil {
-		return models.FriendsInvite{}, err
-	}
-
-	return invite, nil
-}
-
-func (db *Database) RespondFriendsInvite(userID, inviteID uint, response bool) (models.Group, error) {
-
-	var invite models.FriendsInvite
-	if err := db.First(&invite, inviteID).Error; err != nil {
-		return models.Group{}, nil
-	}
-	// checking whether responding user is in fact the target of invitation
-	if invite.TargetID != userID {
-		return models.Group{}, database.ErrNoPrivilages
-	}
-
-	var group models.Group
-	if response { // user accepts the invite
-		if err := db.Transaction(func(tx *gorm.DB) error {
-			group = models.Group{Name: "", Desc: "", Created: time.Now()}
-			if err := db.Create(&group).Error; err != nil {
-				return err
-			}
-			// Creating memberships for both users both get only creator priv to delete group, no adding, deleting or setting is allowed
-			if err := db.createMemberFromID(invite.IssId, group.ID, false, false, false, true); err != nil {
-				return err
-			}
-			if err := db.createMemberFromID(invite.TargetID, group.ID, false, false, false, true); err != nil {
-				return err
-			}
-			if err := db.Model(&invite).Updates(models.FriendsInvite{Status: database.INVITE_ACCEPT, Modified: time.Now()}).Error; err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			return models.Group{}, err
-		}
-	} else { // user declines the invite
-		if err := db.Model(&invite).Updates(models.FriendsInvite{Status: database.INVITE_DECLINE, Modified: time.Now()}).Error; err != nil {
 			return models.Group{}, err
 		}
 	}

@@ -62,32 +62,17 @@ func (Member) TableName() string {
 
 type Invite struct {
 	ID       uint      `gorm:"primaryKey"`
-	IssId    uint      `gorm:"column:iss_id"`
+	IssId    uint      `gorm:"column:iss_id" json:"issID"`
 	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	TargetID uint      `gorm:"column:target_id"`
+	TargetID uint      `gorm:"column:target_id" json:"targetID"`
 	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	GroupID  uint      `gorm:"column:group_id"`
+	GroupID  uint      `gorm:"column:group_id" json:"groupID"`
 	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Status   int       `gorm:"column:status"`
-	Created  time.Time `gorm:"column:created"`
-	Modified time.Time `gorm:"column:modified"`
+	Status   int       `gorm:"column:status" json:"status"`
+	Created  time.Time `gorm:"column:created" json:"created"`
+	Modified time.Time `gorm:"column:modified" json:"modified"`
 }
 
 func (Invite) TableName() string {
 	return "invites"
-}
-
-type FriendsInvite struct {
-	ID       uint      `gorm:"primaryKey"`
-	IssId    uint      `gorm:"column:iss_id"`
-	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	TargetID uint      `gorm:"column:target_id"`
-	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Status   int       `gorm:"column:status"`
-	Created  time.Time `gorm:"column:created"`
-	Modified time.Time `gorm:"column:modified"`
-}
-
-func (FriendsInvite) TableName() string {
-	return "friend_invites"
 }
