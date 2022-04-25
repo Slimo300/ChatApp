@@ -50,3 +50,25 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "invite sent"})
 }
+
+func (s *Server) GetUserInvites(c *gin.Context) {
+
+	id, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
+		return
+	}
+
+	invites, err := s.DB.GetUserInvites(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
+
+	if len(invites) == 0 {
+		c.JSON(http.StatusNoContent, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, invites)
+}

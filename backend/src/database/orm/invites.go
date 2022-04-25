@@ -80,6 +80,12 @@ func (db *Database) RespondGroupInvite(userID, inviteID uint, response bool) (mo
 	return group, nil
 }
 
+func (db *Database) GetUserInvites(userID uint) (invites []models.Invite, err error) {
+
+	err = db.Where(models.Invite{TargetID: userID, Status: database.INVITE_AWAITING}).Find(&invites).Error
+	return
+}
+
 // helper for creating membership with id, it first find user to get his
 // username and use it as member's nick
 func (db *Database) createMemberFromID(userID, groupID uint, adding, deleting, setting, creator bool) error {

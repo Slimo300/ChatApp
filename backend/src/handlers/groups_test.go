@@ -77,7 +77,6 @@ func TestGetUserGroups(t *testing.T) {
 				respBody = msg
 			}
 
-			json.NewDecoder(response.Body).Decode(&respBody)
 			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
 				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
 			}

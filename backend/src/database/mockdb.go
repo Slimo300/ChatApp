@@ -461,3 +461,16 @@ func (m *MockDB) SendGroupInvite(issID, group uint, targetName string) (models.I
 	return invite, nil
 
 }
+
+func (mock *MockDB) GetUserInvites(userID uint) ([]models.Invite, error) {
+
+	userInvites := []models.Invite{}
+
+	for _, invite := range mock.Invites {
+		if invite.TargetID == userID && invite.Status == INVITE_AWAITING {
+			userInvites = append(userInvites, invite)
+		}
+	}
+
+	return userInvites, nil
+}

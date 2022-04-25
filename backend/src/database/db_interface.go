@@ -23,5 +23,6 @@ type DBlayer interface {
 
 	DeleteGroup(id_group, id_user uint) (models.Group, error)
 
+	GetUserInvites(userID uint) ([]models.Invite, error)
 	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)
 }

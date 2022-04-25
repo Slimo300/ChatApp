@@ -218,9 +218,9 @@ func TestDeleteMember(t *testing.T) {
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "row not found"},
 		},
-		// issuer has no right to delete
+		// issuer has no sufficient privilages to delete
 		{
-			desc:               "deletenpriv",
+			desc:               "deletenopriv",
 			ID:                 2,
 			data:               map[string]interface{}{"member": 2, "group": 1},
 			expectedStatusCode: http.StatusBadRequest,
