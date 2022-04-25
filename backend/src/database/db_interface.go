@@ -25,4 +25,5 @@ type DBlayer interface {
 
 	GetUserInvites(userID uint) ([]models.Invite, error)
 	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)
+	RespondGroupInvite(userID, inviteID uint, response bool) (models.Group, error)
 }

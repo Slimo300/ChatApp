@@ -72,3 +72,44 @@ func (s *Server) GetUserInvites(c *gin.Context) {
 
 	c.JSON(http.StatusOK, invites)
 }
+
+func (s *Server) RespondGroupInvite(c *gin.Context) {
+
+	id, err := checkTokenAndGetID(c, s)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
+		return
+	}
+
+	load := struct {
+		InviteID uint  `json:"inviteID"`
+		Answer   *bool `json:"answer"`
+	}{}
+
+	if err := c.ShouldBindJSON(&load); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	if load.InviteID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invite not specified"})
+		return
+	}
+	if load.Answer == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "answer not specified"})
+		return
+	}
+
+	group, err := s.DB.RespondGroupInvite(uint(id), load.InviteID, *load.Answer)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"err": "no such invite"})
+		return
+	}
+
+	if *load.Answer {
+		c.JSON(http.StatusOK, group)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "invite declined"})
+}

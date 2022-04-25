@@ -474,3 +474,53 @@ func (mock *MockDB) GetUserInvites(userID uint) ([]models.Invite, error) {
 
 	return userInvites, nil
 }
+
+func (mock *MockDB) RespondGroupInvite(userID, inviteID uint, response bool) (models.Group, error) {
+
+	var respondedInvite *models.Invite
+	for i, invite := range mock.Invites {
+		if invite.ID == inviteID && invite.TargetID == userID {
+			respondedInvite = &mock.Invites[i]
+		}
+	}
+	if respondedInvite == nil {
+		return models.Group{}, errors.New("no such invite")
+	}
+
+	if response {
+		var respondingUser *models.User
+		for i, user := range mock.Users {
+			if user.ID == userID {
+				respondingUser = &mock.Users[i] // no need to check if assigned in mock database
+			}
+		}
+
+		mock.Members = append(mock.Members, models.Member{
+			ID:       uint(len(mock.Members) + 1),
+			UserID:   userID,
+			GroupID:  respondedInvite.GroupID,
+			Nick:     respondingUser.UserName,
+			Adding:   false,
+			Deleting: false,
+			Setting:  false,
+			Creator:  false,
+			Deleted:  false,
+		})
+
+		respondedInvite.Status = INVITE_ACCEPT
+		respondedInvite.Modified = time.Now()
+
+		for _, group := range mock.Groups {
+			if group.ID == respondedInvite.GroupID {
+				return group, nil
+			}
+		}
+	} else {
+		respondedInvite.Status = INVITE_DECLINE
+		respondedInvite.Modified = time.Now()
+
+		return models.Group{}, nil
+	}
+
+	return models.Group{}, errors.New("Something went wrong")
+}

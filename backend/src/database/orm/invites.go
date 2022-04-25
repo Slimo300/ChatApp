@@ -46,12 +46,8 @@ func (db *Database) RespondGroupInvite(userID, inviteID uint, response bool) (mo
 	var group models.Group
 	var invite models.Invite
 
-	if err := db.First(&invite, inviteID).Error; err != nil {
+	if err := db.Where(models.Invite{ID: inviteID, TargetID: userID}).First(&invite).Error; err != nil {
 		return models.Group{}, nil
-	}
-	// Checking if user is the receiver of invite
-	if invite.TargetID != userID {
-		return models.Group{}, database.ErrNoPrivilages
 	}
 
 	if response { // user joins the group

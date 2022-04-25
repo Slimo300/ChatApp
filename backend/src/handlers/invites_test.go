@@ -179,3 +179,109 @@ func TestGetUserInvites(t *testing.T) {
 		})
 	}
 }
+
+func TestRespondGroupInvite(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mock := database.NewMockDB()
+
+	s := handlers.NewServer(mock, nil)
+
+	dateGroupCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
+
+	testCases := []struct {
+		desc               string
+		id                 int
+		data               map[string]interface{}
+		returnVal          bool
+		expectedStatusCode int
+		expectedResponse   interface{}
+	}{
+		{
+			desc:               "respondInviteYes",
+			id:                 3,
+			data:               map[string]interface{}{"inviteID": 1, "answer": true},
+			returnVal:          true,
+			expectedStatusCode: http.StatusOK,
+			expectedResponse:   models.Group{ID: 1, Name: "New Group", Desc: "totally new group", Created: dateGroupCreated},
+		},
+		{
+			desc:               "respondInviteNo",
+			id:                 3,
+			data:               map[string]interface{}{"inviteID": 1, "answer": false},
+			returnVal:          false,
+			expectedStatusCode: http.StatusOK,
+			expectedResponse:   gin.H{"message": "invite declined"},
+		},
+		{
+			desc:               "respondInviteNotInDatabase",
+			id:                 3,
+			data:               map[string]interface{}{"inviteID": 2, "answer": true},
+			returnVal:          false,
+			expectedStatusCode: http.StatusNotFound,
+			expectedResponse:   gin.H{"err": "no such invite"},
+		},
+		{
+			desc:               "respondInviteWrongUser",
+			id:                 1,
+			data:               map[string]interface{}{"inviteID": 1, "answer": true},
+			returnVal:          false,
+			expectedStatusCode: http.StatusNotFound,
+			expectedResponse:   gin.H{"err": "no such invite"},
+		},
+		{
+			desc:               "respondInviteNoAnswer",
+			id:                 1,
+			data:               map[string]interface{}{"inviteID": 1},
+			returnVal:          false,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "answer not specified"},
+		},
+		{
+			desc:               "respondInviteInviteNotSpecified",
+			id:                 1,
+			data:               map[string]interface{}{"answer": true},
+			returnVal:          false,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "invite not specified"},
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+
+			jwt, err := s.CreateSignedToken(tC.id)
+			if err != nil {
+				t.Error("error when creating signed token")
+			}
+
+			requestBody, _ := json.Marshal(tC.data)
+			req, _ := http.NewRequest("PUT", "/api/invite", bytes.NewReader(requestBody))
+			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
+
+			w := httptest.NewRecorder()
+			_, engine := gin.CreateTestContext(w)
+			engine.Handle(http.MethodPut, "/api/invite", s.RespondGroupInvite)
+			engine.ServeHTTP(w, req)
+			response := w.Result()
+
+			if response.StatusCode != tC.expectedStatusCode {
+				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
+			}
+
+			var respBody interface{}
+			if tC.returnVal {
+				group := models.Group{}
+				json.NewDecoder(response.Body).Decode(&group)
+				respBody = group
+			} else {
+				var msg gin.H
+				json.NewDecoder(response.Body).Decode(&msg)
+				respBody = msg
+			}
+
+			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
+				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
+			}
+		})
+	}
+}
