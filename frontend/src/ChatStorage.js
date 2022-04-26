@@ -11,7 +11,10 @@ export const actionTypes = {
     DELETE_MEMBER: "DELETE_MEMBER",
     SET_MESSAGES: "SET_MESSAGES",
     ADD_MESSAGE: "ADD_MESSAGE",
-    ADD_MESSAGES: "ADD_MESSAGES"
+    ADD_MESSAGES: "ADD_MESSAGES",
+    SET_NOTIFICATIONS: "SET_NOTIFICATIONS",
+    ADD_NOTIFICATION: "ADD_NOTIFICATION",
+    DELETE_NOTIFICATION: "DELETE_NOTIFICATION"
 }
 
 function reducer(state, action) {
@@ -78,6 +81,18 @@ function reducer(state, action) {
                 }
             }
             throw new Error("Received messages don't belong to any of your groups");
+        case actionTypes.SET_NOTIFICATIONS: 
+            newState = {...state};
+            newState.notifications = action.payload;
+            return newState;
+        case actionTypes.ADD_NOTIFICATION:
+            newState = {...state};
+            newState.notifications = [...newState.notifications, action.payload];
+            return newState;
+        case actionTypes.DELETE_NOTIFICATION:
+            newState = {...state};
+            newState.notifications = newState.notifications.filter( (item) => {return item.ID !== action.payload} );
+            return newState;
         default:
             throw new Error("Action not specified");
     }
@@ -85,7 +100,7 @@ function reducer(state, action) {
 
 const ChatStorage = ({children}) => {
 
-    const [state, dispatch] = useReducer(reducer, {groups: []});
+    const [state, dispatch] = useReducer(reducer, {groups: [], notifications: []});
 
     return (
         <StorageContext.Provider value={[state, dispatch]}>

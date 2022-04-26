@@ -22,7 +22,7 @@ func (db *Database) SendGroupInvite(issID, group uint, targetName string) (invit
 		return
 	}
 	// checking if target isn't already in a group
-	if err = db.Where(&models.Member{GroupID: group, UserID: target.ID}).First(models.Member{}).Error; err != nil {
+	if err = db.Where(&models.Member{GroupID: group, UserID: target.ID, Deleted: false}).First(&models.Member{}).Error; err != nil {
 		err = errors.New("user already in a group")
 		return
 	}

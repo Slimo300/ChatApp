@@ -5,12 +5,11 @@ import Main from "./pages/Main";
 import Navigation from "./components/Navigation";
 import RegisterForm from "./pages/Register";
 import ChatStorage from "./ChatStorage";
-
 function App() {
   
   const [name, setName] = useState('');
-  const [createGrShow, setCreateGrShow] = useState(false);
 
+  const [createGrShow, setCreateGrShow] = useState(false);
   const toggleCreateGroup = () => {
     setCreateGrShow(!createGrShow);
   }

@@ -1,5 +1,7 @@
 import React from 'react';
 import {NavLink} from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBell } from '@fortawesome/free-solid-svg-icons'
 
 const Navigation = (props) => {
     const logout = async () => {
@@ -27,7 +29,8 @@ const Navigation = (props) => {
                 <ul className="navbar-nav mr-auto">
                     <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleCrGroup}>Create Room</button>
                 </ul>
-    
+
+                <button className='btn btn-dark'><FontAwesomeIcon className='text-primary' icon={faBell} /></button>
                 <NavLink className="nav-item nav-link" to="/login" onClick={logout}>Logout</NavLink>
             </div>
         );
@@ -35,7 +38,7 @@ const Navigation = (props) => {
 
     return (
         <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-            <a className="navbar-brand" href="#">ChatApp</a>
+            <div className="navbar-brand" >ChatApp</div>
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 {menu}
             </div>

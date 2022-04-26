@@ -107,13 +107,32 @@ const AuthMain = (props) => {
                 }
             }
         )();
-    }, []);
+    }, [dispatch]);
+
+    // effect getting user notifications
+    useEffect(() => {
+        (
+            async () => {
+                const response = await fetch('http://localhost:8080/api/invites', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                });
+                if (response.status !== 200 && response.status !== 204) {
+                    throw new Error("Invalid response when requesting user invites");
+                }
+                if (response.status === 200) {
+                    const responseJSON = await response.json();
+                    dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: responseJSON});
+                }
+            }
+        )();
+    }, [dispatch]);
 
     // getting messages from specific group
     useEffect(()=>{
         (
             async () => {
-                if (current.messages === undefined) {
+                if (current.messages === undefined && current.ID !== undefined) {
                     const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=8", {
                         headers: {"Content-Type": "application/json"},
                         credentials: "include",
@@ -133,7 +152,7 @@ const AuthMain = (props) => {
                 }
             }
         )();
-    }, [current])
+    }, [current, dispatch]);
 
     return (
         <div className="container" >
@@ -145,7 +164,7 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {state.groups.length!==0?state.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
+                                            {chatState.groups.length!==0?chatState.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
