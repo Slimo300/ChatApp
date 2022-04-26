@@ -30,22 +30,16 @@ export const ModalAddUser = (props) => {
             setErr("");
         }, 1000);
     }
-
-    let action = "Add Friend";
-    let message = null;
-
+    let message;
     if (err !== "") {
         message = <h5 className="mb-4 text-danger">{err}</h5>;
-    }
-    if (props.group !== undefined) {
-        action = "Add User";
     }
 
     return (
         <Modal id="buy" tabIndex="-1" role="dialog" isOpen={props.show} toggle={props.toggle}>
             <div role="document">
                 <ModalHeader toggle={props.toggle} className="bg-dark text-primary text-center">
-                    {action}
+                    Add User
                 </ModalHeader>
                 <ModalBody>
                     <div>
@@ -57,7 +51,7 @@ export const ModalAddUser = (props) => {
                             </div>
                             <div className="form-row text-center">
                                 <div className="col-12 mt-2">
-                                    <button type="submit" className="btn btn-dark btn-large text-primary">{action}</button>
+                                    <button type="submit" className="btn btn-dark btn-large text-primary">Add User</button>
                                 </div>
                             </div>
                         </form>

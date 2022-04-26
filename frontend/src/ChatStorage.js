@@ -2,6 +2,12 @@ import React, {createContext, useReducer} from "react";
 
 export const StorageContext = createContext({});
 
+const initialState = {
+    groups: [],
+    notifications: [],
+    user: {},
+};
+
 export const actionTypes = {
     LOGIN: "LOGIN",
     SET_GROUPS: "SET_GROUPS",
@@ -18,81 +24,31 @@ export const actionTypes = {
 }
 
 function reducer(state, action) {
-    let newState;
     switch (action.type) {
         case actionTypes.LOGIN:
-            newState = {...state};
-            newState.user = action.payload;
-            return newState;
+            return Login(state, action.payload);
         case actionTypes.SET_GROUPS:
-            newState = {...state};
-            newState.groups = action.payload;
-            return newState;
+            return SetGroups(state, action.payload);
         case actionTypes.NEW_GROUP:
-            newState = {...state};
-            newState.groups = [...newState.groups, action.payload];
-            return newState;
+            return NewGroup(state, action.payload);
         case actionTypes.DELETE_GROUP:
-            newState = {...state};
-            newState.groups = newState.groups.filter( (item) => {return item.ID !== action.payload} );
-            return newState;
+            return DeleteGroup(state, action.payload);
         case actionTypes.ADD_MEMBER:
-            newState = {...state};
-            for (let i = 0; i < newState.groups.length; i++) {
-                if (newState.groups[i].ID === action.payload.group_id) {
-                    newState.groups[i].Members.push(action.payload);
-                    return newState;
-                }
-            }
-            break;
+            return AddMemberToGroup(state, action.payload);
         case actionTypes.DELETE_MEMBER:
-            newState = {...state};
-            for (let i = 0; i < newState.groups.length; i++) {
-                if (newState.groups[i].ID === action.payload.group_id) {
-                    newState.groups[i].Members = newState.groups[i].Members.filter((item)=>{return item.ID !== action.payload.ID});
-                    return newState
-                }
-            }
-            throw new Error("Member to be deleted not found");
+            return DeleteMemberFromGroup(state, action.payload);
         case actionTypes.SET_MESSAGES:
-            newState = {...state};
-            for (let i = 0; i < newState.groups.length; i++) {
-                if (newState.groups[i].ID === action.payload.group) {
-                    newState.groups[i].messages = action.payload.messages
-                    return newState;
-                }
-            }
-            throw new Error("Received messages don't belong to any of your groups");
+            return SetMessages(state, action.payload);
         case actionTypes.ADD_MESSAGE:
-            newState = {...state};
-            for (let i = 0; i < newState.groups.length; i++) {
-                if (newState.groups[i].ID === action.payload.group) {
-                    newState.groups[i].messages = [...newState.groups[i].messages, action.payload];
-                    return newState;
-                }
-            }
-            throw new Error("Received message don't belong to any of your groups");
+            return AddMessage(state, action.payload);
         case actionTypes.ADD_MESSAGES:
-            newState = {...state};
-            for (let i = 0; i < newState.groups.length; i++) {
-                if (newState.groups[i].ID === action.payload.group) {
-                    newState.groups[i].messages = [...action.payload.messages, ...newState.groups[i].messages];
-                    return newState;
-                }
-            }
-            throw new Error("Received messages don't belong to any of your groups");
-        case actionTypes.SET_NOTIFICATIONS: 
-            newState = {...state};
-            newState.notifications = action.payload;
-            return newState;
+            return AddMessages(state, action.payload);
+        case actionTypes.SET_NOTIFICATIONS:
+            return SetInvites(state, action.payload);
         case actionTypes.ADD_NOTIFICATION:
-            newState = {...state};
-            newState.notifications = [...newState.notifications, action.payload];
-            return newState;
+            return AddInvite(state, action.payload);
         case actionTypes.DELETE_NOTIFICATION:
-            newState = {...state};
-            newState.notifications = newState.notifications.filter( (item) => {return item.ID !== action.payload} );
-            return newState;
+            return DeleteInvite(state, action.payload);
         default:
             throw new Error("Action not specified");
     }
@@ -100,7 +56,7 @@ function reducer(state, action) {
 
 const ChatStorage = ({children}) => {
 
-    const [state, dispatch] = useReducer(reducer, {groups: [], notifications: []});
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     return (
         <StorageContext.Provider value={[state, dispatch]}>
@@ -108,5 +64,101 @@ const ChatStorage = ({children}) => {
         </StorageContext.Provider>
     );
 }
-
 export default ChatStorage;
+
+function Login(state, payload) {
+    let newState = {...state};
+    newState.user = payload;
+    return newState;
+}
+
+function SetGroups(state, payload) {
+    let newState = {...state};
+    newState.groups = payload;
+    return newState;
+}
+
+function NewGroup(state, payload) {
+    let newState = {...state};
+    newState.groups = [...newState.groups, payload];
+    return newState;
+}
+
+function DeleteGroup(state, payload) {
+    let newState = {...state};
+    newState.groups = newState.groups.filter( (item) => { return item.ID !== payload } );
+    return newState;
+}
+
+function AddMemberToGroup(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.group_id) {
+            newState.groups[i].Members.push(payload);
+            return newState;
+        }
+    }
+    throw new Error("Group not found");
+}
+
+function DeleteMemberFromGroup(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.group_id) {
+            newState.groups[i].Members = newState.groups[i].Members.filter((item)=>{return item.ID !== payload.ID});
+            return newState
+        }
+    }
+    throw new Error("Group not found");
+}
+
+function SetMessages(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.group) {
+            newState.groups[i].messages = payload.messages
+            return newState;
+        }
+    }
+    throw new Error("Received messages don't belong to any of your groups");
+}
+
+function AddMessage(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.group) {
+            newState.groups[i].messages = [...newState.groups[i].messages, payload];
+            return newState;
+        }
+    }
+    throw new Error("Received message don't belong to any of your groups");
+}
+
+function AddMessages(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.group) {
+            newState.groups[i].messages = [...payload.messages, ...newState.groups[i].messages];
+            return newState;
+        }
+    }
+    throw new Error("Received messages don't belong to any of your groups");
+}
+
+function SetInvites(state, payload) {
+    let newState = {...state};
+    newState.notifications = payload;
+    return newState;
+}
+
+function AddInvite(state, payload) {
+    let newState = {...state};
+    newState.notifications = [...newState.notifications, payload];
+    return newState;
+}
+
+function DeleteInvite(state, payload) {
+    let newState = {...state};
+    newState.notifications = newState.notifications.filter( (item) => { return item.ID !== payload } );
+    return newState;
+}

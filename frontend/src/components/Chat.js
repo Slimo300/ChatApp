@@ -51,7 +51,7 @@ const Chat = (props) => {
                 throw new Error("No member matches user");
             }
         )();
-    }, [props.group.ID]);
+    }, [props.group.ID, state.user.ID, props.group.Members]);
 
     // function for sending message when submit
     const sendMessage = (e) => {

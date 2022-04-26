@@ -3,8 +3,8 @@ import {Navigate} from "react-router-dom";
 import { actionTypes, StorageContext } from "../ChatStorage";
 import Chat from "../components/Chat";
 import { GroupLabel } from "../components/GroupLabel";
-import { ModalAddUser } from "../components/modals/AddUser";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
+import { GetInvites, GetUser } from "../Requests";
 
 const Main = (props) => {
 
@@ -28,20 +28,8 @@ const AuthMain = (props) => {
 
     // Effect getting user info
     useEffect(() => {
-        (
-            async () => {
-                const response = await fetch('http://localhost:8080/api/user', {
-                    method: 'GET',
-                    headers: {'Content-Type': 'application/json'},
-                    credentials: 'include'});
-                if (response.status !== 200) {
-                    throw new Error("couldn't get user");
-                }
-                const responseJSON = await response.json()
-                dispatch({type: actionTypes.LOGIN, payload: responseJSON})
-            }
-        )();
-        
+        let userPromise = GetUser();
+        userPromise.then( response => {dispatch({type: actionTypes.LOGIN, payload: response})})
     }, [dispatch]);
 
     // Effect starting websocket connection
@@ -111,21 +99,8 @@ const AuthMain = (props) => {
 
     // effect getting user notifications
     useEffect(() => {
-        (
-            async () => {
-                const response = await fetch('http://localhost:8080/api/invites', {
-                    headers: {'Content-Type': 'application/json'},
-                    credentials: 'include'
-                });
-                if (response.status !== 200 && response.status !== 204) {
-                    throw new Error("Invalid response when requesting user invites");
-                }
-                if (response.status === 200) {
-                    const responseJSON = await response.json();
-                    dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: responseJSON});
-                }
-            }
-        )();
+        const invites = GetInvites();
+        invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}); } );
     }, [dispatch]);
 
     // getting messages from specific group
@@ -164,7 +139,7 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {chatState.groups.length!==0?chatState.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
+                                            {state.groups.length!==0?state.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
@@ -175,7 +150,6 @@ const AuthMain = (props) => {
                 </div>
             </div>
           <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup}/>
-          <ModalAddUser show={props.showFrAdd} toggle={props.toggleFrAdd}/>
         </div>
     )
 }

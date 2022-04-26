@@ -27,7 +27,6 @@ export const ModalCreateGroup = (props) => {
             setErr(responseJSON.err);
         } else {
             setErr("Group created");
-            console.log(responseJSON);
             dispatch({type: actionTypes.NEW_GROUP, payload: responseJSON});
         }
         setTimeout(function () {    
