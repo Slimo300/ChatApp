@@ -87,6 +87,8 @@ function SetGroups(state, payload) {
 
 function NewGroup(state, payload) {
     let newState = {...state};
+    payload.messages = [];
+    payload.unreadMessages = 0;
     newState.groups = [...newState.groups, payload];
     return newState;
 }

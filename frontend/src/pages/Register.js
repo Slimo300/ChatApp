@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
+import { Register } from "../Requests";
 
 function RegisterForm() {
   const [username, setName] = useState("");
@@ -12,29 +13,14 @@ function RegisterForm() {
   const submit = async (e) => {
     e.preventDefault();
 
-    if (password !== rpassword) {
-      setMessage("Passwords don't match");
-      return;
-    }
-
-    const response = await fetch('http://localhost:8080/api/register', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      credentials: 'include',
-      body: JSON.stringify({
-          username, 
-          email,
-          password
-        })
-    });
-    const content = await response.json();
-
-    if (content.message === "success") {
+    let register = Register(email, username, password, rpassword);
+    register.then( response => {
+      if (response.err !== undefined) {
+        setMessage(response.err.message);
+        return
+      } 
       setRedirect(true);
-    }
-    else {
-      setMessage(content.err);
-    }
+    } )
   };
 
   if (redirect) {
@@ -47,7 +33,7 @@ function RegisterForm() {
         <div className="mt-5 row">
           <form onSubmit={submit}>
             <div className="display-1 mb-4 text-center text-primary"> Register</div>
-            <div className="mb-3 text-center">{message}</div>
+            <div className="mb-3 text-center text-danger">{message}</div>
             <div className="mb-3 text-center">
               <label htmlFor="username" className="form-label">Username</label>
               <input name="username" type="text" className="form-control" id="username" onChange={(e) => setName(e.target.value)}/>

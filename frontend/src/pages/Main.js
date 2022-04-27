@@ -4,7 +4,7 @@ import { actionTypes, StorageContext } from "../ChatStorage";
 import Chat from "../components/Chat";
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
-import { GetInvites, GetUser } from "../Requests";
+import { GetGroups, GetInvites, GetMessages, GetUser, GetWebsocket } from "../Requests";
 
 const Main = (props) => {
 
@@ -25,23 +25,17 @@ const AuthMain = (props) => {
     }
     const [ws, setWs] = useState({}); // websocket connection
 
-    // Effect getting user info
+    // Getting user data, groups and invites and setting websocket connection
     useEffect(() => {
         let userPromise = GetUser();
-        userPromise.then( response => {dispatch({type: actionTypes.LOGIN, payload: response})})
+        userPromise.then( response => { dispatch({type: actionTypes.LOGIN, payload: response}) } );
+        let groupsPromise = GetGroups();
+        groupsPromise.then( response => { dispatch({type: actionTypes.SET_GROUPS, payload: response}) } );
+        let invites = GetInvites();
+        invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}) } );
+        let websocketPromise = GetWebsocket();
+        websocketPromise.then( response => { setWs(response) } );
     }, [dispatch]);
-
-    // Effect starting websocket connection
-    useEffect(() => {
-        let socket = new WebSocket("ws://localhost:8080/ws")
-        socket.onopen = () => {
-            console.log("Websocket openned");
-        };
-        socket.onclose = () => {
-            console.log("closed");
-        };
-        setWs(socket);
-    }, []);
 
     ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
@@ -69,48 +63,13 @@ const AuthMain = (props) => {
         }
     }
 
-    // effect getting groups of which user is a member
-    useEffect(()=>{
-        (
-            async () => {
-                const response = await fetch('http://localhost:8080/api/group/get', {
-                    headers: {'Content-Type': 'application/json'},
-                    credentials: 'include'});
-                if (response.status !== 200 && response.status !== 204 ) {
-                    throw new Error("Invalid response when requesting user groups");
-                }
-                const responseJSON = await response.json();
-                dispatch({type: actionTypes.SET_GROUPS, payload: responseJSON});
-            }
-        )();
-    }, [dispatch]);
-
-    // effect getting user notifications
-    useEffect(() => {
-        const invites = GetInvites();
-        invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}); } );
-    }, [dispatch]);
-
     // getting messages from specific group
     useEffect(()=>{
         (
             async () => {
-                if (current.messages.length === 0 && current.ID !== undefined) {
-                    const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=8", {
-                        headers: {"Content-Type": "application/json"},
-                        credentials: "include",
-                    });
-                    let messages;
-                    if (response.status === 200) {
-                        messages = await response.json();
-                    }
-                    else if (response.status === 204) {
-                        messages = [];
-                    } 
-                    else {
-                        throw new Error("getting messages failed with status code: ", response.status);
-                    } 
-                    dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: messages, group: current.ID}});
+                if (current.ID !== undefined && current.messages.length === 0) {
+                    let messagesPromise = GetMessages(current.ID.toString())
+                    messagesPromise.then( response => { dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: response, group: current.ID}}) } )
                     toggleToggler();
                 }
             }

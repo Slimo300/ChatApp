@@ -2,15 +2,15 @@ import React from 'react';
 import {NavLink} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBell } from '@fortawesome/free-solid-svg-icons'
+import { Logout } from '../Requests';
 
 const Navigation = (props) => {
     const logout = async () => {
-        await fetch("http://localhost:8080/api/signout", {
-            method: "POST",
-            credentials: "include",
-            headers: {"Content-Type": "application/json"}
-        });
-        props.setName("");
+        let logoutPromise = Logout();
+        logoutPromise.then( response => {
+            if (response === undefined) props.setName("");
+            else alert(response.message);
+        })
     };
 
     let menu;

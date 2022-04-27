@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {v4 as uuidv4} from "uuid";
 import { StorageContext, actionTypes } from "../ChatStorage";
+import { LoadMessages } from "../Requests";
 import GroupMenu from "./GroupMenu";
 import Message from "./Message";
 import { ModalAddUser } from "./modals/AddUser";
@@ -68,26 +68,14 @@ const Chat = (props) => {
     }
 
     const loadMessages = async() => {
-        const response = await fetch("http://localhost:8080/api/group/messages?group=" + props.group.ID.toString() + "&num=8&offset=" + props.group.messages.length, {
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-        });
-        let messages;
-        if (response.status === 200) {
-            messages = await response.json();
-        }
-        else if (response.status === 204) {
-            messages = [];
-        } 
-        else {
-            throw new Error("getting messages failed with status code: ", response.status);
-        } 
-        dispatch({type: actionTypes.ADD_MESSAGES, payload: {messages: messages, group: props.group.ID}});
-    }
-
-    let nomessages = false;
-    if (props.group.messages === undefined) {
-        nomessages = true;
+        let messagesPromise = LoadMessages(props.group.ID.toString(), props.group.messages.length);
+        messagesPromise.then( response => {
+            if (response.name === "Error") {
+                alert("Error when getting messages");
+                return;
+            }
+            dispatch({type: actionTypes.ADD_MESSAGES, payload: {messages: response, group: props.group.ID}}); 
+        } )
     }
 
     let load;
@@ -108,9 +96,9 @@ const Chat = (props) => {
                 <div className="chat-container">
                     <ul className="chat-box" style={{height: '70vh', overflow: 'scroll'}}>
                         <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
-                        {nomessages?null:props.group.messages.map(item => {
+                        {props.group.messages===undefined?null:props.group.messages.map(item => {
                         return <div ref={scrollRef}>
-                                <Message key={uuidv4()} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
+                                <Message key={item.created} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
                             </div>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>

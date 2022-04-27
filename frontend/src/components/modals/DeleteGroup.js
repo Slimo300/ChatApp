@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { actionTypes, StorageContext } from '../../ChatStorage';
+import { DeleteGroup } from '../../Requests';
 
 export const ModalDeleteGroup = (props) => {
 
@@ -9,39 +10,24 @@ export const ModalDeleteGroup = (props) => {
     const [err, setErr] = useState("");
 
     const submit = async() => {
-        const response = await fetch('http://localhost:8080/api/group/delete', {
-            method: "DELETE",
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                "group": props.group.ID
-            })
-        });
-
-        const responseJSON = await response.json()
-
+        let promise = DeleteGroup(props.group.ID);
         let flag = false;
-
-        if (responseJSON.message === "ok") {
-            dispatch({type: actionTypes.DELETE_GROUP, payload: props.group.ID})
-            setErr("Group Deleted");
-            flag = true;
-        }
-        else {
-            setErr(responseJSON.err);
-        }
-        setTimeout(function () {    
-            props.toggle();
-            setErr("");
-            if (flag) {
-                props.setCurrent({});
+        promise.then( response => { 
+            if (response === null){
+                dispatch({type: actionTypes.DELETE_GROUP, payload: props.group.ID})
+                setErr("Group Deleted");
+                flag = true;
+            } else {
+                setErr(response.message);
             }
-        }, 1000);
-    }
-
-    var message = null;
-    if (err !== "") {
-        message = <h5 className="mb-4 text-danger">{err}</h5>
+            setTimeout(function () {    
+                props.toggle();
+                setErr("");
+                if (flag) {
+                    props.setCurrent({});
+                }
+            }, 1000);
+         } );
     }
 
     return (
@@ -52,7 +38,7 @@ export const ModalDeleteGroup = (props) => {
                 </ModalHeader>
                 <ModalBody>
                     <div>
-                        {message}
+                        {err!==""?<h5 className="mb-4 text-danger">{err}</h5>:null}
                         <div className='form-group'>
                             <label>Are you sure you want to delete group {props.group.name}?</label>
                         </div>

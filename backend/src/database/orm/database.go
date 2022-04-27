@@ -122,6 +122,9 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 		return models.Group{}, err
 	}
 
+	if err := db.Where(models.Group{ID: group.ID}).Preload("Members", "deleted is false").First(&group).Error; err != nil {
+		return models.Group{}, err
+	}
 	return group, nil
 }
 

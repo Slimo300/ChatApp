@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { actionTypes, StorageContext } from '../../ChatStorage';
+import { CreateGroup } from '../../Requests';
 
 export const ModalCreateGroup = (props) => {
 
@@ -12,34 +13,20 @@ export const ModalCreateGroup = (props) => {
 
     const submit = async(e) => {
         e.preventDefault();
-        const response = await fetch('http://localhost:8080/api/group/create', {
-            method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                "name": grName,
-                "desc": grDesc,
-            })
-        });
-        const responseJSON = await response.json();
-
-        if (responseJSON.err !== undefined){
-            setErr(responseJSON.err);
-        } else {
-            setErr("Group created");
-            dispatch({type: actionTypes.NEW_GROUP, payload: responseJSON});
-        }
-        setTimeout(function () {    
-            props.toggle();
-            setErr("");
-        }, 1000);
+        let promise = CreateGroup(grName, grDesc);
+        promise.then( response => {
+            if (response.name === "Error") {
+                setErr(response);
+            } else {
+                dispatch({type: actionTypes.NEW_GROUP, payload: response});
+                setErr("Group created");
+            }
+            setTimeout(function () {    
+                props.toggle();
+                setErr("");
+            }, 1000);
+        } );
     }
-
-    let message = null;
-    if (err !== "") {
-        message = <h5 className="mb-4 text-danger">{err}</h5>;
-    }
-
 
     return (
         <Modal id="buy" tabIndex="-1" role="dialog" isOpen={props.show} toggle={props.toggle}>
@@ -49,7 +36,7 @@ export const ModalCreateGroup = (props) => {
                 </ModalHeader>
                 <ModalBody>
                     <div>
-                        {message}
+                        {err!==""?<h5 className="mb-4 text-danger">{err}</h5>:null}
                         <form onSubmit={submit}>
                             <div className="form-group">
                                 <label htmlFor="email">Group name:</label>

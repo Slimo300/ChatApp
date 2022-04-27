@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
+import { Login } from "../Requests";
 
 const SignInForm = (props) => {
 
@@ -10,30 +11,15 @@ const SignInForm = (props) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (email === "") {
-      setMessage("email cannot be blank");
-      return;
-    }
-
-    const response = await fetch('http://localhost:8080/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-            email,
-            password,
-        })
-    });
-
-    const content = await response.json();
-    
-    if (content.name !== undefined){
-      props.setName(content.name);
+    let loginPromise = Login(email, password);
+    loginPromise.then( response => {
+      if (response.name === "Error") {
+        setMessage(response.message);
+        return;
+      }
+      props.setName(response.name);
       setRedirect(true);
-    }
-
-    setMessage(content.err);    
-    
+    });
   }
 
   if (redirect) {
@@ -46,7 +32,7 @@ const SignInForm = (props) => {
       <div className="mt-5 row">
         <form onSubmit={submit}>
           <div className="display-3 mb-4 text-center text-primary"> Log In</div>
-          <div id="message" className="mb-3 text-center">{message}</div>
+          <div id="message" className="mb-3 text-center text-danger">{message}</div>
           <div className="mb-3 text-center">
             <label htmlFor="email" className="form-label">Email address</label>
             <input type="email" className="form-control" id="email" onChange={e => setEmail(e.target.value)}/>
