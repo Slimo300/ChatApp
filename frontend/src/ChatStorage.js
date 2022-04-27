@@ -20,7 +20,8 @@ export const actionTypes = {
     ADD_MESSAGES: "ADD_MESSAGES",
     SET_NOTIFICATIONS: "SET_NOTIFICATIONS",
     ADD_NOTIFICATION: "ADD_NOTIFICATION",
-    DELETE_NOTIFICATION: "DELETE_NOTIFICATION"
+    DELETE_NOTIFICATION: "DELETE_NOTIFICATION",
+    RESET_COUNTER: "RESET_COUNTER"
 }
 
 function reducer(state, action) {
@@ -49,6 +50,8 @@ function reducer(state, action) {
             return AddInvite(state, action.payload);
         case actionTypes.DELETE_NOTIFICATION:
             return DeleteInvite(state, action.payload);
+        case actionTypes.RESET_COUNTER:
+            return ResetCounter(state, action.payload);
         default:
             throw new Error("Action not specified");
     }
@@ -75,6 +78,10 @@ function Login(state, payload) {
 function SetGroups(state, payload) {
     let newState = {...state};
     newState.groups = payload;
+    for (let i = 0; i < newState.groups.length; i++ ) {
+        newState.groups[i].messages = [];
+        newState.groups[i].unreadMessages = 0;
+    }
     return newState;
 }
 
@@ -126,8 +133,11 @@ function SetMessages(state, payload) {
 function AddMessage(state, payload) {
     let newState = {...state};
     for (let i = 0; i < newState.groups.length; i++) {
-        if (newState.groups[i].ID === payload.group) {
-            newState.groups[i].messages = [...newState.groups[i].messages, payload];
+        if (newState.groups[i].ID === payload.message.group) {
+            newState.groups[i].messages = [...newState.groups[i].messages, payload.message];
+            if (!payload.current) {
+                newState.groups[i].unreadMessages += 1;
+            }
             return newState;
         }
     }
@@ -161,4 +171,15 @@ function DeleteInvite(state, payload) {
     let newState = {...state};
     newState.notifications = newState.notifications.filter( (item) => { return item.ID !== payload } );
     return newState;
+}
+
+function ResetCounter(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload) {
+            newState.groups[i].unreadMessages = 0;
+            return newState;
+        }
+    }
+    throw new Error("No such group in storage");
 }

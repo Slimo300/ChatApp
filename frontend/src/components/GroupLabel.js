@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
+import { actionTypes, StorageContext } from "../ChatStorage";
 
 export const GroupLabel = (props) => {
+
+    const [, dispatch] = useContext(StorageContext);
     const change = () => {
+        dispatch({type: actionTypes.RESET_COUNTER, payload: props.group.ID});
         props.setCurrent(props.group);
-        let newCounter = {
-            ...props.counter
-        };
-        newCounter[props.group.ID] = 0;
-        props.setCounter(newCounter);
     };
     
     return (
@@ -18,7 +17,7 @@ export const GroupLabel = (props) => {
             <p className="name-time">
                 <span className="name">{props.group.name}</span>
             </p>
-            {props.counter[props.group.ID]>0?<span className="badge badge-primary float-right">{props.counter[props.group.ID]}</span>:null}
+            {props.group.unreadMessages>0?<span className="badge badge-primary float-right">{props.group.unreadMessages}</span>:null}
         </li>
     );
 }

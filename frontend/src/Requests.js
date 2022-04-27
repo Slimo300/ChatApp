@@ -23,3 +23,14 @@ export async function GetInvites() {
         return promise
     }
 }
+
+export async function GetGroups() {
+    const response = await fetch('http://localhost:8080/api/group/get', {
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include'});
+    if (response.status !== 200 && response.status !== 204 ) {
+        throw new Error("Invalid response when requesting user groups");
+    }
+    const promise = response.json();
+    return promise;
+}

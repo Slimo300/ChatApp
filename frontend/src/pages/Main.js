@@ -18,7 +18,6 @@ const Main = (props) => {
 const AuthMain = (props) => {
 
     const [state, dispatch] = useContext(StorageContext);
-    const [counter, setCounter] = useState({}); // object mapping group_id to unread messages
     const [current, setCurrent] = useState({}); // current group
     const [toggler, setToggler] = useState(false); // toggler for scrollRef
     function toggleToggler(){
@@ -63,14 +62,10 @@ const AuthMain = (props) => {
             return;
         }
         if (msgJSON.group === current.ID) { // add message to state
-            dispatch({type: actionTypes.ADD_MESSAGE, payload: msgJSON})
+            dispatch({type: actionTypes.ADD_MESSAGE, payload: {message: msgJSON, current: true}})
             toggleToggler();
         } else {
-            let newCounter = {
-                ...counter
-              };
-            newCounter[msgJSON.group]++;
-            setCounter(newCounter);
+            dispatch({type: actionTypes.ADD_MESSAGE, payload: {message: msgJSON, current: false}})
         }
     }
 
@@ -85,14 +80,7 @@ const AuthMain = (props) => {
                     throw new Error("Invalid response when requesting user groups");
                 }
                 const responseJSON = await response.json();
-                if (responseJSON.message === undefined) {
-                    let newCounter = {};
-                    for (let i = 0; i < responseJSON.length; i++) {
-                        newCounter[responseJSON[i].ID] = 0;
-                    }
-                    setCounter(newCounter);
-                    dispatch({type: actionTypes.SET_GROUPS, payload: responseJSON});
-                }
+                dispatch({type: actionTypes.SET_GROUPS, payload: responseJSON});
             }
         )();
     }, [dispatch]);
@@ -107,7 +95,7 @@ const AuthMain = (props) => {
     useEffect(()=>{
         (
             async () => {
-                if (current.messages === undefined && current.ID !== undefined) {
+                if (current.messages.length === 0 && current.ID !== undefined) {
                     const response = await fetch("http://localhost:8080/api/group/messages?group=" + current.ID.toString() + "&num=8", {
                         headers: {"Content-Type": "application/json"},
                         credentials: "include",
@@ -139,7 +127,7 @@ const AuthMain = (props) => {
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
-                                            {state.groups.length!==0?state.groups.map(item => {return <GroupLabel counter={counter} setCounter={setCounter} key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
+                                            {state.groups.length!==0?state.groups.map(item => {return <GroupLabel key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
                                         </ul>
                                     </div>
                                 </div>
