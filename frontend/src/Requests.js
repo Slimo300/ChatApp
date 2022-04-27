@@ -48,7 +48,7 @@ export async function GetMessages(groupID) {
         messages = [];
     } 
     else {
-        throw new Error("getting messages failed with status code: ", response.status);
+        throw new Error("getting messages failed with status code: " + response.status.toString());
     }
     return messages;
 }
@@ -85,7 +85,7 @@ export async function Login(email, password) {
         });
 
         if (response.status !== 200) {
-            throw new Error("Invalid status code: ", response.status);
+            throw new Error("Invalid status code: "+ response.status.toString());
         }
     } catch(err) {
         return err;
@@ -128,7 +128,7 @@ export async function Register(email, username, password, rpassword) {
             })
         });
         if ( response.status !==  201) {
-            throw new Error("Invalid status code: ", response.status);
+            throw new Error("Invalid status code: " + response.status.toString());
         }
     }
     catch(err) {
@@ -151,7 +151,7 @@ export async function LoadMessages(groupID, offset) {
             messages = [];
         } 
         else {
-            throw new Error("getting messages failed with status code: ", response.status);
+            throw new Error("getting messages failed with status code: " + response.status.toString());
         } 
     } catch(err) {
         return err;
@@ -172,7 +172,7 @@ export async function CreateGroup(name, desc) {
             })
         });
         if (response.status !== 201) {
-            throw new Error("Invalid status code: ", response.status);
+            throw new Error("Invalid status code: " + response.status.toString());
         }
     } catch(err) {
         return err;
@@ -194,10 +194,55 @@ export async function DeleteGroup(groupID) {
         });
 
         if (response.status !== 200) {
-            throw new Error("Invalid status code: ", response.status)
+            throw new Error("Invalid status code: " + response.status.toString())
         }
     } catch(err) {
         return err;
     }
     return null;
+}
+
+export async function DeleteMember(memberID) {
+    let response;
+    try {
+        response = await fetch('http://localhost:8080/api/group/remove', {
+            method: 'PUT',
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({
+                "member": memberID
+            })
+        });
+        if (response.status !== 200) {
+            throw new Error('invalid status code: ' + response.status.toString());
+        }
+    } catch(err) {
+        return err;
+    }
+    let responseJSON = await response.json();
+    return responseJSON;
+}
+
+export async function SetRights(memberID, adding, deleting, setting) {
+    let response;
+    try {
+        response = await fetch('http://localhost:8080/api/group/rights', {
+            method: 'PUT',
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({
+                "member": memberID,
+                "adding": adding,
+                "deleting": deleting,
+                "setting": setting,
+            })
+        });
+        if (response.status !== 200) {
+            throw new Error("Invalid status code: " + response.status.toString());
+        }
+    } catch(err) {
+        return err;
+    }
+    let responseJSON = await response.json();
+    return responseJSON;
 }

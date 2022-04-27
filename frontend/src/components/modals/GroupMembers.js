@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {v4 as uuidv4} from "uuid";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { DeleteMember, SetRights } from '../../Requests';
 
 export const ModalMembers = (props) => {
 
@@ -54,59 +55,30 @@ const Member = (props) => {
 
     const deleteMember = async() => {
 
-        const response = await fetch('http://localhost:8080/api/group/remove', {
-            method: 'PUT',
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify({
-                "member": props.member.ID
-            })
+        let promise = DeleteMember(props.member.ID);
+        promise.then( response => {
+            if (response.message === "ok") {
+                props.setErr("Member deleted");
+            } else props.setErr(response);
+            setTimeout(function() {
+                props.toggle();
+                props.setErr("");
+            }, 2000);
         });
-
-        const responseJSON = await response.json();
-
-        if (responseJSON.message === "ok") {
-            props.setErr("Member deleted");
-        } else {
-            props.setErr(responseJSON.err);
-            console.log(responseJSON.err);
-        }
-        setTimeout(function () {    
-            props.toggle();
-            props.setErr("");
-        }, 2000);
-
     }
 
     const setRights = async() => {
-
         if (adding === props.member.adding && deleting === props.member.deleting && setting === props.member.setting) {
             return
         }
-
-        const response = await fetch('http://localhost:8080/api/group/rights', {
-            method: 'PUT',
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify({
-                "member": props.member.ID,
-                "adding": adding,
-                "deleting": deleting,
-                "setting": setting,
-            })
+        let promise = SetRights(props.member.ID, adding, deleting, setting);
+        promise.then( response => {
+            if (response.message === "ok") props.setErr("Rights changed");
+            else props.setErr(response);
+            setTimeout(function() {
+                props.setErr("");
+            }, 2000);
         });
-
-        const responseJSON = await response.json();
-
-        if (responseJSON.message === "ok") {
-            props.setErr("Rights changed");
-        } else {
-            props.setErr(responseJSON.err);
-        }
-        setTimeout(function () {
-            props.setErr("");
-        }, 2000);
-
     }
 
     return (
