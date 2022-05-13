@@ -9,12 +9,7 @@ import (
 )
 
 func (s *Server) SendGroupInvite(c *gin.Context) {
-	// getting id from jwt
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
-		return
-	}
+	id := c.GetInt("userID")
 
 	load := struct {
 		Group  int    `json:"group"`
@@ -53,11 +48,7 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 
 func (s *Server) GetUserInvites(c *gin.Context) {
 
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
-		return
-	}
+	id := c.Value("userID").(int)
 
 	invites, err := s.DB.GetUserInvites(uint(id))
 	if err != nil {
@@ -74,12 +65,7 @@ func (s *Server) GetUserInvites(c *gin.Context) {
 }
 
 func (s *Server) RespondGroupInvite(c *gin.Context) {
-
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
-		return
-	}
+	id := c.GetInt("userID")
 
 	load := struct {
 		InviteID uint  `json:"inviteID"`

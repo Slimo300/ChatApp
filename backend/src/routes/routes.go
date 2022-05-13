@@ -6,28 +6,31 @@ import (
 )
 
 func Setup(engine *gin.Engine, server *handlers.Server) {
-	engine.Use(CORSMiddleware())
-	engine.Use(server.CheckDatabase())
 
-	engine.POST("/api/login", server.SignIn)
-	engine.POST("/api/register", server.Register)
-	engine.POST("/api/signout", server.SignOutUser)
-	engine.GET("/api/user", server.GetUser)
+	api := engine.Group("api")
 
-	engine.GET("/api/group/get", server.GetUserGroups)
-	engine.POST("/api/group/create", server.CreateGroup)
-	engine.DELETE("/api/group/delete", server.DeleteGroup)
+	api.Use(CORSMiddleware())
+	api.Use(server.CheckDatabase())
 
-	engine.POST("/api/group/add", server.AddUserToGroup)
-	engine.PUT("/api/group/remove", server.DeleteUserFromGroup)
+	api.POST("/register", server.Register)
+	api.POST("/login", server.SignIn)
 
-	engine.GET("/api/group/messages", server.GetGroupMessages)
+	apiAuth := api.Use(server.MustAuth())
+	apiAuth.POST("/signout", server.SignOutUser)
+	apiAuth.GET("/user", server.GetUser)
 
-	engine.PUT("/api/group/rights", server.GrantPriv)
+	apiAuth.GET("/group", server.GetUserGroups)
+	apiAuth.POST("/group", server.CreateGroup)
+	apiAuth.DELETE("/group/:groupID", server.DeleteGroup)
 
-	engine.GET("/ws", server.ServeWebSocket)
+	apiAuth.DELETE("/member/:memberID", server.DeleteUserFromGroup)
+	apiAuth.PUT("/member/:memberID", server.GrantPriv)
 
-	engine.GET("/api/invites", server.GetUserInvites)
-	engine.POST("/api/invites", server.SendGroupInvite)
-	engine.PUT("/api/invites", server.RespondGroupInvite)
+	apiAuth.GET("/group/:groupID/messages", server.GetGroupMessages)
+
+	apiAuth.GET("/ws", server.ServeWebSocket)
+
+	apiAuth.GET("/invites", server.GetUserInvites)
+	apiAuth.POST("/invites", server.SendGroupInvite)
+	apiAuth.PUT("/invites/:inviteID", server.RespondGroupInvite)
 }

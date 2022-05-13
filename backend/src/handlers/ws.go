@@ -8,11 +8,8 @@ import (
 )
 
 func (s *Server) ServeWebSocket(c *gin.Context) {
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"err": "not authenticated"})
-		return
-	}
+
+	id := c.Value("userID").(int)
 
 	groups, err := s.DB.GetUserGroups(uint(id))
 	if err != nil {

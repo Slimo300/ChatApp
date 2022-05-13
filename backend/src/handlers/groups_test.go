@@ -59,6 +59,8 @@ func TestGetUserGroups(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodGet, "/api/group/get", s.GetUserGroups)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -101,32 +103,32 @@ func TestDeleteGroup(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		ID                 uint
-		data               map[string]interface{}
+		userID             uint
+		groupID            string
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		// user is not a creator of the group so he can't delete it
 		{
 			desc:               "deletegroupnosuccess",
-			ID:                 3,
-			data:               map[string]interface{}{"group": 1},
+			userID:             3,
+			groupID:            "1",
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "insufficient privilages"},
 		},
-		// user is dumb and hasn't specified a group in a query
+		// user hasn't specified a group in a query
 		{
-			desc:               "deletegroupnoquery",
-			ID:                 1,
-			data:               map[string]interface{}{},
+			desc:               "deletegroupno",
+			userID:             1,
+			groupID:            "0",
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "group not specified"},
 		},
 		// creator deletes a group
 		{
 			desc:               "deletegroupsuccess",
-			ID:                 1,
-			data:               map[string]interface{}{"group": 1},
+			userID:             1,
+			groupID:            "1",
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
@@ -135,17 +137,18 @@ func TestDeleteGroup(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.ID))
+			jwt, err := s.CreateSignedToken(int(tC.userID))
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
-			requestBody, _ := json.Marshal(tC.data)
-			req, _ := http.NewRequest("DELETE", "/api/group/delete", bytes.NewBuffer(requestBody))
+			req, _ := http.NewRequest(http.MethodDelete, "/api/group/"+tC.groupID, nil)
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodDelete, "/api/group/delete", s.DeleteGroup)
+
+			engine.Use(s.MustAuth())
+			engine.Handle(http.MethodDelete, "/api/group/:groupID", s.DeleteGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
@@ -228,6 +231,8 @@ func TestCreateGroup(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPost, "/api/group/create", s.CreateGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

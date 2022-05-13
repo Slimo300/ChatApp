@@ -102,6 +102,8 @@ func TestSendGroupInvite(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPost, "/api/invite", s.SendGroupInvite)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -162,6 +164,8 @@ func TestGetUserInvites(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodGet, "/api/invites", s.GetUserInvites)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -260,6 +264,8 @@ func TestRespondGroupInvite(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPut, "/api/invite", s.RespondGroupInvite)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

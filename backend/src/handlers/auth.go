@@ -92,13 +92,9 @@ func (s *Server) SignIn(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // SignOutUser method
 func (s *Server) SignOutUser(c *gin.Context) {
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-		return
-	}
+	id := c.GetInt("userID")
 
-	if err = s.DB.SignOutUser(uint(id)); err != nil {
+	if err := s.DB.SignOutUser(uint(id)); err != nil {
 		if err.Error() == "No user with id: "+strconv.Itoa(id) {
 			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
 			return
@@ -115,11 +111,7 @@ func (s *Server) SignOutUser(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // GetUserById method
 func (s *Server) GetUser(c *gin.Context) {
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
-		return
-	}
+	id := c.GetInt("userID")
 
 	user, err := s.DB.GetUserById(id)
 	if err != nil {

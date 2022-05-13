@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
@@ -10,12 +11,7 @@ import (
 )
 
 func (s *Server) GetUserGroups(c *gin.Context) {
-
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-		return
-	}
+	id := c.GetInt("userID")
 
 	groups, err := s.DB.GetUserGroups(uint(id))
 	if err != nil {
@@ -32,15 +28,10 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 }
 
 func (s *Server) CreateGroup(c *gin.Context) {
-
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-		return
-	}
+	id := c.GetInt("userID")
 
 	var group models.Group
-	err = c.ShouldBindJSON(&group)
+	err := c.ShouldBindJSON(&group)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -66,29 +57,20 @@ func (s *Server) CreateGroup(c *gin.Context) {
 }
 
 func (s *Server) DeleteGroup(c *gin.Context) {
-	// getting id from jwt
-	id, err := checkTokenAndGetID(c, s)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "not authenticated"})
-		return
-	}
+	id := c.GetInt("userID")
 
-	load := struct {
-		Group int `json:"group"`
-	}{}
-
-	// getting req body
-	if err := c.ShouldBindJSON(&load); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
-		return
-	}
-	if load.Group == 0 {
+	groupID := c.Param("groupID")
+	if groupID == "0" || groupID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
 		return
 	}
+	groupIDint, err := strconv.Atoi(groupID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "something went wrong"})
+	}
 
 	// telling database to delete group
-	group, err := s.DB.DeleteGroup(uint(load.Group), uint(id))
+	group, err := s.DB.DeleteGroup(uint(groupIDint), uint(id))
 	if err != nil {
 		if err.Error() == "Couldn't delete group" {
 			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})

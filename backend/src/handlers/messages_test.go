@@ -21,18 +21,18 @@ func TestGetGroupMessages(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		data               uint
+		userID             uint
 		returnVal          bool
-		query              string
+		group              string
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "getmessagessuccess",
-			data:               1,
+			userID:             1,
 			returnVal:          true,
-			query:              "?group=1&num=4",
 			expectedStatusCode: http.StatusOK,
+			group:              "1",
 			expectedResponse: []communication.Message{{Group: 1, Member: 1, Message: "elo", Nick: "Mal", When: "2019-13-01 22:00:45"},
 				{Group: 1, Member: 2, Message: "siema", Nick: "River", When: "2019-15-01 22:00:45"},
 				{Group: 1, Member: 1, Message: "elo elo", Nick: "Mal", When: "2019-16-01 22:00:45"},
@@ -40,17 +40,17 @@ func TestGetGroupMessages(t *testing.T) {
 		},
 		{
 			desc:               "getmessagesunauthorized",
-			data:               3,
+			userID:             3,
 			returnVal:          false,
-			query:              "?group=1&num=4",
+			group:              "1",
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "User cannot request from this group"},
 		},
 		{
 			desc:               "getmessagesnogroup",
-			data:               1,
+			userID:             1,
 			returnVal:          false,
-			query:              "",
+			group:              "0",
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"message": "Select a group"},
 		},
@@ -59,17 +59,19 @@ func TestGetGroupMessages(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.data))
+			jwt, err := s.CreateSignedToken(int(tC.userID))
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
 
-			req, _ := http.NewRequest("GET", "/api/group/messages"+tC.query, nil)
+			req, _ := http.NewRequest("GET", "/api/group/"+tC.group+"/messages?num=4", nil)
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodGet, "/api/group/messages", s.GetGroupMessages)
+
+			engine.Use(s.MustAuth())
+			engine.Handle(http.MethodGet, "/api/group/:groupID/messages", s.GetGroupMessages)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 

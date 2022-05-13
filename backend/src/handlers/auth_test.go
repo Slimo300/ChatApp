@@ -177,6 +177,7 @@ func TestSignOut(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/api/signout", nil)
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
+			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPost, "/api/signout", s.SignOutUser)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
