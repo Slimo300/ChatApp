@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+	mockDB := mock.NewMockDB()
+	s := handlers.NewServer(mockDB, nil)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -32,9 +32,9 @@ func TestRegister(t *testing.T) {
 		},
 		{
 			desc:               "registeremailtaken",
-			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
+			data:               map[string]string{"username": "johnny12", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusConflict,
-			expectedResponse:   gin.H{"err": "email taken"},
+			expectedResponse:   gin.H{"err": "email already in database"},
 		},
 		{
 			desc:               "registerinvalidpass",
@@ -64,7 +64,7 @@ func TestRegister(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
-			engine.Handle(http.MethodPost, "/api/register", s.Register)
+			engine.Handle(http.MethodPost, "/api/register", s.RegisterUser)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
@@ -82,8 +82,8 @@ func TestRegister(t *testing.T) {
 
 func TestSignIn(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+	mockDB := mock.NewMockDB()
+	s := handlers.NewServer(mockDB, nil)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -97,22 +97,16 @@ func TestSignIn(t *testing.T) {
 			expectedResponse:   gin.H{"name": "Mal"},
 		},
 		{
-			desc:               "logininvalidemail",
+			desc:               "loginnosuchemail",
 			data:               map[string]string{"email": "mal.zein@email.co1m", "password": "test"},
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "not a valid email"},
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedResponse:   gin.H{"err": "wrong email or password"},
 		},
 		{
 			desc:               "logininvalidpass",
 			data:               map[string]string{"email": "mal.zein@email.com", "password": "t2est"},
 			expectedStatusCode: http.StatusUnauthorized,
-			expectedResponse:   gin.H{"err": "invalid password"},
-		},
-		{
-			desc:               "loginnosuchuser",
-			data:               map[string]string{"email": "mal2.zein@email.com", "password": "test"},
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"err": "No email mal2.zein@email.com in database"},
+			expectedResponse:   gin.H{"err": "wrong email or password"},
 		},
 	}
 
@@ -140,8 +134,8 @@ func TestSignIn(t *testing.T) {
 
 func TestSignOut(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	db := database.NewMockDB()
-	s := handlers.NewServer(db, nil)
+	mockDB := mock.NewMockDB()
+	s := handlers.NewServer(mockDB, nil)
 
 	testCases := []struct {
 		desc               string
@@ -158,7 +152,7 @@ func TestSignOut(t *testing.T) {
 		{
 			desc:               "logoutnouser",
 			id:                 1000,
-			expectedStatusCode: http.StatusNotFound,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "No user with id: 1000"},
 		},
 	}

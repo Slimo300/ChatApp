@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 func TestGetGroupMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
+	mock := mock.NewMockDB()
 	s := handlers.NewServer(mock, nil)
 
 	testCases := []struct {

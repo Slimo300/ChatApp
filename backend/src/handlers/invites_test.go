@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ import (
 
 func TestSendGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
+	mockDB := mock.NewMockDB()
 
 	// mocking channel
 	channel := make(chan *communication.Action)
@@ -29,7 +29,7 @@ func TestSendGroupInvite(t *testing.T) {
 	}()
 	defer close(channel)
 
-	s := handlers.NewServer(mock, channel)
+	s := handlers.NewServer(mockDB, channel)
 
 	testCases := []struct {
 		desc               string
@@ -124,9 +124,9 @@ func TestSendGroupInvite(t *testing.T) {
 
 func TestGetUserInvites(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
+	mockDB := mock.NewMockDB()
 
-	s := handlers.NewServer(mock, nil)
+	s := handlers.NewServer(mockDB, nil)
 
 	dateCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
 	dateModified, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
@@ -186,9 +186,9 @@ func TestGetUserInvites(t *testing.T) {
 
 func TestRespondGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := database.NewMockDB()
+	mockDB := mock.NewMockDB()
 
-	s := handlers.NewServer(mock, nil)
+	s := handlers.NewServer(mockDB, nil)
 
 	dateGroupCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 
