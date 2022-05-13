@@ -1,6 +1,8 @@
 package database
 
 import (
+	"errors"
+
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
@@ -32,3 +34,13 @@ type DBlayer interface {
 	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)
 	RespondGroupInvite(userID, inviteID uint, response bool) (models.Group, error)
 }
+
+const INVITE_AWAITING = 0
+const INVITE_ACCEPT = 1
+const INVITE_DECLINE = 2
+
+const TIME_FORMAT = "2006-02-01 15:04:05"
+
+var ErrINVALIDPASSWORD = errors.New("invalid password")
+var ErrNoPrivilages = errors.New("insufficient privilages")
+var ErrInternal = errors.New("internal transaction error")
