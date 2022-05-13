@@ -6,12 +6,17 @@ import (
 )
 
 type DBlayer interface {
-	GetUserById(id int) (models.User, error)
-	RegisterUser(models.User) (models.User, error)
-	GetUserGroups(id uint) ([]models.Group, error)
+	IsEmailInDatabase(email string) bool
+	IsUsernameInDatabase(username string) bool
 
-	SignInUser(name string, pass string) (models.User, error)
+	GetUserById(id int) (models.User, error)
+	GetUserByEmail(email string) (models.User, error)
+
+	RegisterUser(models.User) (models.User, error)
+	SignInUser(id uint) error
 	SignOutUser(id uint) error
+
+	GetUserGroups(id uint) ([]models.Group, error)
 
 	GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error)
 	AddMessage(msg communication.Message) (communication.Message, error)

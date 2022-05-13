@@ -12,7 +12,7 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	api.Use(CORSMiddleware())
 	api.Use(server.CheckDatabase())
 
-	api.POST("/register", server.Register)
+	api.POST("/register", server.RegisterUser)
 	api.POST("/login", server.SignIn)
 
 	apiAuth := api.Use(server.MustAuth())
