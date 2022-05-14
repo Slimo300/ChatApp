@@ -50,28 +50,28 @@ func TestSendGroupInvite(t *testing.T) {
 			id:                 1,
 			data:               map[string]interface{}{"group": 1, "target": "Raul"},
 			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"err": "user not found"},
+			expectedResponse:   gin.H{"err": "no user with name: Raul"},
 		},
 		{
-			desc:               "invitenoprivilages",
+			desc:               "invitenorights",
 			id:                 2,
 			data:               map[string]interface{}{"group": 1, "target": "Kel"},
 			expectedStatusCode: http.StatusForbidden,
-			expectedResponse:   gin.H{"err": "insufficient privilages"},
+			expectedResponse:   gin.H{"err": "no rights to add"},
 		},
 		{
 			desc:               "inviteuserismember",
 			id:                 1,
 			data:               map[string]interface{}{"group": 1, "target": "River"},
-			expectedStatusCode: http.StatusForbidden,
-			expectedResponse:   gin.H{"err": "user already in a group"},
+			expectedStatusCode: http.StatusConflict,
+			expectedResponse:   gin.H{"err": "user is already a member of group"},
 		},
 		{
 			desc:               "invitealreadyindatabase",
 			id:                 1,
 			data:               map[string]interface{}{"group": 1, "target": "John"},
-			expectedStatusCode: http.StatusForbidden,
-			expectedResponse:   gin.H{"err": "invite already sent"},
+			expectedStatusCode: http.StatusConflict,
+			expectedResponse:   gin.H{"err": "user already invited"},
 		},
 		{
 			desc:               "invitenogroup",
@@ -194,79 +194,78 @@ func TestRespondGroupInvite(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		id                 int
+		userID             int
+		answer             bool
 		data               map[string]interface{}
+		inviteID           string
 		returnVal          bool
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "respondInviteYes",
-			id:                 3,
-			data:               map[string]interface{}{"inviteID": 1, "answer": true},
+			userID:             3,
+			data:               map[string]interface{}{"answer": true},
+			inviteID:           "1",
 			returnVal:          true,
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   models.Group{ID: 1, Name: "New Group", Desc: "totally new group", Created: dateGroupCreated},
 		},
 		{
 			desc:               "respondInviteNo",
-			id:                 3,
-			data:               map[string]interface{}{"inviteID": 1, "answer": false},
+			userID:             3,
+			data:               map[string]interface{}{"answer": false},
+			inviteID:           "1",
 			returnVal:          false,
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "invite declined"},
 		},
 		{
 			desc:               "respondInviteNotInDatabase",
-			id:                 3,
-			data:               map[string]interface{}{"inviteID": 2, "answer": true},
+			userID:             3,
+			data:               map[string]interface{}{"answer": true},
+			inviteID:           "2",
 			returnVal:          false,
 			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"err": "no such invite"},
+			expectedResponse:   gin.H{"err": "resource not found"},
 		},
 		{
 			desc:               "respondInviteWrongUser",
-			id:                 1,
-			data:               map[string]interface{}{"inviteID": 1, "answer": true},
+			userID:             1,
+			data:               map[string]interface{}{"answer": true},
+			inviteID:           "1",
 			returnVal:          false,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"err": "no such invite"},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "no rights to respond"},
 		},
 		{
 			desc:               "respondInviteNoAnswer",
-			id:                 1,
-			data:               map[string]interface{}{"inviteID": 1},
+			userID:             1,
+			inviteID:           "1",
+			data:               map[string]interface{}{},
 			returnVal:          false,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "answer not specified"},
-		},
-		{
-			desc:               "respondInviteInviteNotSpecified",
-			id:                 1,
-			data:               map[string]interface{}{"answer": true},
-			returnVal:          false,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "invite not specified"},
 		},
 	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.id)
+			jwt, err := s.CreateSignedToken(tC.userID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
 
 			requestBody, _ := json.Marshal(tC.data)
-			req, _ := http.NewRequest("PUT", "/api/invite", bytes.NewReader(requestBody))
+			req, _ := http.NewRequest("PUT", "/api/invite/"+tC.inviteID, bytes.NewReader(requestBody))
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
 
 			engine.Use(s.MustAuth())
-			engine.Handle(http.MethodPut, "/api/invite", s.RespondGroupInvite)
+			engine.Handle(http.MethodPut, "/api/invite/:inviteID", s.RespondGroupInvite)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
