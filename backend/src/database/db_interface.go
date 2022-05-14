@@ -13,6 +13,7 @@ type DBlayer interface {
 
 	GetUserById(id int) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
+	GetUserByUsername(username string) (models.User, error)
 
 	RegisterUser(models.User) (models.User, error)
 	SignInUser(id uint) error
@@ -33,8 +34,16 @@ type DBlayer interface {
 	DeleteGroup(id_group uint) (models.Group, error)
 
 	GetUserInvites(userID uint) ([]models.Invite, error)
-	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)
-	RespondGroupInvite(userID, inviteID uint, response bool) (models.Group, error)
+	AddInvite(issID, targetID, groupID uint) (models.Invite, error)
+
+	DeclineInvite(inviteID uint) error
+
+	AcceptInvite(invite models.Invite) (models.Group, error)
+
+	IsUserInGroup(userID, groupID uint) bool
+	IsUserInvited(userID, groupID uint) bool
+
+	GetInviteByID(inviteID uint) (models.Invite, error)
 }
 
 const INVITE_AWAITING = 0

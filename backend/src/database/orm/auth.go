@@ -16,6 +16,10 @@ func (db *Database) GetUserByEmail(email string) (user models.User, err error) {
 	return user, db.Where(models.User{Email: email}).First(&user).Error
 }
 
+func (db *Database) GetUserByUsername(username string) (user models.User, err error) {
+	return user, db.Where(models.User{UserName: username}).First(&user).Error
+}
+
 func (db *Database) RegisterUser(user models.User) (models.User, error) {
 	user.Active = time.Now()
 	user.SignUp = time.Now()

@@ -69,7 +69,3 @@ func (db *Database) DeleteGroup(groupID uint) (group models.Group, err error) {
 
 	return group, nil
 }
-
-func (db *Database) GetUserGroupMember(userID, groupID uint) (member models.Member, err error) {
-	return member, db.Where(models.Member{UserID: userID, GroupID: groupID}).First(&member).Error
-}

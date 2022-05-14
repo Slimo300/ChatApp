@@ -40,3 +40,12 @@ func (m *MockDB) GrantPriv(memberID uint, adding, deleting, setting bool) error 
 
 	return errors.New("internal error")
 }
+
+func (m *MockDB) IsUserInGroup(userID, groupID uint) bool {
+	for _, member := range m.Members {
+		if member.GroupID == groupID && member.UserID == userID && !member.Deleted {
+			return true
+		}
+	}
+	return false
+}

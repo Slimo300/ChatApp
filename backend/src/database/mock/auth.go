@@ -25,6 +25,15 @@ func (m *MockDB) GetUserByEmail(email string) (models.User, error) {
 	return models.User{}, fmt.Errorf("No user with email: %s", email)
 }
 
+func (m *MockDB) GetUserByUsername(username string) (models.User, error) {
+	for _, user := range m.Users {
+		if user.UserName == username {
+			return user, nil
+		}
+	}
+	return models.User{}, fmt.Errorf("No user with email: %s", username)
+}
+
 func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
 	user.ID = uint(len(m.Users) + 1)
 	user.Active = time.Now()
