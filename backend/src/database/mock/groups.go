@@ -3,8 +3,8 @@ package mock
 import (
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"gorm.io/gorm"
 )
 
 func (m *MockDB) CreateGroup(id uint, name, desc string) (models.Group, error) {
@@ -33,25 +33,23 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return groups, nil
 }
 
-func (m *MockDB) DeleteGroup(id_group, id_user uint) (models.Group, error) {
-
-	var issuer models.Member
-	for _, member := range m.Members {
-		if member.GroupID == id_group && member.UserID == id_user {
-			issuer = member
-			break
-		}
-	}
-	if !issuer.Creator {
-		return models.Group{}, database.ErrNoPrivilages
-	}
-	var deleted_group models.Group
+func (m *MockDB) DeleteGroup(groupID uint) (models.Group, error) {
+	var deletedGroup models.Group
 	for i, group := range m.Groups {
-		if group.ID == id_group {
-			deleted_group = group
+		if group.ID == groupID {
+			deletedGroup = group
 			m.Groups = append(m.Groups[:i], m.Groups[i+1:]...)
 			break
 		}
 	}
-	return deleted_group, nil
+	return deletedGroup, nil
+}
+
+func (m *MockDB) GetUserGroupMember(userID, groupID uint) (models.Member, error) {
+	for _, member := range m.Members {
+		if member.GroupID == groupID && member.UserID == userID {
+			return member, nil
+		}
+	}
+	return models.Member{}, gorm.ErrRecordNotFound
 }

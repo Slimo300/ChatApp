@@ -41,8 +41,8 @@ func TestGetUserGroups(t *testing.T) {
 			desc:               "getgroupsnone",
 			data:               3,
 			returnVal:          false,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse:   gin.H{"message": "You don't have any group"},
+			expectedStatusCode: http.StatusNoContent,
+			expectedResponse:   nil,
 		},
 	}
 
@@ -68,19 +68,13 @@ func TestGetUserGroups(t *testing.T) {
 			if response.StatusCode != tC.expectedStatusCode {
 				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
 			}
-			var respBody interface{}
 			if tC.returnVal {
-				groups := []models.Group{}
-				json.NewDecoder(response.Body).Decode(&groups)
-				respBody = groups
-			} else {
-				var msg gin.H
-				json.NewDecoder(response.Body).Decode(&msg)
-				respBody = msg
-			}
+				respBody := []models.Group{}
+				json.NewDecoder(response.Body).Decode(&respBody)
 
-			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
-				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
+				if !reflect.DeepEqual(respBody, tC.expectedResponse) {
+					t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
+				}
 			}
 		})
 	}
@@ -114,13 +108,13 @@ func TestDeleteGroup(t *testing.T) {
 			userID:             3,
 			groupID:            "1",
 			expectedStatusCode: http.StatusForbidden,
-			expectedResponse:   gin.H{"err": "insufficient privilages"},
+			expectedResponse:   gin.H{"err": "couldn't delete group"},
 		},
 		// user hasn't specified a group in a query
 		{
-			desc:               "deletegroupno",
+			desc:               "deletegroupnotspecified",
 			userID:             1,
-			groupID:            "0",
+			groupID:            "sa",
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "group not specified"},
 		},

@@ -20,15 +20,17 @@ type DBlayer interface {
 
 	GetUserGroups(id uint) ([]models.Group, error)
 
+	GetMemberByID(memberID uint) (models.Member, error)
+	GetUserGroupMember(userID, groupID uint) (models.Member, error)
+
 	GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error)
 	AddMessage(msg communication.Message) (communication.Message, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
-	AddUserToGroup(name string, id_group uint, id_user uint) (models.Member, error)
-	DeleteUserFromGroup(id_member, id_user uint) (models.Member, error)
-	GrantPriv(id_member, id_user uint, adding, deleting, setting bool) error
+	DeleteUserFromGroup(id_member uint) (models.Member, error)
+	GrantPriv(id_member uint, adding, deleting, setting bool) error
 
-	DeleteGroup(id_group, id_user uint) (models.Group, error)
+	DeleteGroup(id_group uint) (models.Group, error)
 
 	GetUserInvites(userID uint) ([]models.Invite, error)
 	SendGroupInvite(issId, groupID uint, target string) (models.Invite, error)

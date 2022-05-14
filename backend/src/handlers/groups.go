@@ -5,21 +5,20 @@ import (
 	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) GetUserGroups(c *gin.Context) {
-	id := c.GetInt("userID")
+	userID := c.GetInt("userID")
 
-	groups, err := s.DB.GetUserGroups(uint(id))
+	groups, err := s.DB.GetUserGroups(uint(userID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 	if len(groups) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": "You don't have any group"})
+		c.Status(http.StatusNoContent)
 		return
 	}
 
@@ -28,7 +27,7 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 }
 
 func (s *Server) CreateGroup(c *gin.Context) {
-	id := c.GetInt("userID")
+	userID := c.GetInt("userID")
 
 	var group models.Group
 	err := c.ShouldBindJSON(&group)
@@ -45,42 +44,40 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	group, err = s.DB.CreateGroup(uint(id), group.Name, group.Desc)
+	group, err = s.DB.CreateGroup(uint(userID), group.Name, group.Desc)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	s.CommChan <- &communication.Action{Group: int(group.ID), User: int(id), Action: "CREATE_GROUP"}
+	s.CommChan <- &communication.Action{Group: int(group.ID), User: int(userID), Action: "CREATE_GROUP"}
 
 	c.JSON(http.StatusCreated, group)
 }
 
 func (s *Server) DeleteGroup(c *gin.Context) {
-	id := c.GetInt("userID")
+	userID := c.GetInt("userID")
 
 	groupID := c.Param("groupID")
-	if groupID == "0" || groupID == "" {
+	groupIDint, err := strconv.Atoi(groupID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
 		return
 	}
-	groupIDint, err := strconv.Atoi(groupID)
+
+	member, err := s.DB.GetUserGroupMember(uint(userID), uint(groupIDint))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "something went wrong"})
+		c.JSON(http.StatusForbidden, gin.H{"err": "couldn't delete group"})
+		return
+	}
+	if !member.Creator {
+		c.JSON(http.StatusForbidden, gin.H{"err": "couldn't delete group"})
+		return
 	}
 
-	// telling database to delete group
-	group, err := s.DB.DeleteGroup(uint(groupIDint), uint(id))
+	group, err := s.DB.DeleteGroup(uint(groupIDint))
 	if err != nil {
-		if err.Error() == "Couldn't delete group" {
-			c.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
-			return
-		}
-		if err == database.ErrNoPrivilages {
-			c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-		return
 	}
 
 	s.CommChan <- &communication.Action{Group: int(group.ID), Action: "DELETE_GROUP"}

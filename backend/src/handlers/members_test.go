@@ -42,8 +42,8 @@ func TestGrantPriv(t *testing.T) {
 			userID:             1,
 			memberID:           "100",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "row not found"},
+			expectedStatusCode: http.StatusNotFound,
+			expectedResponse:   gin.H{"err": "resource not found"},
 		},
 		// issuer has no right to add
 		{
@@ -51,16 +51,16 @@ func TestGrantPriv(t *testing.T) {
 			userID:             1,
 			memberID:           "4",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "member deleted"},
+			expectedStatusCode: http.StatusNotFound,
+			expectedResponse:   gin.H{"err": "resource not found"},
 		},
 		{
-			desc:               "grantprivnopriv",
+			desc:               "grantprivnorights",
 			userID:             2,
 			memberID:           "2",
 			data:               map[string]interface{}{"adding": true, "deleting": true},
 			expectedStatusCode: http.StatusForbidden,
-			expectedResponse:   gin.H{"err": "insufficient privilages"},
+			expectedResponse:   gin.H{"err": "no rights to put"},
 		},
 		{
 			desc:               "grantprivcreator",
@@ -137,14 +137,14 @@ func TestDeleteMember(t *testing.T) {
 			userID:             1,
 			memberID:           "0",
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "member not specified"},
+			expectedResponse:   gin.H{"err": "member's id incorrect"},
 		},
 		{
 			desc:               "deletenopriv",
 			userID:             2,
 			memberID:           "2",
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "insufficient privilages"},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "no rights to delete"},
 		},
 	}
 
