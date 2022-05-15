@@ -34,29 +34,7 @@ func (db *Database) AddMessage(msg communication.Message) (communication.Message
 
 }
 
-// GetGroupMessages gets last messages sent to group, offset is a variable stating how many of messages it should omit (in case some are already loaded)
-func (db *Database) GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error) {
-
-	if err := db.Where(models.Member{GroupID: id_group, UserID: id_user}).First(&models.Member{}).Error; err != nil {
-		return nil, err
-	}
-
-	var messages []models.Message
-	selection := db.Joins("Member", db.Where(&models.Member{GroupID: id_group})).Order("posted desc").Offset(offset).Limit(num).Find(&messages, "`Member`.`group_id` = ?", id_group)
-	if selection.Error != nil {
-		return nil, selection.Error
-	}
-	var sendMessages []communication.Message
-
-	for i := len(messages) - 1; i >= 0; i-- {
-		sendMessages = append(sendMessages, communication.Message{
-			Group:   uint64(messages[i].Member.GroupID),
-			Member:  uint64(messages[i].MemberID),
-			Nick:    messages[i].Member.Nick,
-			When:    messages[i].Posted.Format(database.TIME_FORMAT),
-			Message: messages[i].Text,
-		})
-	}
-
-	return sendMessages, nil
+func (db *Database) GetGroupMessages(groupID uint, offset, num int) (messages []models.Message, err error) {
+	return messages, db.Joins("Member", db.Where(&models.Member{GroupID: groupID})).Order("posted desc").Offset(offset).Limit(num).
+		Find(&messages, "`Member`.`group_id` = ?", groupID).Error
 }

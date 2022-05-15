@@ -24,7 +24,7 @@ type DBlayer interface {
 	GetMemberByID(memberID uint) (models.Member, error)
 	GetUserGroupMember(userID, groupID uint) (models.Member, error)
 
-	GetGroupMessages(id_user, id_group uint, offset, num int) ([]communication.Message, error)
+	GetGroupMessages(id_group uint, offset, num int) ([]models.Message, error)
 	AddMessage(msg communication.Message) (communication.Message, error)
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
