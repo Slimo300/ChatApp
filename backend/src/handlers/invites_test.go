@@ -29,7 +29,7 @@ func TestSendGroupInvite(t *testing.T) {
 	}()
 	defer close(channel)
 
-	s := handlers.NewServer(mockDB, channel)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string
@@ -126,7 +126,7 @@ func TestGetUserInvites(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
 
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 
 	dateCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
 	dateModified, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
@@ -188,7 +188,7 @@ func TestRespondGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
 
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 
 	dateGroupCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 

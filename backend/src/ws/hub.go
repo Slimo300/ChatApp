@@ -21,22 +21,23 @@ var upgrader = &websocket.Upgrader{
 	}}
 
 type Hub struct {
-	db         database.DBlayer
-	serverconn <-chan *communication.Action
-	forward    chan *communication.Message
-	join       chan *client
-	leave      chan *client
-	clients    map[*client]bool
+	db             database.DBlayer
+	rcvServerChan  <-chan *communication.Action
+	sendServerChan chan<- communication.Message
+	forward        chan *communication.Message
+	join           chan *client
+	leave          chan *client
+	clients        map[*client]bool
 }
 
-func NewHub(db database.DBlayer, ch <-chan *communication.Action) *Hub {
+func NewHub(sendChan chan<- communication.Message, rcvChan <-chan *communication.Action) *Hub {
 	return &Hub{
-		db:         db,
-		serverconn: ch,
-		forward:    make(chan *communication.Message),
-		join:       make(chan *client),
-		leave:      make(chan *client),
-		clients:    make(map[*client]bool),
+		rcvServerChan:  rcvChan,
+		sendServerChan: sendChan,
+		forward:        make(chan *communication.Message),
+		join:           make(chan *client),
+		leave:          make(chan *client),
+		clients:        make(map[*client]bool),
 	}
 }
 
@@ -49,19 +50,15 @@ func (h *Hub) Run() {
 			delete(h.clients, client)
 			close(client.send)
 		case msg := <-h.forward:
-			message, err := h.db.AddMessage(*msg)
-			if err != nil {
-				panic(err)
-			}
-			message.Nick = msg.Nick
+			h.sendServerChan <- *msg
 			for client := range h.clients {
 				for _, gr := range client.groups {
 					if gr == int64(msg.Group) {
-						client.send <- &message
+						client.send <- msg
 					}
 				}
 			}
-		case msg := <-h.serverconn:
+		case msg := <-h.rcvServerChan:
 			switch msg.Action {
 			case "DELETE_GROUP":
 				h.GroupDeleted(msg.Group)

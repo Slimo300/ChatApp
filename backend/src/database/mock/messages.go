@@ -3,8 +3,6 @@ package mock
 import (
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
@@ -20,15 +18,13 @@ func (m *MockDB) GetGroupMessages(groupID uint, offset, num int) (messages []mod
 	return messages, nil
 }
 
-func (m *MockDB) AddMessage(msg communication.Message) (communication.Message, error) {
-	msgTime := time.Now()
+func (m *MockDB) AddMessage(memberID uint, text string) error {
 	m.Messages = append(m.Messages, models.Message{
 		ID:       uint(len(m.Messages) + 1),
-		Posted:   msgTime,
-		Text:     msg.Message,
-		MemberID: uint(msg.Member),
+		Posted:   time.Now(),
+		Text:     text,
+		MemberID: memberID,
 	})
 
-	msg.When = msgTime.Format(database.TIME_FORMAT)
-	return msg, nil
+	return nil
 }

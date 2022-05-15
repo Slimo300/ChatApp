@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/models"
@@ -19,7 +18,7 @@ import (
 func TestGetUserGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := mock.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+	s := handlers.NewServer(mock)
 
 	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 
@@ -83,17 +82,7 @@ func TestGetUserGroups(t *testing.T) {
 func TestDeleteGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-
-	// mocking channel
-	channel := make(chan *communication.Action)
-	go func() {
-		for {
-			<-channel
-		}
-	}()
-	defer close(channel)
-
-	s := handlers.NewServer(mockDB, channel)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string
@@ -164,16 +153,7 @@ func TestCreateGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
 
-	// mocking channel
-	channel := make(chan *communication.Action)
-	go func() {
-		for {
-			<-channel
-		}
-	}()
-	defer close(channel)
-
-	s := handlers.NewServer(mockDB, channel)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string

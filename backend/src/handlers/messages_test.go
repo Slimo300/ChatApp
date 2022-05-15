@@ -17,7 +17,7 @@ import (
 func TestGetGroupMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mock := mock.NewMockDB()
-	s := handlers.NewServer(mock, nil)
+	s := handlers.NewServer(mock)
 
 	testCases := []struct {
 		desc               string

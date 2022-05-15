@@ -78,7 +78,7 @@ func (s *Server) DeleteUserFromGroup(c *gin.Context) {
 		return
 	}
 
-	s.CommChan <- &communication.Action{Action: "DELETE_MEMBER", Member: member}
+	s.sendHubChan <- &communication.Action{Action: "DELETE_MEMBER", Member: member}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }

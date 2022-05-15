@@ -13,25 +13,40 @@ import (
 )
 
 type Server struct {
-	DB       database.DBlayer
-	Hub      *ws.Hub
-	CommChan chan<- *communication.Action
-	secret   string
-	domain   string
+	DB          database.DBlayer
+	Hub         *ws.Hub
+	sendHubChan chan<- *communication.Action
+	rcvHubChan  <-chan communication.Message
+	secret      string
+	domain      string
 }
 
-func NewServer(db database.DBlayer, ch chan *communication.Action) *Server {
+func NewServer(db database.DBlayer) *Server {
+	sendHubChan := make(chan *communication.Action)
+	rcvHubChan := make(chan communication.Message)
 	return &Server{
-		DB:       db,
-		secret:   "wołowina",
-		domain:   "localhost",
-		CommChan: ch,
-		Hub:      ws.NewHub(db, ch),
+		DB:          db,
+		secret:      "wołowina",
+		domain:      "localhost",
+		sendHubChan: sendHubChan,
+		rcvHubChan:  rcvHubChan,
+		Hub:         ws.NewHub(rcvHubChan, sendHubChan),
+	}
+}
+
+func (s *Server) ListenToHub() {
+	var msg communication.Message
+	select {
+	case msg = <-s.rcvHubChan:
+		if err := s.DB.AddMessage(uint(msg.Member), msg.Message); err != nil {
+			panic("Panicced while adding message")
+		}
 	}
 }
 
 func (s *Server) RunHub() {
-	s.Hub.Run()
+	go s.Hub.Run()
+	s.ListenToHub()
 }
 
 func (s *Server) CreateSignedToken(iss int) (string, error) {

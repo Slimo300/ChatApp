@@ -17,7 +17,7 @@ import (
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -83,7 +83,7 @@ func TestRegister(t *testing.T) {
 func TestSignIn(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -135,7 +135,7 @@ func TestSignIn(t *testing.T) {
 func TestSignOut(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string

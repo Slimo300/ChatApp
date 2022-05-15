@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
@@ -25,7 +24,7 @@ type DBlayer interface {
 	GetUserGroupMember(userID, groupID uint) (models.Member, error)
 
 	GetGroupMessages(id_group uint, offset, num int) ([]models.Message, error)
-	AddMessage(msg communication.Message) (communication.Message, error)
+	AddMessage(memberID uint, text string) error
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
 	DeleteUserFromGroup(id_member uint) (models.Member, error)
@@ -37,7 +36,6 @@ type DBlayer interface {
 	AddInvite(issID, targetID, groupID uint) (models.Invite, error)
 
 	DeclineInvite(inviteID uint) error
-
 	AcceptInvite(invite models.Invite) (models.Group, error)
 
 	IsUserInGroup(userID, groupID uint) bool

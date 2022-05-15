@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/gin-gonic/gin"
@@ -18,7 +17,7 @@ import (
 func TestGrantPriv(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, nil)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string
@@ -116,14 +115,7 @@ func TestDeleteMember(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
 
-	channel := make(chan *communication.Action)
-	go func() {
-		for {
-			<-channel
-		}
-	}()
-	defer close(channel)
-	s := handlers.NewServer(mockDB, channel)
+	s := handlers.NewServer(mockDB)
 
 	testCases := []struct {
 		desc               string
