@@ -52,7 +52,7 @@ func TestGetGroupMessages(t *testing.T) {
 			returnVal:          false,
 			group:              "0",
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"message": "Select a group"},
+			expectedResponse:   gin.H{"err": "invalid group ID"},
 		},
 	}
 
@@ -64,7 +64,7 @@ func TestGetGroupMessages(t *testing.T) {
 				t.Error("error when creating signed token")
 			}
 
-			req, _ := http.NewRequest("GET", "/api/group/"+tC.group+"/messages?num=4", nil)
+			req, _ := http.NewRequest("GET", "/api/group/"+tC.group+"/messages?num=4&offset=0", nil)
 			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()

@@ -9,9 +9,9 @@ import (
 
 func (s *Server) ServeWebSocket(c *gin.Context) {
 
-	id := c.Value("userID").(int)
+	userID := c.GetInt("userID")
 
-	groups, err := s.DB.GetUserGroups(uint(id))
+	groups, err := s.DB.GetUserGroups(uint(userID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
@@ -21,6 +21,6 @@ func (s *Server) ServeWebSocket(c *gin.Context) {
 		grInt = append(grInt, int64(g.ID))
 	}
 
-	ws.ServeWebSocket(c.Writer, c.Request, s.Hub, grInt, id)
+	ws.ServeWebSocket(c.Writer, c.Request, s.Hub, grInt, userID)
 
 }
