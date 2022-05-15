@@ -36,6 +36,14 @@ func TestGrantPriv(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
+		{
+			desc:               "grantprivbadrequest",
+			userID:             1,
+			memberID:           "2",
+			data:               map[string]interface{}{"adding": true, "deleting": true},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "bad request, all 3 fields must be present"},
+		},
 		// no member provided in request body
 		{
 			desc:               "grantprivnomember",
@@ -58,7 +66,7 @@ func TestGrantPriv(t *testing.T) {
 			desc:               "grantprivnorights",
 			userID:             2,
 			memberID:           "2",
-			data:               map[string]interface{}{"adding": true, "deleting": true},
+			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": true},
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "no rights to put"},
 		},

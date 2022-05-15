@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,8 +17,12 @@ func (s *Server) GrantPriv(c *gin.Context) {
 		return
 	}
 
-	var memberNewData models.Member
-	if err := c.ShouldBindJSON(&memberNewData); err != nil {
+	load := struct {
+		Adding   *bool `json:"adding" binding:"required"`
+		Deleting *bool `json:"deleting" binding:"required"`
+		Setting  *bool `json:"setting" binding:"required"`
+	}{}
+	if err := c.ShouldBindJSON(&load); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "bad request, all 3 fields must be present"})
 		return
 	}
@@ -40,7 +43,7 @@ func (s *Server) GrantPriv(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"err": "creator can't be modified"})
 	}
 
-	if err := s.DB.GrantPriv(uint(memberIDint), memberNewData.Adding, memberNewData.Deleting, memberNewData.Setting); err != nil {
+	if err := s.DB.GrantPriv(uint(memberIDint), *load.Adding, *load.Deleting, *load.Setting); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
