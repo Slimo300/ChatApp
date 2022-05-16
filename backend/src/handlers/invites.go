@@ -76,7 +76,7 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 
 	invite := models.Invite{IssId: uint(userID), TargetID: userToBeAdded.ID, GroupID: uint(load.GroupID)}
 
-	s.sendHubChan <- &communication.Action{Invite: invite}
+	s.actionChan <- &communication.Action{Invite: invite}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "invite sent"})
 }

@@ -50,7 +50,7 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	s.sendHubChan <- &communication.Action{Group: int(group.ID), User: int(userID), Action: "CREATE_GROUP"}
+	s.actionChan <- &communication.Action{Group: int(group.ID), User: int(userID), Action: "CREATE_GROUP"}
 
 	c.JSON(http.StatusCreated, group)
 }
@@ -80,7 +80,7 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 	}
 
-	s.sendHubChan <- &communication.Action{Group: int(group.ID), Action: "DELETE_GROUP"}
+	s.actionChan <- &communication.Action{Group: int(group.ID), Action: "DELETE_GROUP"}
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 
 }

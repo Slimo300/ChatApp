@@ -6,9 +6,8 @@ import (
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
 
-func (db *Database) AddMessage(memberID uint, text string) error {
+func (db *Database) AddMessage(memberID uint, text string, when time.Time) error {
 	message := models.Message{
-		Posted:   time.Now(),
 		Text:     text,
 		MemberID: memberID,
 	}

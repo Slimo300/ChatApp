@@ -83,6 +83,7 @@ func TestDeleteGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
 	s := handlers.NewServer(mockDB)
+	go s.MockHub()
 
 	testCases := []struct {
 		desc               string
@@ -154,6 +155,7 @@ func TestCreateGroup(t *testing.T) {
 	mockDB := mock.NewMockDB()
 
 	s := handlers.NewServer(mockDB)
+	go s.MockHub()
 
 	testCases := []struct {
 		desc               string

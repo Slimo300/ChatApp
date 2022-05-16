@@ -18,10 +18,10 @@ func (m *MockDB) GetGroupMessages(groupID uint, offset, num int) (messages []mod
 	return messages, nil
 }
 
-func (m *MockDB) AddMessage(memberID uint, text string) error {
+func (m *MockDB) AddMessage(memberID uint, text string, when time.Time) error {
 	m.Messages = append(m.Messages, models.Message{
 		ID:       uint(len(m.Messages) + 1),
-		Posted:   time.Now(),
+		Posted:   when,
 		Text:     text,
 		MemberID: memberID,
 	})

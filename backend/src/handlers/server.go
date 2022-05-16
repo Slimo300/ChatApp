@@ -15,38 +15,47 @@ import (
 type Server struct {
 	DB          database.DBlayer
 	Hub         *ws.Hub
-	sendHubChan chan<- *communication.Action
-	rcvHubChan  <-chan communication.Message
+	actionChan  chan<- *communication.Action
+	messageChan <-chan *communication.Message
 	secret      string
 	domain      string
 }
 
 func NewServer(db database.DBlayer) *Server {
-	sendHubChan := make(chan *communication.Action)
-	rcvHubChan := make(chan communication.Message)
+	actionChan := make(chan *communication.Action)
+	messageChan := make(chan *communication.Message)
 	return &Server{
 		DB:          db,
 		secret:      "wołowina",
 		domain:      "localhost",
-		sendHubChan: sendHubChan,
-		rcvHubChan:  rcvHubChan,
-		Hub:         ws.NewHub(rcvHubChan, sendHubChan),
+		actionChan:  actionChan,
+		messageChan: messageChan,
+		Hub:         ws.NewHub(messageChan, actionChan),
 	}
 }
 
-func (s *Server) ListenToHub() {
-	var msg communication.Message
-	select {
-	case msg = <-s.rcvHubChan:
-		if err := s.DB.AddMessage(uint(msg.Member), msg.Message); err != nil {
-			panic("Panicced while adding message")
-		}
-	}
+func (s *Server) MockHub() {
+	mockChan := make(chan *communication.Action)
+	s.actionChan = mockChan
+	<-mockChan
 }
 
 func (s *Server) RunHub() {
-	go s.Hub.Run()
-	s.ListenToHub()
+	go s.ListenToHub()
+	s.Hub.Run()
+}
+
+func (s *Server) ListenToHub() {
+	var msg *communication.Message
+	for {
+		select {
+		case msg = <-s.messageChan:
+			when, _ := time.Parse(msg.When, communication.TIME_FORMAT)
+			if err := s.DB.AddMessage(uint(msg.Member), msg.Message, when); err != nil {
+				panic("Panicced while adding message")
+			}
+		}
+	}
 }
 
 func (s *Server) CreateSignedToken(iss int) (string, error) {

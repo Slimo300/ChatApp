@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/models"
@@ -19,17 +18,8 @@ import (
 func TestSendGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockDB := mock.NewMockDB()
-
-	// mocking channel
-	channel := make(chan *communication.Action)
-	go func() {
-		for {
-			<-channel
-		}
-	}()
-	defer close(channel)
-
 	s := handlers.NewServer(mockDB)
+	go s.MockHub()
 
 	testCases := []struct {
 		desc               string

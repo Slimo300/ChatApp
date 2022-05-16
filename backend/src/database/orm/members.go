@@ -21,5 +21,10 @@ func (db *Database) GetUserGroupMember(userID, groupID uint) (member models.Memb
 }
 
 func (db *Database) IsUserInGroup(userID, groupID uint) bool {
-	return db.Where(models.Member{UserID: userID, GroupID: groupID, Deleted: false}).First(&models.Member{}).Error == nil
+	var member models.Member
+	err := db.Where(models.Member{UserID: userID, GroupID: groupID}).First(&member).Error
+	if err != nil || member.Deleted == true {
+		return false
+	}
+	return true
 }

@@ -1,6 +1,8 @@
 package communication
 
 import (
+	"time"
+
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gorilla/websocket"
 )
@@ -22,6 +24,10 @@ func (m *Message) Send(ws *websocket.Conn) error {
 		return err
 	}
 	return nil
+}
+
+func (m *Message) SetTime() {
+	m.When = time.Now().Format(TIME_FORMAT)
 }
 
 func ShortenMessages(messages []models.Message) (shortMessages []Message) {

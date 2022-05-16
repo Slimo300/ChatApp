@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/gorilla/websocket"
 )
 
@@ -21,23 +20,22 @@ var upgrader = &websocket.Upgrader{
 	}}
 
 type Hub struct {
-	db             database.DBlayer
-	rcvServerChan  <-chan *communication.Action
-	sendServerChan chan<- communication.Message
-	forward        chan *communication.Message
-	join           chan *client
-	leave          chan *client
-	clients        map[*client]bool
+	actionServerChan  <-chan *communication.Action
+	messageServerChan chan<- *communication.Message
+	forward           chan *communication.Message
+	join              chan *client
+	leave             chan *client
+	clients           map[*client]bool
 }
 
-func NewHub(sendChan chan<- communication.Message, rcvChan <-chan *communication.Action) *Hub {
+func NewHub(messageChan chan<- *communication.Message, actionChan <-chan *communication.Action) *Hub {
 	return &Hub{
-		rcvServerChan:  rcvChan,
-		sendServerChan: sendChan,
-		forward:        make(chan *communication.Message),
-		join:           make(chan *client),
-		leave:          make(chan *client),
-		clients:        make(map[*client]bool),
+		actionServerChan:  actionChan,
+		messageServerChan: messageChan,
+		forward:           make(chan *communication.Message),
+		join:              make(chan *client),
+		leave:             make(chan *client),
+		clients:           make(map[*client]bool),
 	}
 }
 
@@ -50,7 +48,8 @@ func (h *Hub) Run() {
 			delete(h.clients, client)
 			close(client.send)
 		case msg := <-h.forward:
-			h.sendServerChan <- *msg
+			msg.SetTime()
+			h.messageServerChan <- msg
 			for client := range h.clients {
 				for _, gr := range client.groups {
 					if gr == int64(msg.Group) {
@@ -58,7 +57,7 @@ func (h *Hub) Run() {
 					}
 				}
 			}
-		case msg := <-h.rcvServerChan:
+		case msg := <-h.actionServerChan:
 			switch msg.Action {
 			case "DELETE_GROUP":
 				h.GroupDeleted(msg.Group)

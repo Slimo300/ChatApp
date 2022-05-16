@@ -7,9 +7,9 @@ import (
 
 func Setup(engine *gin.Engine, server *handlers.Server) {
 
-	api := engine.Group("api")
+	engine.Use(CORSMiddleware())
 
-	api.Use(CORSMiddleware())
+	api := engine.Group("/api")
 	api.Use(server.CheckDatabase())
 
 	api.POST("/register", server.RegisterUser)
@@ -28,11 +28,13 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 
 	apiAuth.GET("/group/:groupID/messages", server.GetGroupMessages)
 
-	apiAuth.GET("/ws", server.ServeWebSocket)
-
 	apiAuth.GET("/invites", server.GetUserInvites)
 	apiAuth.POST("/invites", server.SendGroupInvite)
 	apiAuth.PUT("/invites/:inviteID", server.RespondGroupInvite)
+
+	ws := engine.Group("/ws")
+	ws.Use(server.MustAuth())
+	ws.GET("/", server.ServeWebSocket)
 }
 
 func CORSMiddleware() gin.HandlerFunc {

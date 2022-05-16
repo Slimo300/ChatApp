@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
 )
@@ -24,7 +25,7 @@ type DBlayer interface {
 	GetUserGroupMember(userID, groupID uint) (models.Member, error)
 
 	GetGroupMessages(id_group uint, offset, num int) ([]models.Message, error)
-	AddMessage(memberID uint, text string) error
+	AddMessage(memberID uint, text string, when time.Time) error
 
 	CreateGroup(id uint, name, desc string) (models.Group, error)
 	DeleteUserFromGroup(id_member uint) (models.Member, error)

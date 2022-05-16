@@ -116,6 +116,7 @@ func TestDeleteMember(t *testing.T) {
 	mockDB := mock.NewMockDB()
 
 	s := handlers.NewServer(mockDB)
+	go s.MockHub()
 
 	testCases := []struct {
 		desc               string
