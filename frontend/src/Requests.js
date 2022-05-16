@@ -25,7 +25,7 @@ export async function GetInvites() {
 }
 
 export async function GetGroups() {
-    const response = await fetch('http://localhost:8080/api/group/get', {
+    const response = await fetch('http://localhost:8080/api/group', {
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'});
     if (response.status !== 200 && response.status !== 204 ) {
@@ -35,26 +35,8 @@ export async function GetGroups() {
     return promise;
 }
 
-export async function GetMessages(groupID) {
-    const response = await fetch("http://localhost:8080/api/group/messages?group=" + groupID + "&num=8", {
-        headers: {"Content-Type": "application/json"},
-        credentials: "include",
-    });
-    let messages;
-    if (response.status === 200) {
-        messages = await response.json();
-    }
-    else if (response.status === 204) {
-        messages = [];
-    } 
-    else {
-        throw new Error("getting messages failed with status code: " + response.status.toString());
-    }
-    return messages;
-}
-
 export async function GetWebsocket() {
-    let socket = new WebSocket("ws://localhost:8080/ws")
+    let socket = new WebSocket("ws://localhost:8080/ws/")
     socket.onopen = () => {
         console.log("Websocket openned");
     };
@@ -140,7 +122,7 @@ export async function Register(email, username, password, rpassword) {
 export async function LoadMessages(groupID, offset) {
     let messages;
     try {
-        let response = await fetch("http://localhost:8080/api/group/messages?group=" + groupID + "&num=8&offset=" + offset, {
+        let response = await fetch("http://localhost:8080/api/group/"+groupID+"/messages?num=8&offset=" + offset, {
             headers: {"Content-Type": "application/json"},
             credentials: "include",
         });
@@ -162,7 +144,7 @@ export async function LoadMessages(groupID, offset) {
 export async function CreateGroup(name, desc) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group/create', {
+        response = await fetch('http://localhost:8080/api/group', {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -184,13 +166,10 @@ export async function CreateGroup(name, desc) {
 export async function DeleteGroup(groupID) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group/delete', {
+        response = await fetch('http://localhost:8080/api/group/'+groupID, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
-            body: JSON.stringify({
-                "group": groupID
-            })
         });
 
         if (response.status !== 200) {
@@ -205,13 +184,10 @@ export async function DeleteGroup(groupID) {
 export async function DeleteMember(memberID) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group/remove', {
-            method: 'PUT',
+        response = await fetch('http://localhost:8080/api/member/'+memberID, {
+            method: 'DELETE',
             headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify({
-                "member": memberID
-            })
+            credentials: "include"
         });
         if (response.status !== 200) {
             throw new Error('invalid status code: ' + response.status.toString());
@@ -226,12 +202,11 @@ export async function DeleteMember(memberID) {
 export async function SetRights(memberID, adding, deleting, setting) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group/rights', {
+        response = await fetch('http://localhost:8080/api/member/'+memberID, {
             method: 'PUT',
             headers: {"Content-Type": "application/json"},
             credentials: "include",
             body: JSON.stringify({
-                "member": memberID,
                 "adding": adding,
                 "deleting": deleting,
                 "setting": setting,

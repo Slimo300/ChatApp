@@ -4,7 +4,7 @@ import { actionTypes, StorageContext } from "../ChatStorage";
 import Chat from "../components/Chat";
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
-import { GetGroups, GetInvites, GetMessages, GetUser, GetWebsocket } from "../Requests";
+import { GetGroups, GetInvites, GetUser, GetWebsocket, LoadMessages } from "../Requests";
 
 const Main = (props) => {
 
@@ -19,7 +19,7 @@ const AuthMain = (props) => {
 
     const [state, dispatch] = useContext(StorageContext);
     const [current, setCurrent] = useState({}); // current group
-    const [toggler, setToggler] = useState(false); // toggler for scrollRef
+    const [toggler, setToggler] = useState(false);
     function toggleToggler(){
         setToggler(!toggler);
     }
@@ -68,7 +68,7 @@ const AuthMain = (props) => {
         (
             async () => {
                 if (current.ID !== undefined && current.messages.length === 0) {
-                    let messagesPromise = GetMessages(current.ID.toString())
+                    let messagesPromise = LoadMessages(current.ID.toString(), 0)
                     messagesPromise.then( response => { dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: response, group: current.ID}}) } )
                     toggleToggler();
                 }

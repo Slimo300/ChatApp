@@ -125,7 +125,7 @@ function SetMessages(state, payload) {
     let newState = {...state};
     for (let i = 0; i < newState.groups.length; i++) {
         if (newState.groups[i].ID === payload.group) {
-            newState.groups[i].messages = payload.messages
+            newState.groups[i].messages = payload.messages.reverse()
             return newState;
         }
     }
@@ -150,7 +150,7 @@ function AddMessages(state, payload) {
     let newState = {...state};
     for (let i = 0; i < newState.groups.length; i++) {
         if (newState.groups[i].ID === payload.group) {
-            newState.groups[i].messages = [...payload.messages, ...newState.groups[i].messages];
+            newState.groups[i].messages = [...payload.messages.reverse(), ...newState.groups[i].messages];
             return newState;
         }
     }
