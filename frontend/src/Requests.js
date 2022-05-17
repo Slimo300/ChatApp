@@ -48,32 +48,30 @@ export async function GetWebsocket() {
 
 export async function Login(email, password) {
     let response;
-    try {
-        if (email.trim() === "") {
-            throw new Error("Email cannot be blank");
-        }
-        if (password.trim() === "") {
-            throw new Error("Password cannot be blank");
-        }
-
-        response = await fetch('http://localhost:8080/api/login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                email,
-                password,
-            })
-        });
-
-        if (response.status !== 200) {
-            throw new Error("Invalid status code: "+ response.status.toString());
-        }
-    } catch(err) {
-        return err;
+    let error;
+    if (email.trim() === "") {
+        throw new Error("Email cannot be blank");
     }
-    let promise = await response.json();
-    return promise;
+    if (password.trim() === "") {
+        throw new Error("Password cannot be blank");
+    }
+
+    response = await fetch('http://localhost:8080/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+            email,
+            password,
+        })
+    });
+
+    if (response.status !== 200) {
+        error = "Error occured, status code: "+response.status;
+    }
+   
+    let responseJSON = await response.json();
+    return {response: responseJSON, error: error};
 }
 
 export async function Logout() {

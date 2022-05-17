@@ -50,7 +50,10 @@ func (s *Server) ListenToHub() {
 	for {
 		select {
 		case msg = <-s.messageChan:
-			when, _ := time.Parse(msg.When, communication.TIME_FORMAT)
+			when, err := time.Parse(communication.TIME_FORMAT, msg.When)
+			if err != nil {
+				panic(err.Error())
+			}
 			if err := s.DB.AddMessage(uint(msg.Member), msg.Message, when); err != nil {
 				panic("Panicced while adding message")
 			}

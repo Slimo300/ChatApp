@@ -96,9 +96,9 @@ const Chat = (props) => {
                 <div className="chat-container">
                     <ul className="chat-box" style={{height: '70vh', overflow: 'scroll'}}>
                         <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
-                        {props.group.messages===undefined?null:props.group.messages.map(item => {
+                        {props.group.messages===undefined?null:props.group.messages.map((item) => {
                         return <div ref={scrollRef}>
-                                <Message key={item.created} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
+                                <Message key={item.ID} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
                             </div>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>

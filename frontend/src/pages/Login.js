@@ -11,13 +11,13 @@ const SignInForm = (props) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    let loginPromise = Login(email, password);
-    loginPromise.then( response => {
-      if (response.name === "Error") {
-        setMessage(response.message);
+    let result = Login(email, password);
+    result.then( res => {
+      if (res.error !== undefined) {
+        setMessage(res.message);
         return;
       }
-      props.setName(response.name);
+      props.setName(res.response.name);
       setRedirect(true);
     });
   }

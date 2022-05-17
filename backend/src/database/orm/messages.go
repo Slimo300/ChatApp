@@ -10,6 +10,7 @@ func (db *Database) AddMessage(memberID uint, text string, when time.Time) error
 	message := models.Message{
 		Text:     text,
 		MemberID: memberID,
+		Posted:   when,
 	}
 
 	if err := db.Create(&message).Error; err != nil {

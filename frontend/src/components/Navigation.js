@@ -38,9 +38,9 @@ const Navigation = (props) => {
                 <div className="btn-group">
                     <button type="button" className="btn btn-secondary dropdown-toggle bg-dark" data-toggle="dropdown" aria-expanded="false">
                         <FontAwesomeIcon className='text-primary pr-2' icon={faBell} />
-                        <span class="badge badge-secondary">{state.notifications!==undefined?state.notifications.length:null}</span>
+                        <span className="badge badge-secondary">{state.notifications!==undefined?state.notifications.length:null}</span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-right">
+                    <div className="dropdown-menu dropdown-menu-right">
                         {state.notifications!==undefined?state.notifications.map((item)=> <Invite groupID={item.groupID} issID={item.issID} inviteID={item.ID} />):null}
                     </div>
                 </div>
