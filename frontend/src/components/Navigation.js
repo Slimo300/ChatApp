@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {NavLink} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBell } from '@fortawesome/free-solid-svg-icons'
 import { Logout } from '../Requests';
+import { StorageContext } from '../ChatStorage';
+import Invite from './Invite';
 
 const Navigation = (props) => {
+
+    const [state,] = useContext(StorageContext);
+
     const logout = async () => {
         let logoutPromise = Logout();
         logoutPromise.then( response => {
@@ -30,7 +35,16 @@ const Navigation = (props) => {
                     <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleCrGroup}>Create Room</button>
                 </ul>
 
-                <button className='btn btn-dark'><FontAwesomeIcon className='text-primary' icon={faBell} /></button>
+                <div className="btn-group">
+                    <button type="button" className="btn btn-secondary dropdown-toggle bg-dark" data-toggle="dropdown" aria-expanded="false">
+                        <FontAwesomeIcon className='text-primary pr-2' icon={faBell} />
+                        <span class="badge badge-secondary">{state.notifications!==undefined?state.notifications.length:null}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        {state.notifications!==undefined?state.notifications.map((item)=> <Invite groupID={item.groupID} issID={item.issID} inviteID={item.ID} />):null}
+                    </div>
+                </div>
+
                 <NavLink className="nav-item nav-link" to="/login" onClick={logout}>Logout</NavLink>
             </div>
         );

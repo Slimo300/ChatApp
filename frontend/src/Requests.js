@@ -221,3 +221,23 @@ export async function SetRights(memberID, adding, deleting, setting) {
     let responseJSON = await response.json();
     return responseJSON;
 }
+
+export async function RespondInvite(inviteID, answer) {
+    let response;
+
+    response = await fetch('http://localhost:8080/api/invites/'+inviteID, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        credentials: "include",
+        body: JSON.stringify({
+            "answer": answer,
+        }),
+    });
+    if (response.status !== 200) {
+        let responseJSON = await response.json();
+        console.log(responseJSON.err);
+        return null;
+    }
+    let responseJSON = await response.json();
+    return responseJSON;
+}  

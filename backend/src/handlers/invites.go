@@ -6,9 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
-	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -74,9 +72,13 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 		return
 	}
 
-	invite := models.Invite{IssId: uint(userID), TargetID: userToBeAdded.ID, GroupID: uint(load.GroupID)}
+	_, err = s.DB.AddInvite(uint(userID), userToBeAdded.ID, uint(load.GroupID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal database error"})
+		return
+	}
 
-	s.actionChan <- &communication.Action{Invite: invite}
+	// s.actionChan <- &communication.Action{Invite: invite}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "invite sent"})
 }
