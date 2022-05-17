@@ -14,6 +14,7 @@ const Invite = (props) => {
                 return;
             }
             dispatch({type: actionTypes.NEW_GROUP, payload: response});
+            dispatch({type: actionTypes.DELETE_NOTIFICATION, payload: props.inviteID});
             console.log(response);
         });
     };

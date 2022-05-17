@@ -52,6 +52,8 @@ function reducer(state, action) {
             return DeleteInvite(state, action.payload);
         case actionTypes.RESET_COUNTER:
             return ResetCounter(state, action.payload);
+        case actionTypes.DELETE_NOTIFICATION:
+            return DeleteNotification(state, action.payload);
         default:
             throw new Error("Action not specified");
     }
@@ -184,4 +186,10 @@ function ResetCounter(state, payload) {
         }
     }
     throw new Error("No such group in storage");
+}
+
+function DeleteNotification(state, payload) {
+    let newState = {...state};
+    newState.notifications = newState.notifications.filter( (item) => { return item.ID !== payload } );
+    return newState;
 }

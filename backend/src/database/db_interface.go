@@ -45,9 +45,9 @@ type DBlayer interface {
 	GetInviteByID(inviteID uint) (models.Invite, error)
 }
 
-const INVITE_AWAITING = 0
-const INVITE_ACCEPT = 1
-const INVITE_DECLINE = 2
+const INVITE_AWAITING = 1
+const INVITE_ACCEPT = 2
+const INVITE_DECLINE = 3
 
 const TIME_FORMAT = "2006-02-01 15:04:05"
 
