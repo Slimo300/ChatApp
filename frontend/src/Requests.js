@@ -1,5 +1,16 @@
+
+const port = "8080";
+
+let hostname;
+
+if (window.location.host ==="localhost:3000") {
+    hostname="localhost";
+}else{
+    hostname="backend";
+}
+
 export async function GetUser() {
-    const response = await fetch('http://localhost:8080/api/user', {
+    const response = await fetch('http://'+hostname+':'+port+'/api/user', {
         method: 'GET',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'});
@@ -11,7 +22,7 @@ export async function GetUser() {
 }
 
 export async function GetInvites() {
-    const response = await fetch('http://localhost:8080/api/invites', {
+    const response = await fetch('http://'+hostname+':'+port+'api/invites', {
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'
     });
@@ -25,7 +36,7 @@ export async function GetInvites() {
 }
 
 export async function GetGroups() {
-    const response = await fetch('http://localhost:8080/api/group', {
+    const response = await fetch('http://'+hostname+':'+port+'/api/group', {
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'});
     if (response.status !== 200 && response.status !== 204 ) {
@@ -36,7 +47,7 @@ export async function GetGroups() {
 }
 
 export async function GetWebsocket() {
-    let socket = new WebSocket("ws://localhost:8080/ws/")
+    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
     socket.onopen = () => {
         console.log("Websocket openned");
     };
@@ -56,7 +67,7 @@ export async function Login(email, password) {
         throw new Error("Password cannot be blank");
     }
 
-    response = await fetch('http://localhost:8080/api/login', {
+    response = await fetch('http://'+hostname+':'+port+'/api/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -76,7 +87,7 @@ export async function Login(email, password) {
 
 export async function Logout() {
     try {
-        let response = await fetch("http://localhost:8080/api/signout", {
+        let response = await fetch('http://'+hostname+':'+port+'/api/signout', {
             method: "POST",
             credentials: "include",
             headers: {"Content-Type": "application/json"}
@@ -97,7 +108,7 @@ export async function Register(email, username, password, rpassword) {
         if (password !== rpassword) {
             throw new Error("Passwords don't match");
         }
-        let response = await fetch('http://localhost:8080/api/register', {
+        let response = await fetch('http://'+hostname+':'+port+'/api/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -120,7 +131,7 @@ export async function Register(email, username, password, rpassword) {
 export async function LoadMessages(groupID, offset) {
     let messages;
     try {
-        let response = await fetch("http://localhost:8080/api/group/"+groupID+"/messages?num=8&offset=" + offset, {
+        let response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID+'/messages?num=8&offset=' + offset, {
             headers: {"Content-Type": "application/json"},
             credentials: "include",
         });
@@ -142,7 +153,7 @@ export async function LoadMessages(groupID, offset) {
 export async function CreateGroup(name, desc) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group', {
+        response = await fetch('http://'+hostname+':'+port+'/api/group', {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -164,7 +175,7 @@ export async function CreateGroup(name, desc) {
 export async function DeleteGroup(groupID) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/group/'+groupID, {
+        response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -182,7 +193,7 @@ export async function DeleteGroup(groupID) {
 export async function DeleteMember(memberID) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/member/'+memberID, {
+        response = await fetch('http://'+hostname+':'+port+'/api/member/'+memberID, {
             method: 'DELETE',
             headers: {"Content-Type": "application/json"},
             credentials: "include"
@@ -200,7 +211,7 @@ export async function DeleteMember(memberID) {
 export async function SetRights(memberID, adding, deleting, setting) {
     let response;
     try {
-        response = await fetch('http://localhost:8080/api/member/'+memberID, {
+        response = await fetch('http://'+hostname+':'+port+'/api/member/'+memberID, {
             method: 'PUT',
             headers: {"Content-Type": "application/json"},
             credentials: "include",
@@ -223,7 +234,7 @@ export async function SetRights(memberID, adding, deleting, setting) {
 export async function RespondInvite(inviteID, answer) {
     let response;
 
-    response = await fetch('http://localhost:8080/api/invites/'+inviteID, {
+    response = await fetch('http://'+hostname+':'+port+'/api/invites/'+inviteID, {
         method: "PUT",
         headers: {"Content-Type": "application/json"},
         credentials: "include",

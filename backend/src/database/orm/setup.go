@@ -15,8 +15,8 @@ type Database struct {
 
 // Setup creates Database object and initializes connection between MySQL database
 func Setup() (*Database, error) {
-	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
-		os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLDBNAME"))), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
+		os.Getenv("MYSQLPASSWORD"), os.Getenv("MYSQLHOST"), "3306", os.Getenv("MYSQLDBNAME"))), &gorm.Config{
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {

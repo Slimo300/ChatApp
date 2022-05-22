@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  chatmysql:
+    image: mysql/mysql-server
+    container_name: chatmysql
+    hostname: db
+    user: root
+    networks:
+      - chatnet
+    ports:
+      - 3307:3306
+    volumes:
+      - chatmysqlvolume:/var/lib/mysql
+  chatbackend:
+    depends_on: 
+      - chatmysql
+    build:
+      context: backend/src
+    container_name: chatbackend
+    hostname: backend
+    networks:
+      - chatnet
+    ports:
+      - 8080:8080
+    environment:
+      - MYSQLUSERNAME=${MYSQLUSERNAME:-user}
+      - MYSQLPASSWORD=${MYSQLPASSWORD:?database password not set}
+      - MYSQLHOST=${MYSQLHOST:-db}
+      - MYSQLPORT=${MYSQLPORT:-3306}
+      - MYSQLDBNAME=${MYSQLDBNAME:-test}
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+  chatfrontend:
+    build: frontend
+    container_name: chatfrontend
+    hostname: front
+    networks:
+      - chatnet
+    ports:
+      - 3000:3000
+
+volumes:
+  chatmysqlvolume:
+
+networks:
+  chatnet:
+    driver: bridge
