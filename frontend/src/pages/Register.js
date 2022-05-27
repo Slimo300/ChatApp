@@ -14,9 +14,11 @@ function RegisterForm() {
     e.preventDefault();
 
     let register = Register(email, username, password, rpassword);
+    console.log("SSASS");
     register.then( response => {
+      console.log(response);
       if (response.err !== undefined) {
-        setMessage(response.err.message);
+        setMessage(response.err);
         return
       } 
       setRedirect(true);

@@ -101,31 +101,25 @@ export async function Logout() {
 }
 
 export async function Register(email, username, password, rpassword) {
-    try {
-        if (password.trim() === "") {
-            throw new Error("Password can't be blank");
-        }
-        if (password !== rpassword) {
-            throw new Error("Passwords don't match");
-        }
-        let response = await fetch('http://'+hostname+':'+port+'/api/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                username, 
-                email,
-                password
-            })
-        });
-        if ( response.status !==  201) {
-            throw new Error("Invalid status code: " + response.status.toString());
-        }
+    if (password.trim() === "") {
+        throw new Error("Password can't be blank");
     }
-    catch(err) {
-        return err;
+    if (password !== rpassword) {
+        throw new Error("Passwords don't match");
     }
-    return null;
+    let response = await fetch('http://'+hostname+':'+port+'/api/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+            username, 
+            email,
+            password
+        })
+    });
+    let responseJSON = await response.json();
+
+    return responseJSON;
 }
 
 export async function LoadMessages(groupID, offset) {
