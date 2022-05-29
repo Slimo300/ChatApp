@@ -10,7 +10,7 @@ const GroupMenu = (props) => {
             <div className="dropdown-divider"></div>
             {props.member.creator?
             <button className="dropdown-item" onClick={props.toggleDel}>Delete Group</button>:
-            <button className="dropdown-item" onClick={props.toggleDel}>Leave Group</button>}
+            <button className="dropdown-item" onClick={props.toggleLeave}>Leave Group</button>}
         </div>
     );
 };

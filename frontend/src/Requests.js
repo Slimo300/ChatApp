@@ -47,7 +47,7 @@ export async function GetGroups() {
 }
 
 export async function GetWebsocket() {
-    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws')
+    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
     socket.onopen = () => {
         console.log("Websocket openned");
     };

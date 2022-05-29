@@ -3,17 +3,20 @@ import {NavLink} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBell } from '@fortawesome/free-solid-svg-icons'
 import { Logout } from '../Requests';
-import { StorageContext } from '../ChatStorage';
+import { StorageContext, actionTypes } from '../ChatStorage';
 import Invite from './Invite';
 
 const Navigation = (props) => {
 
-    const [state,] = useContext(StorageContext);
+    const [state, dispatch] = useContext(StorageContext);
 
     const logout = async () => {
         let logoutPromise = Logout();
         logoutPromise.then( response => {
-            if (response === undefined) props.setName("");
+            if (response === undefined) {
+                dispatch({type: actionTypes.LOGOUT})
+                props.setName("");
+            }
             else alert(response.message);
         })
     };

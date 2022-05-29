@@ -10,6 +10,7 @@ const initialState = {
 
 export const actionTypes = {
     LOGIN: "LOGIN",
+    LOGOUT: "LOGOUT",
     SET_GROUPS: "SET_GROUPS",
     NEW_GROUP: "NEW_GROUP",
     DELETE_GROUP: "DELETE_GROUP",
@@ -28,6 +29,8 @@ function reducer(state, action) {
     switch (action.type) {
         case actionTypes.LOGIN:
             return Login(state, action.payload);
+        case actionTypes.LOGOUT:
+            return Logout();
         case actionTypes.SET_GROUPS:
             return SetGroups(state, action.payload);
         case actionTypes.NEW_GROUP:
@@ -75,6 +78,10 @@ function Login(state, payload) {
     let newState = {...state};
     newState.user = payload;
     return newState;
+}
+
+function Logout() {
+    return initialState;
 }
 
 function SetGroups(state, payload) {
