@@ -14,11 +14,11 @@ func (s *Server) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 	}
 	if !isEmailValid(user.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not a valid email"})
 		return
 	}
 	if len(user.Pass) <= 6 {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"err": "not a valid password"})
 		return
 	}
 	if len(user.UserName) < 2 {
@@ -58,11 +58,11 @@ func (s *Server) SignIn(c *gin.Context) {
 	requestPassword := user.Pass
 	user, err := s.DB.GetUserByEmail(user.Email)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "wrong email or password"})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "wrong email or password"})
 		return
 	}
 	if !checkPassword(user.Pass, requestPassword) {
-		c.JSON(http.StatusUnauthorized, gin.H{"err": "wrong email or password"})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "wrong email or password"})
 		return
 	}
 	if err := s.DB.SignInUser(user.ID); err != nil {

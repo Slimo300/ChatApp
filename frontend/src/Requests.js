@@ -22,7 +22,7 @@ export async function GetUser() {
 }
 
 export async function GetInvites() {
-    const response = await fetch('http://'+hostname+':'+port+'api/invites', {
+    const response = await fetch('http://'+hostname+':'+port+'/api/invites', {
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'
     });
@@ -47,7 +47,7 @@ export async function GetGroups() {
 }
 
 export async function GetWebsocket() {
-    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
+    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws')
     socket.onopen = () => {
         console.log("Websocket openned");
     };
@@ -58,8 +58,6 @@ export async function GetWebsocket() {
 }
 
 export async function Login(email, password) {
-    let response;
-    let error;
     if (email.trim() === "") {
         throw new Error("Email cannot be blank");
     }
@@ -67,7 +65,7 @@ export async function Login(email, password) {
         throw new Error("Password cannot be blank");
     }
 
-    response = await fetch('http://'+hostname+':'+port+'/api/login', {
+    let response = await fetch('http://'+hostname+':'+port+'/api/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -77,12 +75,9 @@ export async function Login(email, password) {
         })
     });
 
-    if (response.status !== 200) {
-        error = "Error occured, status code: "+response.status;
-    }
-   
     let responseJSON = await response.json();
-    return {response: responseJSON, error: error};
+
+    return responseJSON;
 }
 
 export async function Logout() {

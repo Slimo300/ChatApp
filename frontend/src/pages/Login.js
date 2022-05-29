@@ -13,11 +13,11 @@ const SignInForm = (props) => {
     e.preventDefault();
     let result = Login(email, password);
     result.then( res => {
-      if (res.error !== undefined) {
-        setMessage(res.message);
+      if (res.err !== undefined) {
+        setMessage(res.err);
         return;
       }
-      props.setName(res.response.name);
+      props.setName(res.name);
       setRedirect(true);
     });
   }
