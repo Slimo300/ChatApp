@@ -2,9 +2,11 @@ import React, { useContext, useEffect, useState } from "react";
 import {Navigate} from "react-router-dom";
 import { actionTypes, StorageContext } from "../ChatStorage";
 import Chat from "../components/Chat";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
 import { GetGroups, GetInvites, GetUser, GetWebsocket, LoadMessages } from "../Requests";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const Main = (props) => {
 
@@ -24,6 +26,11 @@ const AuthMain = (props) => {
         setToggler(!toggler);
     }
     const [ws, setWs] = useState({}); // websocket connection
+
+    const [createGrShow, setCreateGrShow] = useState(false);
+    const toggleCreateGroup = () => {
+        setCreateGrShow(!createGrShow);
+    }
 
     // Getting user data, groups and invites and setting websocket connection
     useEffect(() => {
@@ -84,6 +91,8 @@ const AuthMain = (props) => {
                         <div className="card m-0">
                             <div className="row no-gutters">
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
+                                    <button className="btn btn-primary mt-3 ml-3" onClick={toggleCreateGroup}><FontAwesomeIcon icon={faPlus} className="mr-3"/>New Group</button>
+                                    <hr />
                                     <div className="users-container">
                                         <ul className="users" style={{height: '85vh', overflow: 'scroll'}}>
                                             {state.groups.length!==0?state.groups.map(item => {return <GroupLabel key={item.ID} setCurrent={setCurrent} group={item}/>}):null}
@@ -96,7 +105,7 @@ const AuthMain = (props) => {
                     </div>
                 </div>
             </div>
-          <ModalCreateGroup show={props.showCrGroup} toggle={props.toggleCrGroup}/>
+          <ModalCreateGroup show={createGrShow} toggle={toggleCreateGroup}/>
         </div>
     )
 }

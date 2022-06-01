@@ -325,3 +325,27 @@ ul {
     margin-bottom: 2rem;
     box-shadow: none;
 }
+
+
+/* Profile */
+
+.card-box {
+    padding: 20px;
+    border-radius: 3px;
+    margin-bottom: 30px;
+    background-color: #fff;
+}
+
+.profile-image-holder {
+    height: 150px;
+    width: 150px;
+}
+
+.img-thumbnail {
+    padding: .25rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    width: 100%;
+    height: 100%;
+}

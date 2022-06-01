@@ -5,23 +5,20 @@ import Main from "./pages/Main";
 import Navigation from "./components/Navigation";
 import RegisterForm from "./pages/Register";
 import ChatStorage from "./ChatStorage";
+import Profile from "./pages/Profile";
 function App() {
   
   const [name, setName] = useState('');
-
-  const [createGrShow, setCreateGrShow] = useState(false);
-  const toggleCreateGroup = () => {
-    setCreateGrShow(!createGrShow);
-  }
 
   return (
       <div >
         <ChatStorage>
         <Router>
-          <Navigation name={name} setName={setName} toggleCrGroup={toggleCreateGroup}/>
+          <Navigation name={name} setName={setName}/>
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name} toggleCrGroup={toggleCreateGroup} showCrGroup={createGrShow}/>}/>
+              <Route path="/" element={<Main name={name}/>}/>
+              <Route path="/profile" element={<Profile name={name} />}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
