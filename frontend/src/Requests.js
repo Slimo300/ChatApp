@@ -39,8 +39,8 @@ export async function GetGroups() {
     const response = await fetch('http://'+hostname+':'+port+'/api/group', {
         headers: {'Content-Type': 'application/json'},
         credentials: 'include'});
-    if (response.status !== 200 && response.status !== 204 ) {
-        throw new Error("Invalid response when requesting user groups");
+    if (response.status === 204) {
+        return {"err": "no groups"};
     }
     const promise = await response.json();
     return promise;
@@ -239,3 +239,28 @@ export async function RespondInvite(inviteID, answer) {
     let responseJSON = await response.json();
     return responseJSON;
 }  
+
+export async function ChangePassword(oldPassword, newPassword, repeatPassword) {
+    if (newPassword === "") {
+        return {"err": "password cannot be blank"}
+    }
+    if (newPassword.length <  6) {
+        return {"err": "password must be at least 6 characters long"}
+    }
+    if (repeatPassword !== newPassword) {
+        return {"err": "Passwords don't match"}
+    }
+
+    let response = await fetch('http://'+hostname+':'+port+"/api/change-password", {
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify({
+            "oldPassword": oldPassword,
+            "newPassword": newPassword,
+        }),
+    })
+
+    let responseJSON = await response.json();
+
+    return responseJSON;
+}

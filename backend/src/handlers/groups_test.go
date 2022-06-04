@@ -9,16 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database/mock"
-	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 )
 
 func TestGetUserGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mock := mock.NewMockDB()
-	s := handlers.NewServer(mock)
+	s := SetupTestServer()
 
 	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 
@@ -81,9 +78,7 @@ func TestGetUserGroups(t *testing.T) {
 
 func TestDeleteGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB)
-	go s.MockHub()
+	s := SetupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string
@@ -152,10 +147,7 @@ func TestDeleteGroup(t *testing.T) {
 
 func TestCreateGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-
-	s := handlers.NewServer(mockDB)
-	go s.MockHub()
+	s := SetupTestServer()
 
 	testCases := []struct {
 		desc               string

@@ -9,15 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database/mock"
-	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB)
+	s := SetupTestServer()
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -82,8 +79,7 @@ func TestRegister(t *testing.T) {
 
 func TestSignIn(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB)
+	s := SetupTestServer()
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -134,8 +130,7 @@ func TestSignIn(t *testing.T) {
 
 func TestSignOut(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB)
+	s := SetupTestServer()
 
 	testCases := []struct {
 		desc               string

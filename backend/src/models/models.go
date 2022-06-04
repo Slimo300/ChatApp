@@ -9,6 +9,7 @@ type User struct {
 	UserName string    `gorm:"column:username;unique" json:"username"`
 	Email    string    `gorm:"column:email;unique" json:"email"`
 	Pass     string    `gorm:"column:password" json:"password"`
+	Picture  string    `gorm:"picture_url" json:"pictureUrl"`
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
 	LoggedIn bool      `gorm:"column:logged" json:"logged"`
@@ -22,6 +23,7 @@ type Group struct {
 	ID      uint      `gorm:"primaryKey"`
 	Name    string    `gorm:"column:name" json:"name"`
 	Desc    string    `gorm:"column:desc" json:"desc"`
+	Picture string    `gorm:"column:picture_url" json:"pictureUrl"`
 	Created time.Time `gorm:"column:created" json:"created"`
 	Members []Member  `gorm:"foreignKey:GroupID"`
 }

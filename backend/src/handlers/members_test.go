@@ -9,15 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database/mock"
-	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 func TestGrantPriv(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB)
+	s := SetupTestServer()
 
 	testCases := []struct {
 		desc               string
@@ -113,10 +110,7 @@ func TestGrantPriv(t *testing.T) {
 }
 func TestDeleteMember(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockDB := mock.NewMockDB()
-
-	s := handlers.NewServer(mockDB)
-	go s.MockHub()
+	s := SetupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string

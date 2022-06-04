@@ -24,6 +24,7 @@ func (db *Database) RegisterUser(user models.User) (models.User, error) {
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false
+	user.Picture = ""
 	return user, db.Create(&user).Error
 }
 

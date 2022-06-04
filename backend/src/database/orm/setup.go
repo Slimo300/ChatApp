@@ -27,3 +27,17 @@ func Setup() (*Database, error) {
 
 	return &Database{DB: db}, nil
 }
+
+func SetupDevelopment() (*Database, error) {
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", os.Getenv("MYSQLUSERNAME"),
+		os.Getenv("MYSQLPASSWORD"), "localhost", "3306", os.Getenv("MYSQLDBNAME"))), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	db.AutoMigrate(&models.User{}, models.Group{}, models.Member{}, models.Message{}, models.Invite{})
+
+	return &Database{DB: db}, nil
+}

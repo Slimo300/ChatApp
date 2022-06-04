@@ -25,7 +25,7 @@ func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
 }
 
 func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
-	group := models.Group{Name: name, Desc: desc, Created: time.Now()}
+	group := models.Group{Name: name, Desc: desc, Created: time.Now(), Picture: ""}
 
 	var creator models.User
 	db.Where(models.User{ID: id}).First(&creator)

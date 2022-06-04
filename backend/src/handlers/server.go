@@ -7,30 +7,35 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/storage"
 	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
 type Server struct {
-	DB          database.DBlayer
-	Hub         *ws.Hub
-	actionChan  chan<- *communication.Action
-	messageChan <-chan *communication.Message
-	secret      string
-	domain      string
+	DB           database.DBlayer
+	Storage      storage.StorageLayer
+	Hub          *ws.Hub
+	actionChan   chan<- *communication.Action
+	messageChan  <-chan *communication.Message
+	secret       string
+	domain       string
+	maxBodyBytes int
 }
 
-func NewServer(db database.DBlayer) *Server {
+func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
 	actionChan := make(chan *communication.Action)
 	messageChan := make(chan *communication.Message)
 	return &Server{
-		DB:          db,
-		secret:      "wołowina",
-		domain:      "localhost",
-		actionChan:  actionChan,
-		messageChan: messageChan,
-		Hub:         ws.NewHub(messageChan, actionChan),
+		DB:           db,
+		Storage:      storage,
+		secret:       "wołowina",
+		domain:       "localhost",
+		actionChan:   actionChan,
+		messageChan:  messageChan,
+		maxBodyBytes: 4194304,
+		Hub:          ws.NewHub(messageChan, actionChan),
 	}
 }
 

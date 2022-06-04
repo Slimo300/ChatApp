@@ -19,6 +19,11 @@ type DBlayer interface {
 	SignInUser(id uint) error
 	SignOutUser(id uint) error
 
+	SetPassword(userID uint, password string) error
+	GetProfilePictureURL(userID uint) (string, error)
+	SetProfilePicture(userID uint, newURI string) error
+	DeleteProfilePicture(userID uint) error
+
 	GetUserGroups(id uint) ([]models.Group, error)
 
 	GetMemberByID(memberID uint) (models.Member, error)
