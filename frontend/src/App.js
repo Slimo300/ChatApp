@@ -5,20 +5,23 @@ import Main from "./pages/Main";
 import Navigation from "./components/Navigation";
 import RegisterForm from "./pages/Register";
 import ChatStorage from "./ChatStorage";
-import Profile from "./pages/Profile";
 function App() {
   
   const [name, setName] = useState('');
+
+  const [profileShow, setProfileShow] = useState(false);
+  const toggleProfileShow = () => {
+    setProfileShow(!profileShow);
+  }
 
   return (
       <div >
         <ChatStorage>
         <Router>
-          <Navigation name={name} setName={setName}/>
+          <Navigation name={name} setName={setName} toggleProfile={toggleProfileShow} />
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name}/>}/>
-              <Route path="/profile" element={<Profile name={name} />}/>
+              <Route path="/" element={<Main name={name} profileShow={profileShow} toggleProfile={toggleProfileShow}/>}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>

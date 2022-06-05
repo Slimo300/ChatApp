@@ -7,6 +7,7 @@ import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
 import { GetGroups, GetInvites, GetUser, GetWebsocket, LoadMessages } from "../Requests";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { ModalUserProfile } from "./Profile";
 
 const Main = (props) => {
 
@@ -17,7 +18,7 @@ const Main = (props) => {
     );
 }
 
-const AuthMain = () => {
+const AuthMain = (props) => {
 
     const [state, dispatch] = useContext(StorageContext);
     const [current, setCurrent] = useState({}); // current group
@@ -108,6 +109,7 @@ const AuthMain = () => {
                 </div>
             </div>
           <ModalCreateGroup show={createGrShow} toggle={toggleCreateGroup}/>
+          <ModalUserProfile show={props.profileShow} toggle={props.toggleProfile} />
         </div>
     )
 }

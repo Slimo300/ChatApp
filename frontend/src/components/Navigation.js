@@ -35,10 +35,9 @@ const Navigation = (props) => {
         menu = (
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav mr-auto">
-                    {/* <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleCrGroup}>Create Room</button> */}
+                    <button type='button' className="navbar-brand order-1 btn btn-dark text-primary" onClick={props.toggleProfile}>Profile</button>
                 </ul>
 
-                <NavLink className="nav-item nav-link" to="/profile">Profile</NavLink>
                 <div className="btn-group">
                     <button type="button" className="btn btn-secondary dropdown-toggle bg-dark" data-toggle="dropdown" aria-expanded="false">
                         <FontAwesomeIcon className='text-primary pr-2' icon={faBell} />
