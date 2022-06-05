@@ -38,6 +38,10 @@ type DBlayer interface {
 
 	DeleteGroup(id_group uint) (models.Group, error)
 
+	GetGroupProfilePicture(groupID uint) (string, error)
+	SetGroupProfilePicture(groupID uint, newURI string) error
+	DeleteGroupProfilePicture(groupID uint) error
+
 	GetUserInvites(userID uint) ([]models.Invite, error)
 	AddInvite(issID, targetID, groupID uint) (models.Invite, error)
 

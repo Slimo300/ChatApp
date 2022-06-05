@@ -6,6 +6,7 @@ import Message from "./Message";
 import { ModalAddUser } from "./modals/AddUser";
 import { ModalDeleteGroup } from "./modals/DeleteGroup";
 import { ModalMembers } from "./modals/GroupMembers";
+import { ModalGroupOptions } from "./modals/GroupOptions";
 import { ModalLeaveGroup } from "./modals/LeaveGroup";
 
 const Chat = (props) => {
@@ -38,6 +39,10 @@ const Chat = (props) => {
     const [leaveGrShow, setLeaveGroupShow] = useState(false);
     const toggleLeaveGroup = () => {
         setLeaveGroupShow(!leaveGrShow);
+    };
+    const [optionsShow, setOptionsShow] = useState(false);
+    const toggleOptions = () => {
+        setOptionsShow(!optionsShow);
     };
 
     // getting group membership
@@ -95,7 +100,7 @@ const Chat = (props) => {
                         <button className="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Settings
                         </button>
-                        <GroupMenu toggleDel={toggleDelGroup} toggleAdd={toggleAddUser} toggleMembers={toggleMembers} toggleLeave={toggleLeaveGroup} member={member}/>
+                        <GroupMenu toggleOptions={toggleOptions} toggleDel={toggleDelGroup} toggleAdd={toggleAddUser} toggleMembers={toggleMembers} toggleLeave={toggleLeaveGroup} member={member}/>
                     </div>
                 </div>
                 <div className="chat-container">
@@ -115,6 +120,7 @@ const Chat = (props) => {
                 <ModalLeaveGroup show={leaveGrShow} toggle={toggleLeaveGroup} member={member} group={props.group} setCurrent={props.setCurrent}/>
                 <ModalAddUser show={addUserShow} toggle={toggleAddUser} group={props.group}/>
                 <ModalMembers show={membersShow} toggle={toggleMembers} group={props.group} member={member} />
+                <ModalGroupOptions show={optionsShow} toggle={toggleOptions} group={props.group} />
             </div>
         );
     }

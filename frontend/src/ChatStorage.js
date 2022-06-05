@@ -25,6 +25,8 @@ export const actionTypes = {
     RESET_COUNTER: "RESET_COUNTER",
     NEW_PROFILE_PICTURE: "NEW_PROFILE_PICTURE",
     DELETE_PROFILE_PICTURE: "DELETE_PROFILE_PICTURE",
+    NEW_GROUP_PROFILE_PICTURE: "NEW_GROUP_PROFILE_PICTURE",
+    DELETE_GROUP_PROFILE_PICTURE: "DELETE_GROUP_PROFILE_PICTURE",
 }
 
 function reducer(state, action) {
@@ -63,6 +65,10 @@ function reducer(state, action) {
             return NewProfilePicture(state, action.payload);
         case actionTypes.DELETE_PROFILE_PICTURE:
             return DeleteProfilePicture(state);
+        case actionTypes.NEW_GROUP_PROFILE_PICTURE:
+            return NewGroupProfilePicture(state, action.payload);
+        case actionTypes.DELETE_GROUP_PROFILE_PICTURE:
+            return DeleteGroupProfilePicture(state, action.payload);
         default:
             throw new Error("Action not specified");
     }
@@ -216,5 +222,27 @@ function NewProfilePicture(state, payload) {
 function DeleteProfilePicture(state) {
     let newState = {...state};
     newState.user.pictureUrl = "";
+    return newState;
+}
+
+function NewGroupProfilePicture(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload.groupID) {
+            newState.groups[i].pictureUrl = payload.newURI;
+            return newState;
+        }
+    }
+    return newState;
+}
+
+function DeleteGroupProfilePicture(state, payload) {
+    let newState = {...state};
+    for (let i = 0; i < newState.groups.length; i++) {
+        if (newState.groups[i].ID === payload) {
+            newState.groups[i].pictureUrl = "";
+            return newState;
+        }
+    }
     return newState;
 }

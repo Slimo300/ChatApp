@@ -53,3 +53,32 @@ func (m *MockDB) GetUserGroupMember(userID, groupID uint) (models.Member, error)
 	}
 	return models.Member{}, gorm.ErrRecordNotFound
 }
+
+func (m *MockDB) DeleteGroupProfilePicture(groupID uint) error {
+	for _, group := range m.Groups {
+		if group.ID == groupID {
+			group.Picture = ""
+			return nil
+		}
+	}
+	return gorm.ErrRecordNotFound
+}
+
+func (m *MockDB) SetGroupProfilePicture(groupID uint, newURI string) error {
+	for _, group := range m.Groups {
+		if group.ID == groupID {
+			group.Picture = newURI
+			return nil
+		}
+	}
+	return gorm.ErrRecordNotFound
+}
+
+func (m *MockDB) GetGroupProfilePicture(groupID uint) (string, error) {
+	for _, group := range m.Groups {
+		if group.ID == groupID {
+			return group.Picture, nil
+		}
+	}
+	return "", gorm.ErrRecordNotFound
+}

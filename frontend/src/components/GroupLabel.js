@@ -12,7 +12,13 @@ export const GroupLabel = (props) => {
     return (
         <li className="person" onClick={change}>
             <div className="user">
-                <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/>
+                <img className="rounded-circle img-thumbnail"
+                    src={"https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.group.pictureUrl}
+                    onError={({ currentTarget }) => {
+                        currentTarget.onerror = null; 
+                        currentTarget.src="https://cdn.icon-icons.com/icons2/3005/PNG/512/people_group_icon_188185.png";
+                    }}
+                />
             </div>
             <p className="name-time">
                 <span className="name">{props.group.name}</span>

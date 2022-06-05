@@ -25,6 +25,8 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	apiAuth.GET("/group", server.GetUserGroups)
 	apiAuth.POST("/group", server.CreateGroup)
 	apiAuth.DELETE("/group/:groupID", server.DeleteGroup)
+	apiAuth.POST("/group/:groupID/image", server.SetGroupProfilePicture)
+	apiAuth.DELETE("/group/:groupID/image", server.DeleteGroupProfilePicture)
 
 	apiAuth.DELETE("/member/:memberID", server.DeleteUserFromGroup)
 	apiAuth.PUT("/member/:memberID", server.GrantPriv)

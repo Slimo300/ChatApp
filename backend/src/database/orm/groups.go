@@ -69,3 +69,19 @@ func (db *Database) DeleteGroup(groupID uint) (group models.Group, err error) {
 
 	return group, nil
 }
+
+func (db *Database) SetGroupProfilePicture(groupID uint, newURI string) error {
+	return db.First(&models.Group{}, groupID).Update("picture_url", newURI).Error
+}
+
+func (db *Database) DeleteGroupProfilePicture(groupID uint) error {
+	return db.First(&models.Group{}, groupID).Update("picture_url", "").Error
+}
+
+func (db *Database) GetGroupProfilePicture(groupID uint) (string, error) {
+	var group models.Group
+	if err := db.First(&group, groupID).Error; err != nil {
+		return "", err
+	}
+	return group.Picture, nil
+}
