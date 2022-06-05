@@ -7,11 +7,11 @@ func (db *Database) SetPassword(userID uint, password string) error {
 }
 
 func (db *Database) DeleteProfilePicture(userID uint) error {
-	return db.First(&models.User{}, userID).Update("picture_url", "").Error
+	return db.First(&models.User{}, userID).Update("picture", "").Error
 }
 
 func (db *Database) SetProfilePicture(userID uint, newURI string) error {
-	return db.First(&models.User{}, userID).Update("picture_url", newURI).Error
+	return db.First(&models.User{}, userID).Update("picture", newURI).Error
 }
 
 func (db *Database) GetProfilePictureURL(userID uint) (string, error) {

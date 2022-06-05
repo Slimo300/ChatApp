@@ -22,10 +22,9 @@ func Setup() S3Storage {
 }
 
 func (s *S3Storage) UpdateProfilePicture(img multipart.File, key string) error {
-
 	_, err := s.PutObject(&s3.PutObjectInput{
 		Body:   img,
-		Bucket: aws.String(os.Getenv("IMAGE_BUCKET_NAME")),
+		Bucket: aws.String(os.Getenv("IMAGEBUCKETNAME")),
 		Key:    aws.String(key),
 	})
 	return err
@@ -33,7 +32,7 @@ func (s *S3Storage) UpdateProfilePicture(img multipart.File, key string) error {
 
 func (s *S3Storage) DeleteProfilePicture(key string) error {
 	_, err := s.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(os.Getenv("IMAGE_BUCKET_NAME")),
+		Bucket: aws.String(os.Getenv("IMAGEBUCKETNAME")),
 		Key:    aws.String(key + ".jpeg"),
 	})
 	return err

@@ -1,15 +1,18 @@
 import React, { useContext, useState } from "react";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { ChangePassword } from "../Requests";
-import { StorageContext } from '../ChatStorage';
+import { ChangePassword, DeleteProfilePicture, UpdateProfilePicture } from "../Requests";
+import { actionTypes, StorageContext } from '../ChatStorage';
 
 export const ModalUserProfile = (props) => {
 
-    const [state, ] = useContext(StorageContext);
+    const [state, dispatch] = useContext(StorageContext);
 
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
+
+    const [file, setFile] = useState({});
+
     const [message, setMessage] = useState("");
 
     const changePassword = (e) => {
@@ -30,6 +33,46 @@ export const ModalUserProfile = (props) => {
             })
     }
 
+    const updatePicture = (e) => {
+        e.preventDefault();
+        let data = new FormData();
+        data.append("avatarFile", file);
+    
+        let response = UpdateProfilePicture(data);
+        response.then(resp => {
+            if (resp.err !== undefined) {
+                setMessage(resp.err);
+            } else {
+                setMessage("image uploaded");
+                dispatch({type: actionTypes.NEW_PROFILE_PICTURE, payload: resp.newUrl});
+                let timestamp = new Date().getTime();
+                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
+                document.getElementById("customFile").value= null;
+            }
+            setTimeout(function() {
+                setMessage("");
+            }, 3000);
+        })
+    };
+
+    const deletePicture = (e) => {
+        let response = DeleteProfilePicture()
+        response.then(resp => {
+            if (resp.err !== undefined) {
+                setMessage(resp.err);
+            } else {
+                setMessage("image deleted");
+                dispatch({type: actionTypes.DELETE_PROFILE_PICTURE})
+                let timestamp = new Date().getTime();
+                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
+            }
+            setTimeout(function() {
+                setMessage("");
+            }, 3000);
+        })
+
+    };
+
     return (
         <Modal id="buy" tabIndex="-1" role="dialog" isOpen={props.show} toggle={props.toggle}>
             <div role="document">
@@ -43,7 +86,7 @@ export const ModalUserProfile = (props) => {
                                 <div className="member-card">
                                     {message}
                                     <div className="mx-auto profile-image-holder">
-                                        <img className="rounded-circle img-thumbnail"
+                                        <img id="profilePicture" className="rounded-circle img-thumbnail"
                                             src={"https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl}
                                             onError={({ currentTarget }) => {
                                                 currentTarget.onerror = null; 
@@ -56,14 +99,14 @@ export const ModalUserProfile = (props) => {
                                     </div>
                                     <hr />
                                     <h3>Change profile picture</h3>
-                                    <form>
-                                        <input type="file" className="form-control" id="customFile" />   
+                                    <form encType="multipart/form-data" action="">
+                                        <input type="file" className="form-control" id="customFile" onChange={e => setFile(e.target.files[0])}  />
                                         <div className="text-center mt-2">
-                                            <button className="btn btn-primary text-center w-100">Upload</button>
+                                            <button className="btn btn-primary text-center w-100" onClick={updatePicture}>Upload</button>
                                         </div>
                                     </form>
                                     <div className="text-center mt-4">
-                                        <button className="btn btn-danger text-center w-100">Delete Picture</button>
+                                        <button className="btn btn-danger text-center w-100" onClick={deletePicture}>Delete Picture</button>
                                     </div>
                                     <hr />
                                     <form className="mt-4">

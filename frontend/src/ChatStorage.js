@@ -22,7 +22,9 @@ export const actionTypes = {
     SET_NOTIFICATIONS: "SET_NOTIFICATIONS",
     ADD_NOTIFICATION: "ADD_NOTIFICATION",
     DELETE_NOTIFICATION: "DELETE_NOTIFICATION",
-    RESET_COUNTER: "RESET_COUNTER"
+    RESET_COUNTER: "RESET_COUNTER",
+    NEW_PROFILE_PICTURE: "NEW_PROFILE_PICTURE",
+    DELETE_PROFILE_PICTURE: "DELETE_PROFILE_PICTURE",
 }
 
 function reducer(state, action) {
@@ -57,6 +59,10 @@ function reducer(state, action) {
             return ResetCounter(state, action.payload);
         case actionTypes.DELETE_NOTIFICATION:
             return DeleteNotification(state, action.payload);
+        case actionTypes.NEW_PROFILE_PICTURE:
+            return NewProfilePicture(state, action.payload);
+        case actionTypes.DELETE_PROFILE_PICTURE:
+            return DeleteProfilePicture(state);
         default:
             throw new Error("Action not specified");
     }
@@ -198,5 +204,17 @@ function ResetCounter(state, payload) {
 function DeleteNotification(state, payload) {
     let newState = {...state};
     newState.notifications = newState.notifications.filter( (item) => { return item.ID !== payload } );
+    return newState;
+}
+
+function NewProfilePicture(state, payload) {
+    let newState = {...state};
+    newState.user.pictureUrl = payload;
+    return newState;
+}
+
+function DeleteProfilePicture(state) {
+    let newState = {...state};
+    newState.user.pictureUrl = "";
     return newState;
 }

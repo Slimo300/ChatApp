@@ -16,9 +16,9 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 	api.POST("/login", server.SignIn)
 
 	apiAuth := api.Use(server.MustAuth())
-	apiAuth.DELETE("/delete-image", server.DeleteProfilePicture)
-	apiAuth.POST("/set-image", server.UpdateProfilePicture) // not tested
-	apiAuth.PUT("/change-password", server.ChangePassword)  // not tested
+	apiAuth.DELETE("/delete-image", server.DeleteProfilePicture) // not tested
+	apiAuth.POST("/set-image", server.UpdateProfilePicture)      // not tested
+	apiAuth.PUT("/change-password", server.ChangePassword)       // not tested
 	apiAuth.POST("/signout", server.SignOutUser)
 	apiAuth.GET("/user", server.GetUser)
 

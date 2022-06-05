@@ -264,3 +264,22 @@ export async function ChangePassword(oldPassword, newPassword, repeatPassword) {
 
     return responseJSON;
 }
+
+export async function UpdateProfilePicture(data) {
+    let response = await fetch('http://'+hostname+':'+port+"/api/set-image", {
+        method: "POST",
+        credentials: "include",
+        body: data,
+    })
+    let responseJSON = await response.json();
+    return responseJSON;
+}
+
+export async function DeleteProfilePicture() {
+    let response = await fetch('http://'+hostname+":"+port+"/api/delete-image", {
+        method: "DELETE",
+        credentials: "include",
+    })
+    let responseJSON = await response.json();
+    return responseJSON;
+}
