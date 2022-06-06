@@ -44,7 +44,7 @@ const Navigation = (props) => {
                         <span className="badge badge-secondary">{state.notifications!==undefined?state.notifications.length:null}</span>
                     </button>
                     <div className="dropdown-menu dropdown-menu-right">
-                        {state.notifications!==undefined?state.notifications.map((item)=> <Invite groupID={item.groupID} issID={item.issID} inviteID={item.ID} />):null}
+                        {state.notifications!==undefined?state.notifications.map((item)=> <Invite invite={item} />):null}
                     </div>
                 </div>
 

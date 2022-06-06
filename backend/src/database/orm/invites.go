@@ -36,7 +36,7 @@ func (db *Database) AcceptInvite(invite models.Invite) (group models.Group, err 
 }
 
 func (db *Database) GetUserInvites(userID uint) (invites []models.Invite, err error) {
-	return invites, db.Where(models.Invite{TargetID: userID, Status: database.INVITE_AWAITING}).Find(&invites).Error
+	return invites, db.Where(models.Invite{TargetID: userID, Status: database.INVITE_AWAITING}).Preload("Iss").Preload("Group").Find(&invites).Error
 }
 
 func (db *Database) GetInviteByID(inviteID uint) (invite models.Invite, err error) {

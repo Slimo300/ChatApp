@@ -349,3 +349,12 @@ ul {
     width: 100%;
     height: 100%;
 }
+
+.image-holder-invite {
+    height: 50px;
+    width: 50px;
+}
+
+.invite {
+    width: 40vw;
+}

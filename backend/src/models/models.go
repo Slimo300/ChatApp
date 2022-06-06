@@ -65,11 +65,11 @@ func (Member) TableName() string {
 type Invite struct {
 	ID       uint      `gorm:"primaryKey"`
 	IssId    uint      `gorm:"column:iss_id" json:"issID"`
-	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"issuer"`
 	TargetID uint      `gorm:"column:target_id" json:"targetID"`
 	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	GroupID  uint      `gorm:"column:group_id" json:"groupID"`
-	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"group"`
 	Status   int       `gorm:"column:status" json:"status"`
 	Created  time.Time `gorm:"column:created" json:"created"`
 	Modified time.Time `gorm:"column:modified" json:"modified"`
