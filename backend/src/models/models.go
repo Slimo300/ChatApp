@@ -8,7 +8,7 @@ type User struct {
 	ID       uint      `gorm:"primaryKey"`
 	UserName string    `gorm:"column:username;unique" json:"username"`
 	Email    string    `gorm:"column:email;unique" json:"email"`
-	Pass     string    `gorm:"column:password" json:"password"`
+	Pass     string    `gorm:"column:password" json:"-"`
 	Picture  string    `gorm:"picture_url" json:"pictureUrl"`
 	Active   time.Time `gorm:"column:activity" json:"activity"`
 	SignUp   time.Time `gorm:"column:signup" json:"signup"`
@@ -49,7 +49,7 @@ type Member struct {
 	GroupID  uint   `gorm:"column:group_id;uniqueIndex:idx_first" json:"group_id"`
 	UserID   uint   `gorm:"column:user_id;uniqueIndex:idx_first" json:"user_id"`
 	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Nick     string `gorm:"column:nick" json:"nick"`
 	Adding   bool   `gorm:"column:adding" json:"adding"`
 	Deleting bool   `gorm:"column:deleting" json:"deleting"`

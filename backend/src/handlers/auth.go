@@ -8,36 +8,41 @@ import (
 )
 
 func (s *Server) RegisterUser(c *gin.Context) {
-	var user models.User
-	err := c.ShouldBindJSON(&user)
+	load := struct {
+		UserName string `json:"username"`
+		Email    string `json:"email"`
+		Pass     string `json:"password"`
+	}{}
+	err := c.ShouldBindJSON(&load)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 	}
-	if !isEmailValid(user.Email) {
+	if !isEmailValid(load.Email) {
 		c.JSON(http.StatusUnauthorized, gin.H{"err": "not a valid email"})
 		return
 	}
-	if len(user.Pass) <= 6 {
+	if len(load.Pass) <= 6 {
 		c.JSON(http.StatusUnauthorized, gin.H{"err": "not a valid password"})
 		return
 	}
-	if len(user.UserName) < 2 {
+	if len(load.UserName) < 2 {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid username"})
 		return
 	}
-	if s.DB.IsUsernameInDatabase(user.UserName) {
+	if s.DB.IsUsernameInDatabase(load.UserName) {
 		c.JSON(http.StatusConflict, gin.H{"err": "username taken"})
 		return
 	}
-	if s.DB.IsEmailInDatabase(user.Email) {
+	if s.DB.IsEmailInDatabase(load.Email) {
 		c.JSON(http.StatusConflict, gin.H{"err": "email already in database"})
 		return
 	}
-	user.Pass, err = hashPassword(user.Pass)
+	load.Pass, err = hashPassword(load.Pass)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
+	user := models.User{Email: load.Email, UserName: load.UserName, Pass: load.Pass}
 	user, err = s.DB.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
@@ -50,13 +55,16 @@ func (s *Server) RegisterUser(c *gin.Context) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SignIn method
 func (s *Server) SignIn(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	load := struct {
+		Email string `json:"email"`
+		Pass  string `json:"password"`
+	}{}
+	if err := c.ShouldBindJSON(&load); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
-	requestPassword := user.Pass
-	user, err := s.DB.GetUserByEmail(user.Email)
+	requestPassword := load.Pass
+	user, err := s.DB.GetUserByEmail(load.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "wrong email or password"})
 		return

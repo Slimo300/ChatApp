@@ -18,8 +18,13 @@ func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
 		return groups, err
 	}
 
-	if err := db.Where("id in (?)", userGroupsIDs).Preload("Members", "deleted is false").Find(&groups).Error; err != nil {
+	if err := db.Where("id in (?)", userGroupsIDs).Preload("Members", "deleted is false").Preload("Members.User").Find(&groups).Error; err != nil {
 		return groups, err
+	}
+	for _, group := range groups {
+		for _, member := range group.Members {
+			member.User.Pass = ""
+		}
 	}
 	return groups, nil
 }

@@ -83,7 +83,16 @@ const Member = (props) => {
 
     return (
         <tr className="chat-avatar">
-            <td className='pr-3'><img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin"/></td>
+            <td className='pr-3'>
+                <img
+                    src={"https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.member.User.pictureUrl}
+                    onError={({ currentTarget }) => {
+                        currentTarget.onerror = null; 
+                        currentTarget.src="https://erasmuscoursescroatia.com/wp-content/uploads/2015/11/no-user.jpg";
+                    }}
+                />    
+            </td>
+            
             <td className="chat-name pr-3 align-middle">{props.member.nick}</td>
             {props.user.setting?<td className='align-middle'>
                 <input className="form-check-input" type="checkbox" id="inlineCheckbox1" checked={adding} disabled={props.member.creator} onChange={toggleAdding}/>

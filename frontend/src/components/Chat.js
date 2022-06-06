@@ -45,6 +45,16 @@ const Chat = (props) => {
         setOptionsShow(!optionsShow);
     };
 
+    const GetMemberPicture = (group, member) => {
+        for (let i = 0; i < group.Members.length; i++) {
+            if (group.Members[i].ID == member) {
+                console.log(group.Members[i].User.pictureUrl);
+                return group.Members[i].User.pictureUrl;
+            }
+        }
+        return "";
+    }
+
     // getting group membership
     useEffect(()=>{
         (
@@ -108,7 +118,7 @@ const Chat = (props) => {
                         <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
                         {props.group.messages===undefined?null:props.group.messages.map((item) => {
                         return <div ref={scrollRef}>
-                                <Message key={item.ID} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} />
+                                <Message key={item.ID} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} picture={GetMemberPicture(props.group, item.member)} />
                             </div>})}
                     </ul>
                     <form id="chatbox" className="form-group mt-3 mb-0 d-flex column justify-content-center" onSubmit={sendMessage}>
