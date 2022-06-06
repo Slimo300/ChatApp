@@ -60,7 +60,7 @@ func (s *Server) ListenToHub() {
 				panic(err.Error())
 			}
 			if err := s.DB.AddMessage(uint(msg.Member), msg.Message, when); err != nil {
-				panic("Panicced while adding message")
+				panic("Panicked while adding message")
 			}
 		}
 	}
