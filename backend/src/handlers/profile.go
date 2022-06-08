@@ -81,8 +81,10 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
 		return
 	}
+	wasEmpty := false
 	if pictureURL == "" {
 		pictureURL = uuid.New().String()
+		wasEmpty = true
 	}
 
 	file, err := imageFileHeader.Open()
@@ -96,9 +98,11 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 		return
 	}
 
-	if err = s.DB.SetProfilePicture(uint(userID), pictureURL); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-		return
+	if wasEmpty {
+		if err = s.DB.SetProfilePicture(uint(userID), pictureURL); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"newUrl": pictureURL})

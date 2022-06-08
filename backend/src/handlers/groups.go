@@ -138,8 +138,10 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
 		return
 	}
+	wasEmpty := false
 	if pictureURL == "" {
 		pictureURL = uuid.New().String()
+		wasEmpty = true
 	}
 
 	file, err := imageFileHeader.Open()
@@ -153,9 +155,11 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 		return
 	}
 
-	if err = s.DB.SetGroupProfilePicture(uint(groupIDint), pictureURL); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-		return
+	if wasEmpty {
+		if err = s.DB.SetGroupProfilePicture(uint(groupIDint), pictureURL); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"newUrl": pictureURL})
@@ -187,7 +191,7 @@ func (s *Server) DeleteGroupProfilePicture(c *gin.Context) {
 		return
 	}
 	if url == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "user has no image to delete"})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "group has no image to delete"})
 		return
 	}
 	if err = s.DB.SetGroupProfilePicture(uint(groupIDint), ""); err != nil {
