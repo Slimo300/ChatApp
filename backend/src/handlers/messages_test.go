@@ -10,15 +10,20 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func TestGetGroupMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := SetupTestServer()
 
+	groupId, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
+	member1, _ := uuid.Parse("e4372b71-30ca-42e1-8c1e-7df6d033fd3f")
+	member2, _ := uuid.Parse("b38aaff8-6733-4a1d-8eaf-fc10e656d02b")
+
 	testCases := []struct {
 		desc               string
-		userID             uint
+		userID             string
 		returnVal          bool
 		group              string
 		expectedStatusCode int
@@ -26,26 +31,26 @@ func TestGetGroupMessages(t *testing.T) {
 	}{
 		{
 			desc:               "getmessagessuccess",
-			userID:             1,
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			returnVal:          true,
 			expectedStatusCode: http.StatusOK,
-			group:              "1",
-			expectedResponse: []communication.Message{{Group: 1, Member: 1, Message: "elo", Nick: "Mal", When: "2019-13-01 22:00:45"},
-				{Group: 1, Member: 2, Message: "siema", Nick: "River", When: "2019-15-01 22:00:45"},
-				{Group: 1, Member: 1, Message: "elo elo", Nick: "Mal", When: "2019-16-01 22:00:45"},
-				{Group: 1, Member: 2, Message: "siema siema", Nick: "River", When: "2019-17-01 22:00:45"}},
+			group:              "61fbd273-b941-471c-983a-0a3cd2c74747",
+			expectedResponse: []communication.Message{{Group: groupId, Member: member1, Message: "elo", Nick: "Mal", When: "2019-13-01 22:00:45"},
+				{Group: groupId, Member: member2, Message: "siema", Nick: "River", When: "2019-15-01 22:00:45"},
+				{Group: groupId, Member: member1, Message: "elo elo", Nick: "Mal", When: "2019-16-01 22:00:45"},
+				{Group: groupId, Member: member2, Message: "siema siema", Nick: "River", When: "2019-17-01 22:00:45"}},
 		},
 		{
 			desc:               "getmessagesunauthorized",
-			userID:             3,
+			userID:             "634240cf-1219-4be2-adfa-90ab6b47899b",
 			returnVal:          false,
-			group:              "1",
+			group:              "61fbd273-b941-471c-983a-0a3cd2c74747",
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "User cannot request from this group"},
 		},
 		{
 			desc:               "getmessagesnogroup",
-			userID:             1,
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			returnVal:          false,
 			group:              "0",
 			expectedStatusCode: http.StatusBadRequest,
@@ -56,7 +61,7 @@ func TestGetGroupMessages(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.userID))
+			jwt, err := s.CreateSignedToken(tC.userID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}

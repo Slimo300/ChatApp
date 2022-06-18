@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
@@ -16,7 +15,7 @@ import (
 type Server struct {
 	DB           database.DBlayer
 	Storage      storage.StorageLayer
-	Hub          *ws.Hub
+	Hub          ws.HubInterface
 	actionChan   chan<- *communication.Action
 	messageChan  <-chan *communication.Message
 	secret       string
@@ -39,10 +38,19 @@ func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
 	}
 }
 
-func (s *Server) MockHub() {
-	mockChan := make(chan *communication.Action)
-	s.actionChan = mockChan
-	<-mockChan
+func NewServerWithMockHub(db database.DBlayer, storage storage.StorageLayer) *Server {
+	actionChan := make(chan *communication.Action)
+	messageChan := make(chan *communication.Message)
+	return &Server{
+		DB:           db,
+		Storage:      storage,
+		secret:       "wołowina",
+		domain:       "localhost",
+		actionChan:   actionChan,
+		messageChan:  messageChan,
+		maxBodyBytes: 4194304,
+		Hub:          ws.NewMockHub(actionChan),
+	}
 }
 
 func (s *Server) RunHub() {
@@ -59,16 +67,16 @@ func (s *Server) ListenToHub() {
 			if err != nil {
 				panic(err.Error())
 			}
-			if err := s.DB.AddMessage(uint(msg.Member), msg.Message, when); err != nil {
+			if err := s.DB.AddMessage(msg.Member, msg.Message, when); err != nil {
 				panic("Panicked while adding message")
 			}
 		}
 	}
 }
 
-func (s *Server) CreateSignedToken(iss int) (string, error) {
+func (s *Server) CreateSignedToken(iss string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(iss),
+		Issuer:    iss,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(s.secret))
@@ -93,12 +101,12 @@ func (s *Server) MustAuth() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
 			return
 		}
-		id, err := strconv.Atoi(token.Claims.(*jwt.StandardClaims).Issuer)
+		userID := token.Claims.(*jwt.StandardClaims).Issuer
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
 			return
 		}
-		c.Set("userID", id)
+		c.Set("userID", userID)
 		c.Next()
 	}
 }

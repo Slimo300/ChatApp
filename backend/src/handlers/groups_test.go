@@ -11,6 +11,7 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func TestGetUserGroups(t *testing.T) {
@@ -18,24 +19,25 @@ func TestGetUserGroups(t *testing.T) {
 	s := SetupTestServer()
 
 	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
+	groupID, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
 
 	testCases := []struct {
 		desc               string
-		data               uint
+		id                 string
 		returnVal          bool
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "getgroupssuccess",
-			data:               1,
+			id:                 "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			returnVal:          true,
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   []models.Group{{ID: 1, Name: "New Group", Desc: "totally new group", Created: date}},
+			expectedResponse:   []models.Group{{ID: groupID, Name: "New Group", Desc: "totally new group", Created: date}},
 		},
 		{
 			desc:               "getgroupsnone",
-			data:               3,
+			id:                 "634240cf-1219-4be2-adfa-90ab6b47899b",
 			returnVal:          false,
 			expectedStatusCode: http.StatusNoContent,
 			expectedResponse:   nil,
@@ -45,7 +47,7 @@ func TestGetUserGroups(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.data))
+			jwt, err := s.CreateSignedToken(tC.id)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
@@ -82,7 +84,7 @@ func TestDeleteGroup(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		userID             uint
+		userID             string
 		groupID            string
 		expectedStatusCode int
 		expectedResponse   interface{}
@@ -90,24 +92,24 @@ func TestDeleteGroup(t *testing.T) {
 		// user is not a creator of the group so he can't delete it
 		{
 			desc:               "deletegroupnosuccess",
-			userID:             3,
-			groupID:            "1",
+			userID:             "634240cf-1219-4be2-adfa-90ab6b47899b",
+			groupID:            "61fbd273-b941-471c-983a-0a3cd2c74747",
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "couldn't delete group"},
 		},
 		// user hasn't specified a group in a query
 		{
 			desc:               "deletegroupnotspecified",
-			userID:             1,
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			groupID:            "sa",
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "group not specified"},
+			expectedResponse:   gin.H{"err": "invalid group ID"},
 		},
 		// creator deletes a group
 		{
 			desc:               "deletegroupsuccess",
-			userID:             1,
-			groupID:            "1",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			groupID:            "61fbd273-b941-471c-983a-0a3cd2c74747",
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
@@ -116,7 +118,7 @@ func TestDeleteGroup(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.userID))
+			jwt, err := s.CreateSignedToken(tC.userID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
@@ -147,11 +149,11 @@ func TestDeleteGroup(t *testing.T) {
 
 func TestCreateGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := SetupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string
-		ID                 uint
+		ID                 string
 		data               map[string]interface{}
 		returnVal          bool
 		expectedStatusCode int
@@ -160,7 +162,7 @@ func TestCreateGroup(t *testing.T) {
 		// no name provided in request body
 		{
 			desc:               "creategroupnoname",
-			ID:                 3,
+			ID:                 "634240cf-1219-4be2-adfa-90ab6b47899b",
 			data:               map[string]interface{}{"name": "", "desc": "ng1"},
 			returnVal:          false,
 			expectedStatusCode: http.StatusBadRequest,
@@ -169,7 +171,7 @@ func TestCreateGroup(t *testing.T) {
 		// no description provided in request body
 		{
 			desc:               "creategroupnodesc",
-			ID:                 3,
+			ID:                 "634240cf-1219-4be2-adfa-90ab6b47899b",
 			data:               map[string]interface{}{"name": "ng1", "desc": ""},
 			returnVal:          false,
 			expectedStatusCode: http.StatusBadRequest,
@@ -178,18 +180,18 @@ func TestCreateGroup(t *testing.T) {
 		// creator deletes a group
 		{
 			desc:               "creategroupsuccess",
-			ID:                 3,
+			ID:                 "634240cf-1219-4be2-adfa-90ab6b47899b",
 			data:               map[string]interface{}{"name": "ng1", "desc": "ng1"},
 			returnVal:          true,
 			expectedStatusCode: http.StatusCreated,
-			expectedResponse:   models.Group{ID: 2, Name: "ng1", Desc: "ng1"},
+			expectedResponse:   models.Group{Name: "ng1", Desc: "ng1"},
 		},
 	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.ID))
+			jwt, err := s.CreateSignedToken(tC.ID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
@@ -211,10 +213,11 @@ func TestCreateGroup(t *testing.T) {
 
 			var respBody interface{}
 			if tC.returnVal {
-				member := models.Group{}
-				json.NewDecoder(response.Body).Decode(&member)
-				member.Created = time.Time{}
-				respBody = member
+				group := models.Group{}
+				json.NewDecoder(response.Body).Decode(&group)
+				group.Created = time.Time{}
+				group.ID = uuid.UUID{}
+				respBody = group
 			} else {
 				var msg gin.H
 				json.NewDecoder(response.Body).Decode(&msg)

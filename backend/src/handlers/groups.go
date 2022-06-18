@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/models"
@@ -12,9 +11,13 @@ import (
 )
 
 func (s *Server) GetUserGroups(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+	}
 
-	groups, err := s.DB.GetUserGroups(uint(userID))
+	groups, err := s.DB.GetUserGroups(userUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -29,10 +32,14 @@ func (s *Server) GetUserGroups(c *gin.Context) {
 }
 
 func (s *Server) CreateGroup(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+	}
 
 	var group models.Group
-	err := c.ShouldBindJSON(&group)
+	err = c.ShouldBindJSON(&group)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -46,28 +53,33 @@ func (s *Server) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	group, err = s.DB.CreateGroup(uint(userID), group.Name, group.Desc)
+	group, err = s.DB.CreateGroup(userUID, group.Name, group.Desc)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	s.actionChan <- &communication.Action{Group: int(group.ID), User: int(userID), Action: "CREATE_GROUP"}
+	s.actionChan <- &communication.Action{Group: group.ID, User: userUID, Action: "CREATE_GROUP"}
 
 	c.JSON(http.StatusCreated, group)
 }
 
 func (s *Server) DeleteGroup(c *gin.Context) {
-	userID := c.GetInt("userID")
-
-	groupID := c.Param("groupID")
-	groupIDint, err := strconv.Atoi(groupID)
+	userID := c.GetString("userID")
+	uid, err := uuid.Parse(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
 		return
 	}
 
-	member, err := s.DB.GetUserGroupMember(uint(userID), uint(groupIDint))
+	groupID := c.Param("groupID")
+	groupUID, err := uuid.Parse(groupID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid group ID"})
+		return
+	}
+
+	member, err := s.DB.GetUserGroupMember(uid, groupUID)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": "couldn't delete group"})
 		return
@@ -77,18 +89,23 @@ func (s *Server) DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	group, err := s.DB.DeleteGroup(uint(groupIDint))
+	group, err := s.DB.DeleteGroup(groupUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 	}
 
-	s.actionChan <- &communication.Action{Group: int(group.ID), Action: "DELETE_GROUP"}
+	s.actionChan <- &communication.Action{Group: group.ID, Action: "DELETE_GROUP"}
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 
 }
 
 func (s *Server) SetGroupProfilePicture(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "Invalid ID"})
+		return
+	}
 
 	imageFileHeader, err := c.FormFile("avatarFile")
 	if err != nil {
@@ -114,16 +131,13 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 	}
 
 	groupID := c.Param("groupID")
-	if groupID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
-		return
-	}
-	groupIDint, err := strconv.Atoi(groupID)
+	groupUID, err := uuid.Parse(groupID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "Invalid group ID"})
 		return
 	}
-	member, err := s.DB.GetUserGroupMember(uint(userID), uint(groupIDint))
+
+	member, err := s.DB.GetUserGroupMember(userUID, groupUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -133,7 +147,7 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 		return
 	}
 
-	pictureURL, err := s.DB.GetGroupProfilePicture(uint(groupIDint))
+	pictureURL, err := s.DB.GetGroupProfilePicture(groupUID)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
 		return
@@ -156,7 +170,7 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 	}
 
 	if wasEmpty {
-		if err = s.DB.SetGroupProfilePicture(uint(groupIDint), pictureURL); err != nil {
+		if err = s.DB.SetGroupProfilePicture(groupUID, pictureURL); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 			return
 		}
@@ -166,18 +180,19 @@ func (s *Server) SetGroupProfilePicture(c *gin.Context) {
 }
 
 func (s *Server) DeleteGroupProfilePicture(c *gin.Context) {
-	userID := c.GetInt("userID")
-	groupID := c.Param("groupID")
-	if groupID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "groupID not specified"})
-		return
-	}
-	groupIDint, err := strconv.Atoi(groupID)
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
 		return
 	}
-	member, err := s.DB.GetUserGroupMember(uint(userID), uint(groupIDint))
+	groupID := c.Param("groupID")
+	groupUID, err := uuid.Parse(groupID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid grouo ID"})
+		return
+	}
+	member, err := s.DB.GetUserGroupMember(userUID, groupUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -185,7 +200,7 @@ func (s *Server) DeleteGroupProfilePicture(c *gin.Context) {
 	if !member.Setting {
 		c.JSON(http.StatusForbidden, gin.H{"err": "no rights to set"})
 	}
-	url, err := s.DB.GetGroupProfilePicture(uint(groupIDint))
+	url, err := s.DB.GetGroupProfilePicture(groupUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -194,7 +209,7 @@ func (s *Server) DeleteGroupProfilePicture(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "group has no image to delete"})
 		return
 	}
-	if err = s.DB.SetGroupProfilePicture(uint(groupIDint), ""); err != nil {
+	if err = s.DB.SetGroupProfilePicture(groupUID, ""); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}

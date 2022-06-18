@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 )
 
-func (m *MockDB) GetUserById(id int) (models.User, error) {
+func (m *MockDB) GetUserById(uid uuid.UUID) (models.User, error) {
 	for _, user := range m.Users {
-		if user.ID == uint(id) {
+		if user.ID == uid {
 			return user, nil
 		}
 	}
-	return models.User{}, fmt.Errorf("No user with id: %d", id)
+	return models.User{}, fmt.Errorf("No user with id: %v", uid)
 }
 
 func (m *MockDB) GetUserByEmail(email string) (models.User, error) {
@@ -22,7 +23,7 @@ func (m *MockDB) GetUserByEmail(email string) (models.User, error) {
 			return user, nil
 		}
 	}
-	return models.User{}, fmt.Errorf("No user with email: %s", email)
+	return models.User{}, fmt.Errorf("No user with email: %v", email)
 }
 
 func (m *MockDB) GetUserByUsername(username string) (models.User, error) {
@@ -35,7 +36,7 @@ func (m *MockDB) GetUserByUsername(username string) (models.User, error) {
 }
 
 func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
-	user.ID = uint(len(m.Users) + 1)
+	user.ID = uuid.New()
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false
@@ -43,7 +44,7 @@ func (m *MockDB) RegisterUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (m *MockDB) SignInUser(id uint) error {
+func (m *MockDB) SignInUser(id uuid.UUID) error {
 	for _, user := range m.Users {
 		if user.ID == id {
 			user.LoggedIn = true
@@ -53,14 +54,14 @@ func (m *MockDB) SignInUser(id uint) error {
 	return fmt.Errorf("No user with id: %d", id)
 }
 
-func (m *MockDB) SignOutUser(id uint) error {
+func (m *MockDB) SignOutUser(id uuid.UUID) error {
 	for _, user := range m.Users {
 		if user.ID == id {
 			user.LoggedIn = false
 			return nil
 		}
 	}
-	return fmt.Errorf("No user with id: %d", id)
+	return fmt.Errorf("No user with id: %v", id.String())
 }
 
 func (m *MockDB) IsEmailInDatabase(email string) bool {

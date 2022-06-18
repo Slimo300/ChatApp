@@ -5,53 +5,54 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 )
 
 type DBlayer interface {
 	IsEmailInDatabase(email string) bool
 	IsUsernameInDatabase(username string) bool
 
-	GetUserById(id int) (models.User, error)
+	GetUserById(uid uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
 
 	RegisterUser(models.User) (models.User, error)
-	SignInUser(id uint) error
-	SignOutUser(id uint) error
+	SignInUser(id uuid.UUID) error
+	SignOutUser(id uuid.UUID) error
 
-	SetPassword(userID uint, password string) error
-	GetProfilePictureURL(userID uint) (string, error)
-	SetProfilePicture(userID uint, newURI string) error
-	DeleteProfilePicture(userID uint) error
+	SetPassword(userID uuid.UUID, password string) error
+	GetProfilePictureURL(userID uuid.UUID) (string, error)
+	SetProfilePicture(userID uuid.UUID, newURI string) error
+	DeleteProfilePicture(userID uuid.UUID) error
 
-	GetUserGroups(id uint) ([]models.Group, error)
+	GetUserGroups(id uuid.UUID) ([]models.Group, error)
 
-	GetMemberByID(memberID uint) (models.Member, error)
-	GetUserGroupMember(userID, groupID uint) (models.Member, error)
+	GetMemberByID(memberID uuid.UUID) (models.Member, error)
+	GetUserGroupMember(userID, groupID uuid.UUID) (models.Member, error)
 
-	GetGroupMessages(id_group uint, offset, num int) ([]models.Message, error)
-	AddMessage(memberID uint, text string, when time.Time) error
+	GetGroupMessages(grouID uuid.UUID, offset, num int) ([]models.Message, error)
+	AddMessage(memberID uuid.UUID, text string, when time.Time) error
 
-	CreateGroup(id uint, name, desc string) (models.Group, error)
-	DeleteUserFromGroup(id_member uint) (models.Member, error)
-	GrantPriv(id_member uint, adding, deleting, setting bool) error
+	CreateGroup(ID uuid.UUID, name, desc string) (models.Group, error)
+	DeleteUserFromGroup(memberID uuid.UUID) (models.Member, error)
+	GrantPriv(memberID uuid.UUID, adding, deleting, setting bool) error
 
-	DeleteGroup(id_group uint) (models.Group, error)
+	DeleteGroup(groupID uuid.UUID) (models.Group, error)
 
-	GetGroupProfilePicture(groupID uint) (string, error)
-	SetGroupProfilePicture(groupID uint, newURI string) error
-	DeleteGroupProfilePicture(groupID uint) error
+	GetGroupProfilePicture(groupID uuid.UUID) (string, error)
+	SetGroupProfilePicture(groupID uuid.UUID, newURI string) error
+	DeleteGroupProfilePicture(groupID uuid.UUID) error
 
-	GetUserInvites(userID uint) ([]models.Invite, error)
-	AddInvite(issID, targetID, groupID uint) (models.Invite, error)
+	GetUserInvites(userID uuid.UUID) ([]models.Invite, error)
+	AddInvite(issID, targetID, groupID uuid.UUID) (models.Invite, error)
 
-	DeclineInvite(inviteID uint) error
+	DeclineInvite(inviteID uuid.UUID) error
 	AcceptInvite(invite models.Invite) (models.Group, error)
 
-	IsUserInGroup(userID, groupID uint) bool
-	IsUserInvited(userID, groupID uint) bool
+	IsUserInGroup(userID, groupID uuid.UUID) bool
+	IsUserInvited(userID, groupID uuid.UUID) bool
 
-	GetInviteByID(inviteID uint) (models.Invite, error)
+	GetInviteByID(inviteID uuid.UUID) (models.Invite, error)
 }
 
 const INVITE_AWAITING = 1

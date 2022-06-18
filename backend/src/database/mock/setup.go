@@ -18,7 +18,7 @@ func NewMockDB() *MockDB {
 
 	USERS := `[
 		{
-			"ID": 1,
+			"ID": "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			"signup": "2018-08-14T07:52:54Z",
 			"active": "2019-01-13T22:00:45Z",
 			"username": "Mal",
@@ -27,7 +27,7 @@ func NewMockDB() *MockDB {
 			"logged": true
 		},
 		{
-			"ID": 2,
+			"ID": "0ef41409-24b0-43e6-80a3-cf31a4b1a684",
 			"signup": "2018-08-14T07:52:55Z",
 			"active": "2019-01-12T22:39:01Z",
 			"username": "River",
@@ -36,7 +36,7 @@ func NewMockDB() *MockDB {
 			"logged": false
 		},
 		{
-			"ID": 3,
+			"ID": "634240cf-1219-4be2-adfa-90ab6b47899b",
 			"username": "John",
 			"signup": "2019-01-13T08:43:44Z",
 			"active": "2019-01-13T15:12:25Z",
@@ -45,7 +45,7 @@ func NewMockDB() *MockDB {
 			"logged": false
 		},
 		{
-			"ID": 4,
+			"ID": "1fa00013-89b1-49ad-af29-a79afea1f8b8",
 			"username": "Kal",
 			"signup": "2019-01-13T08:53:44Z",
 			"active": "2019-01-13T15:52:25Z",
@@ -54,7 +54,7 @@ func NewMockDB() *MockDB {
 			"logged": false
 		},
 		{
-			"ID": 5,
+			"ID": "fe98176b-cf09-4da5-94ae-81207519a75f",
 			"username": "Kel",
 			"signup": "2019-01-12T08:53:44Z",
 			"active": "2019-01-12T15:52:25Z",
@@ -66,7 +66,7 @@ func NewMockDB() *MockDB {
 
 	GROUPS := `[
 		{
-			"ID": 1,
+			"ID": "61fbd273-b941-471c-983a-0a3cd2c74747",
 			"name": "New Group",
 			"desc": "totally new group",
 			"created": "2019-01-13T08:47:44Z"
@@ -75,9 +75,9 @@ func NewMockDB() *MockDB {
 
 	MEMBERS := `[
 		{
-			"ID": 1,
-			"group_id": 1,
-			"user_id": 1,
+			"ID": "e4372b71-30ca-42e1-8c1e-7df6d033fd3f",
+			"group_id": "61fbd273-b941-471c-983a-0a3cd2c74747",
+			"user_id": "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			"nick": "Mal",
 			"adding": true,
 			"deleting": true,
@@ -86,9 +86,9 @@ func NewMockDB() *MockDB {
 			"deleted": false
 		},
 		{
-			"ID": 2,
-			"group_id": 1,
-			"user_id": 2,
+			"ID": "b38aaff8-6733-4a1d-8eaf-fc10e656d02b",
+			"group_id": "61fbd273-b941-471c-983a-0a3cd2c74747",
+			"user_id": "0ef41409-24b0-43e6-80a3-cf31a4b1a684",
 			"nick": "River",
 			"adding": false,
 			"deleting": false,
@@ -97,9 +97,9 @@ func NewMockDB() *MockDB {
 			"deleted": false
 		},
 		{
-			"ID": 4,
-			"group_id": 1,
-			"user_id": 4,
+			"ID": "324c0237-e196-4c96-a3be-fee55e745b89",
+			"group_id": "61fbd273-b941-471c-983a-0a3cd2c74747",
+			"user_id": "1fa00013-89b1-49ad-af29-a79afea1f8b8",
 			"nick": "Kal",
 			"adding": false,
 			"deleting": false,
@@ -114,35 +114,35 @@ func NewMockDB() *MockDB {
 			"ID": 1,
 			"posted": "2019-01-13T22:00:45Z",
 			"text": "elo",
-			"member_id": 1
+			"member_id": "e4372b71-30ca-42e1-8c1e-7df6d033fd3f"
 		},
 		{
 			"ID": 2,
 			"posted": "2019-01-15T22:00:45Z",
 			"text": "siema",
-			"member_id": 2
+			"member_id": "b38aaff8-6733-4a1d-8eaf-fc10e656d02b"
 		}, 
 		{
 			"ID": 3,
 			"posted": "2019-01-16T22:00:45Z",
 			"text": "elo elo",
-			"member_id": 1
+			"member_id": "e4372b71-30ca-42e1-8c1e-7df6d033fd3f"
 		},
 		{
 			"ID": 4,
 			"posted": "2019-01-17T22:00:45Z",
 			"text": "siema siema",
-			"member_id": 2
+			"member_id": "b38aaff8-6733-4a1d-8eaf-fc10e656d02b"
 		}
 	]`
 
 	INVITES := `[
 		{
-			"ID": 1,
-			"issID": 1,
-			"targetID": 3,
-			"groupID": 1,
-			"status": 0,
+			"ID": "0916b355-323c-45fd-b79e-4160eaac1320",
+			"issID": "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			"targetID": "634240cf-1219-4be2-adfa-90ab6b47899b",
+			"groupID": "61fbd273-b941-471c-983a-0a3cd2c74747",
+			"status": 1,
 			"created": "2019-03-17T22:04:45Z",
 			"modified": "2019-03-17T22:04:45Z"
 		}

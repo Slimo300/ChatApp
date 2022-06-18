@@ -6,18 +6,19 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (m *MockDB) AddInvite(issID, targetID, groupID uint) (models.Invite, error) {
-	invite := models.Invite{ID: uint(len(m.Invites) + 1), IssId: issID, TargetID: targetID, GroupID: groupID,
+func (m *MockDB) AddInvite(issID, targetID, groupID uuid.UUID) (models.Invite, error) {
+	invite := models.Invite{ID: uuid.New(), IssId: issID, TargetID: targetID, GroupID: groupID,
 		Status: database.INVITE_AWAITING, Created: time.Now(), Modified: time.Now()}
 	m.Invites = append(m.Invites, invite)
 	return invite, nil
 
 }
 
-func (mock *MockDB) GetUserInvites(userID uint) ([]models.Invite, error) {
+func (mock *MockDB) GetUserInvites(userID uuid.UUID) ([]models.Invite, error) {
 
 	userInvites := []models.Invite{}
 	for _, invite := range mock.Invites {
@@ -28,7 +29,7 @@ func (mock *MockDB) GetUserInvites(userID uint) ([]models.Invite, error) {
 	return userInvites, nil
 }
 
-func (mock *MockDB) GetInviteByID(inviteID uint) (models.Invite, error) {
+func (mock *MockDB) GetInviteByID(inviteID uuid.UUID) (models.Invite, error) {
 	for _, invite := range mock.Invites {
 		if invite.ID == inviteID {
 			return invite, nil
@@ -59,7 +60,7 @@ func (mock *MockDB) AcceptInvite(invite models.Invite) (models.Group, error) {
 	return models.Group{}, errors.New("Something went wrong")
 }
 
-func (mock *MockDB) createOrRestoreMember(userID, groupID uint) error {
+func (mock *MockDB) createOrRestoreMember(userID, groupID uuid.UUID) error {
 	for _, member := range mock.Members {
 		if member.UserID == userID && member.GroupID == groupID && member.Deleted {
 			member.Deleted = false
@@ -70,7 +71,7 @@ func (mock *MockDB) createOrRestoreMember(userID, groupID uint) error {
 	for _, user := range mock.Users {
 		if user.ID == userID {
 			mock.Members = append(mock.Members, models.Member{
-				ID:       uint(len(mock.Members) + 1),
+				ID:       uuid.New(),
 				UserID:   userID,
 				GroupID:  groupID,
 				Nick:     user.UserName,
@@ -87,7 +88,7 @@ func (mock *MockDB) createOrRestoreMember(userID, groupID uint) error {
 	return errors.New("error")
 }
 
-func (m *MockDB) IsUserInvited(userID, groupID uint) bool {
+func (m *MockDB) IsUserInvited(userID, groupID uuid.UUID) bool {
 	for _, invite := range m.Invites {
 		if invite.TargetID == userID && invite.GroupID == groupID && invite.Status == database.INVITE_AWAITING {
 			return true
@@ -96,7 +97,7 @@ func (m *MockDB) IsUserInvited(userID, groupID uint) bool {
 	return false
 }
 
-func (m *MockDB) DeclineInvite(inviteID uint) error {
+func (m *MockDB) DeclineInvite(inviteID uuid.UUID) error {
 	for _, invite := range m.Invites {
 		if invite.ID == inviteID {
 			invite.Status = database.INVITE_DECLINE

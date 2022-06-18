@@ -2,6 +2,7 @@ package communication
 
 import (
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -13,8 +14,8 @@ type Sender interface {
 // Action represents type for signalizing changes to hub and further to frontend
 type Action struct {
 	Action string        `json:"action"` // pop or insert
-	Group  int           `json:"group"`  // id_group
-	User   int           `json:"-"`      // id_user
+	Group  uuid.UUID     `json:"group"`  // id_group
+	User   uuid.UUID     `json:"-"`      // id_user
 	Member models.Member `json:"member"` // member info for updates
 	Invite models.Invite `json:"invite"` // invite
 }

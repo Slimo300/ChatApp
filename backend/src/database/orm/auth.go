@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (db *Database) GetUserById(id int) (user models.User, err error) {
+func (db *Database) GetUserById(id uuid.UUID) (user models.User, err error) {
 	return user, db.First(&user, id).Error
 }
 
@@ -42,11 +43,11 @@ func (db *Database) IsUsernameInDatabase(username string) bool {
 	return true
 }
 
-func (db *Database) SignInUser(id uint) (err error) {
+func (db *Database) SignInUser(id uuid.UUID) (err error) {
 	return db.First(&models.User{}, id).Updates(models.User{LoggedIn: true, Active: time.Now()}).Error
 
 }
 
-func (db *Database) SignOutUser(id uint) error {
+func (db *Database) SignOutUser(id uuid.UUID) error {
 	return db.First(&models.User{ID: id}).Updates(models.User{LoggedIn: false, Active: time.Now()}).Error
 }

@@ -8,8 +8,8 @@ import (
 
 func SetupTestServerWithHub() handlers.Server {
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, storage.MockStorage{})
-	go s.MockHub()
+	s := handlers.NewServerWithMockHub(mockDB, storage.MockStorage{})
+	go s.RunHub()
 	return *s
 }
 

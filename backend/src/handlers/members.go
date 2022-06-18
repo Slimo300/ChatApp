@@ -2,18 +2,23 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (s *Server) GrantPriv(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 	memberID := c.Param("memberID")
-	memberIDint, err := strconv.Atoi(memberID)
-	if err != nil || memberIDint <= 0 {
-		c.JSON(http.StatusBadRequest, "member's id incorrect")
+	memberUID, err := uuid.Parse(memberID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid member ID"})
 		return
 	}
 
@@ -27,13 +32,13 @@ func (s *Server) GrantPriv(c *gin.Context) {
 		return
 	}
 
-	memberToBeChanged, err := s.DB.GetMemberByID(uint(memberIDint))
+	memberToBeChanged, err := s.DB.GetMemberByID(memberUID)
 	if err != nil || memberToBeChanged.Deleted {
 		c.JSON(http.StatusNotFound, gin.H{"err": "resource not found"})
 		return
 	}
 
-	issuerMember, err := s.DB.GetUserGroupMember(uint(userID), memberToBeChanged.GroupID)
+	issuerMember, err := s.DB.GetUserGroupMember(userUID, memberToBeChanged.GroupID)
 	if err != nil || !issuerMember.Setting {
 		c.JSON(http.StatusForbidden, gin.H{"err": "no rights to put"})
 		return
@@ -43,7 +48,7 @@ func (s *Server) GrantPriv(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"err": "creator can't be modified"})
 	}
 
-	if err := s.DB.GrantPriv(uint(memberIDint), *load.Adding, *load.Deleting, *load.Setting); err != nil {
+	if err := s.DB.GrantPriv(memberUID, *load.Adding, *load.Deleting, *load.Setting); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
@@ -52,27 +57,32 @@ func (s *Server) GrantPriv(c *gin.Context) {
 }
 
 func (s *Server) DeleteUserFromGroup(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 	memberID := c.Param("memberID")
-	memberIDint, err := strconv.Atoi(memberID)
-	if err != nil || memberIDint <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "member's id incorrect"})
+	memberUID, err := uuid.Parse(memberID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid member ID"})
 		return
 	}
 
-	memberToBeDeleted, err := s.DB.GetMemberByID(uint(memberIDint))
+	memberToBeDeleted, err := s.DB.GetMemberByID(memberUID)
 	if err != nil || memberToBeDeleted.Deleted {
 		c.JSON(http.StatusNotFound, gin.H{"err": "resource not found"})
 		return
 	}
 
-	issuerMember, err := s.DB.GetUserGroupMember(uint(userID), memberToBeDeleted.GroupID)
+	issuerMember, err := s.DB.GetUserGroupMember(userUID, memberToBeDeleted.GroupID)
 	if err != nil || (!issuerMember.Deleting && issuerMember.ID != memberToBeDeleted.ID) {
 		c.JSON(http.StatusForbidden, gin.H{"err": "no rights to delete"})
 		return
 	}
 
-	member, err := s.DB.DeleteUserFromGroup(uint(memberIDint))
+	member, err := s.DB.DeleteUserFromGroup(memberUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return

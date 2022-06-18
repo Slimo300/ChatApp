@@ -2,15 +2,16 @@ package ws
 
 import (
 	"github.com/Slimo300/ChatApp/backend/src/communication"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type client struct {
-	id     int
+	id     uuid.UUID
 	socket *websocket.Conn
 	send   chan communication.Sender
-	hub    *Hub
-	groups []int64
+	hub    HubInterface
+	groups []uuid.UUID
 }
 
 func (c *client) read() {
@@ -21,7 +22,7 @@ func (c *client) read() {
 		if err := c.socket.ReadJSON(&msg); err != nil {
 			return
 		}
-		c.hub.forward <- &msg
+		c.hub.Forward(&msg)
 	}
 }
 

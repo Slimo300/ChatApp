@@ -11,7 +11,12 @@ import (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ChangePassword
 func (s *Server) ChangePassword(c *gin.Context) {
-	id := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 
 	load := struct {
 		NewPassword string `json:"newPassword"`
@@ -22,7 +27,7 @@ func (s *Server) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	user, err := s.DB.GetUserById(id)
+	user, err := s.DB.GetUserById(userUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -51,7 +56,12 @@ func (s *Server) ChangePassword(c *gin.Context) {
 // UpdateProfilePicture
 
 func (s *Server) UpdateProfilePicture(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 
 	imageFileHeader, err := c.FormFile("avatarFile")
 	if err != nil {
@@ -76,7 +86,7 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 		return
 	}
 
-	pictureURL, err := s.DB.GetProfilePictureURL(uint(userID))
+	pictureURL, err := s.DB.GetProfilePictureURL(userUID)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"err": err.Error()})
 		return
@@ -99,7 +109,7 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 	}
 
 	if wasEmpty {
-		if err = s.DB.SetProfilePicture(uint(userID), pictureURL); err != nil {
+		if err = s.DB.SetProfilePicture(userUID, pictureURL); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 			return
 		}
@@ -112,9 +122,13 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 // UpdateProfilePicture
 
 func (s *Server) DeleteProfilePicture(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+	}
 
-	url, err := s.DB.GetProfilePictureURL(uint(userID))
+	url, err := s.DB.GetProfilePictureURL(userUID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
@@ -123,7 +137,7 @@ func (s *Server) DeleteProfilePicture(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "user has no image to delete"})
 		return
 	}
-	if err = s.DB.SetProfilePicture(uint(userID), ""); err != nil {
+	if err = s.DB.SetProfilePicture(userUID, ""); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}

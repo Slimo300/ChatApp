@@ -1,10 +1,11 @@
 package mock
 
 import (
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (m *MockDB) SetPassword(userID uint, password string) error {
+func (m *MockDB) SetPassword(userID uuid.UUID, password string) error {
 	for _, user := range m.Users {
 		if user.ID == userID {
 			user.Pass = password
@@ -14,7 +15,7 @@ func (m *MockDB) SetPassword(userID uint, password string) error {
 	return gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) DeleteProfilePicture(userID uint) error {
+func (m *MockDB) DeleteProfilePicture(userID uuid.UUID) error {
 	for _, user := range m.Users {
 		if user.ID == userID {
 			user.Picture = ""
@@ -24,7 +25,7 @@ func (m *MockDB) DeleteProfilePicture(userID uint) error {
 	return gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) SetProfilePicture(userID uint, newURI string) error {
+func (m *MockDB) SetProfilePicture(userID uuid.UUID, newURI string) error {
 	for _, user := range m.Users {
 		if user.ID == userID {
 			user.Picture = newURI
@@ -34,7 +35,7 @@ func (m *MockDB) SetProfilePicture(userID uint, newURI string) error {
 	return gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) GetProfilePictureURL(userID uint) (string, error) {
+func (m *MockDB) GetProfilePictureURL(userID uuid.UUID) (string, error) {
 	for _, user := range m.Users {
 		if user.ID == userID {
 			return user.Picture, nil

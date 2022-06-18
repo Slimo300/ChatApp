@@ -6,14 +6,20 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (s *Server) GetGroupMessages(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 
 	groupID := c.Param("groupID")
-	groupIDint, err := strconv.Atoi(groupID)
-	if err != nil || groupIDint <= 0 {
+	groupUID, err := uuid.Parse(groupID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid group ID"})
 		return
 	}
@@ -32,12 +38,12 @@ func (s *Server) GetGroupMessages(c *gin.Context) {
 		return
 	}
 
-	if !s.DB.IsUserInGroup(uint(userID), uint(groupIDint)) {
+	if !s.DB.IsUserInGroup(userUID, groupUID) {
 		c.JSON(http.StatusForbidden, gin.H{"err": "User cannot request from this group"})
 		return
 	}
 
-	messages, err := s.DB.GetGroupMessages(uint(groupIDint), offsetInt, numInt)
+	messages, err := s.DB.GetGroupMessages(groupUID, offsetInt, numInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return

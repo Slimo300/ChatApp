@@ -3,18 +3,23 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (s *Server) GetUserInvites(c *gin.Context) {
 
-	id := c.Value("userID").(int)
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "Invalid ID"})
+		return
+	}
 
-	invites, err := s.DB.GetUserInvites(uint(id))
+	invites, err := s.DB.GetUserInvites(userUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
@@ -29,10 +34,15 @@ func (s *Server) GetUserInvites(c *gin.Context) {
 }
 
 func (s *Server) SendGroupInvite(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 
 	load := struct {
-		GroupID int    `json:"group"`
+		GroupID string `json:"group"`
 		Target  string `json:"target"`
 	}{}
 
@@ -41,8 +51,9 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
-	if load.GroupID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"err": "group not specified"})
+	groupUID, err := uuid.Parse(load.GroupID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid group ID"})
 		return
 	}
 	if strings.TrimSpace(load.Target) == "" {
@@ -50,7 +61,7 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 		return
 	}
 
-	issuerMember, err := s.DB.GetUserGroupMember(uint(userID), uint(load.GroupID))
+	issuerMember, err := s.DB.GetUserGroupMember(userUID, groupUID)
 	if err != nil || !issuerMember.Adding {
 		c.JSON(http.StatusForbidden, gin.H{"err": "no rights to add"})
 		return
@@ -62,17 +73,17 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 		return
 	}
 
-	if s.DB.IsUserInGroup(userToBeAdded.ID, uint(load.GroupID)) {
+	if s.DB.IsUserInGroup(userToBeAdded.ID, groupUID) {
 		c.JSON(http.StatusConflict, gin.H{"err": "user is already a member of group"})
 		return
 	}
 
-	if s.DB.IsUserInvited(userToBeAdded.ID, uint(load.GroupID)) {
+	if s.DB.IsUserInvited(userToBeAdded.ID, groupUID) {
 		c.JSON(http.StatusConflict, gin.H{"err": "user already invited"})
 		return
 	}
 
-	_, err = s.DB.AddInvite(uint(userID), userToBeAdded.ID, uint(load.GroupID))
+	_, err = s.DB.AddInvite(userUID, userToBeAdded.ID, groupUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "internal database error"})
 		return
@@ -84,10 +95,15 @@ func (s *Server) SendGroupInvite(c *gin.Context) {
 }
 
 func (s *Server) RespondGroupInvite(c *gin.Context) {
-	userID := c.GetInt("userID")
+	userID := c.GetString("userID")
+	userUID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
+	}
 	inviteID := c.Param("inviteID")
-	inviteIDint, err := strconv.Atoi(inviteID)
-	if err != nil || inviteIDint <= 0 {
+	inviteUID, err := uuid.Parse(inviteID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid invite id"})
 		return
 	}
@@ -100,13 +116,13 @@ func (s *Server) RespondGroupInvite(c *gin.Context) {
 		return
 	}
 
-	invite, err := s.DB.GetInviteByID(uint(inviteIDint))
+	invite, err := s.DB.GetInviteByID(inviteUID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"err": "resource not found"})
 		return
 	}
 
-	if invite.TargetID != uint(userID) {
+	if invite.TargetID != userUID {
 		c.JSON(http.StatusForbidden, gin.H{"err": "no rights to respond"})
 		return
 	}

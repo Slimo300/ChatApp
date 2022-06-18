@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID       uint      `gorm:"primaryKey"`
+	ID       uuid.UUID `gorm:"primaryKey"`
 	UserName string    `gorm:"column:username;unique" json:"username"`
 	Email    string    `gorm:"column:email;unique" json:"email"`
 	Pass     string    `gorm:"column:password" json:"-"`
@@ -20,7 +22,7 @@ func (User) TableName() string {
 }
 
 type Group struct {
-	ID      uint      `gorm:"primaryKey"`
+	ID      uuid.UUID `gorm:"primaryKey"`
 	Name    string    `gorm:"column:name" json:"name"`
 	Desc    string    `gorm:"column:desc" json:"desc"`
 	Picture string    `gorm:"column:picture_url" json:"pictureUrl"`
@@ -33,10 +35,10 @@ func (Group) TableName() string {
 }
 
 type Message struct {
-	ID       uint      `gorm:"primaryKey"`
+	ID       uuid.UUID `gorm:"primaryKey"`
 	Posted   time.Time `gorm:"column:posted" json:"posted"`
 	Text     string    `gorm:"column:text" json:"text"`
-	MemberID uint      `gorm:"column:id_member" json:"member_id"`
+	MemberID uuid.UUID `gorm:"column:id_member" json:"member_id"`
 	Member   Member    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
@@ -45,17 +47,17 @@ func (Message) TableName() string {
 }
 
 type Member struct {
-	ID       uint   `gorm:"primaryKey"`
-	GroupID  uint   `gorm:"column:group_id;uniqueIndex:idx_first" json:"group_id"`
-	UserID   uint   `gorm:"column:user_id;uniqueIndex:idx_first" json:"user_id"`
-	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-	Nick     string `gorm:"column:nick" json:"nick"`
-	Adding   bool   `gorm:"column:adding" json:"adding"`
-	Deleting bool   `gorm:"column:deleting" json:"deleting"`
-	Setting  bool   `gorm:"column:setting" json:"setting" `
-	Creator  bool   `gorm:"column:creator" json:"creator"`
-	Deleted  bool   `gorm:"column:deleted" json:"deleted"`
+	ID       uuid.UUID `gorm:"primaryKey"`
+	GroupID  uuid.UUID `gorm:"column:group_id;uniqueIndex:idx_first" json:"group_id"`
+	UserID   uuid.UUID `gorm:"column:user_id;uniqueIndex:idx_first" json:"user_id"`
+	User     User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+	Nick     string    `gorm:"column:nick" json:"nick"`
+	Adding   bool      `gorm:"column:adding" json:"adding"`
+	Deleting bool      `gorm:"column:deleting" json:"deleting"`
+	Setting  bool      `gorm:"column:setting" json:"setting" `
+	Creator  bool      `gorm:"column:creator" json:"creator"`
+	Deleted  bool      `gorm:"column:deleted" json:"deleted"`
 }
 
 func (Member) TableName() string {
@@ -63,12 +65,12 @@ func (Member) TableName() string {
 }
 
 type Invite struct {
-	ID       uint      `gorm:"primaryKey"`
-	IssId    uint      `gorm:"column:iss_id" json:"issID"`
+	ID       uuid.UUID `gorm:"primaryKey"`
+	IssId    uuid.UUID `gorm:"column:iss_id" json:"issID"`
 	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"issuer"`
-	TargetID uint      `gorm:"column:target_id" json:"targetID"`
+	TargetID uuid.UUID `gorm:"column:target_id" json:"targetID"`
 	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-	GroupID  uint      `gorm:"column:group_id" json:"groupID"`
+	GroupID  uuid.UUID `gorm:"column:group_id" json:"groupID"`
 	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"group"`
 	Status   int       `gorm:"column:status" json:"status"`
 	Created  time.Time `gorm:"column:created" json:"created"`

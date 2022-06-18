@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (m *MockDB) CreateGroup(id uint, name, desc string) (models.Group, error) {
+func (m *MockDB) CreateGroup(id uuid.UUID, name, desc string) (models.Group, error) {
 	newGroup := models.Group{
-		ID:      uint(len(m.Groups) + 1),
+		ID:      uuid.New(),
 		Name:    name,
 		Desc:    desc,
 		Created: time.Now(),
@@ -19,7 +20,7 @@ func (m *MockDB) CreateGroup(id uint, name, desc string) (models.Group, error) {
 	return newGroup, nil
 }
 
-func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
+func (m *MockDB) GetUserGroups(id uuid.UUID) ([]models.Group, error) {
 	var groups []models.Group
 	for _, member := range m.Members {
 		if member.UserID == id {
@@ -33,7 +34,7 @@ func (m *MockDB) GetUserGroups(id uint) ([]models.Group, error) {
 	return groups, nil
 }
 
-func (m *MockDB) DeleteGroup(groupID uint) (models.Group, error) {
+func (m *MockDB) DeleteGroup(groupID uuid.UUID) (models.Group, error) {
 	var deletedGroup models.Group
 	for i, group := range m.Groups {
 		if group.ID == groupID {
@@ -45,7 +46,7 @@ func (m *MockDB) DeleteGroup(groupID uint) (models.Group, error) {
 	return deletedGroup, nil
 }
 
-func (m *MockDB) GetUserGroupMember(userID, groupID uint) (models.Member, error) {
+func (m *MockDB) GetUserGroupMember(userID, groupID uuid.UUID) (models.Member, error) {
 	for _, member := range m.Members {
 		if member.GroupID == groupID && member.UserID == userID {
 			return member, nil
@@ -54,7 +55,7 @@ func (m *MockDB) GetUserGroupMember(userID, groupID uint) (models.Member, error)
 	return models.Member{}, gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) DeleteGroupProfilePicture(groupID uint) error {
+func (m *MockDB) DeleteGroupProfilePicture(groupID uuid.UUID) error {
 	for _, group := range m.Groups {
 		if group.ID == groupID {
 			group.Picture = ""
@@ -64,7 +65,7 @@ func (m *MockDB) DeleteGroupProfilePicture(groupID uint) error {
 	return gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) SetGroupProfilePicture(groupID uint, newURI string) error {
+func (m *MockDB) SetGroupProfilePicture(groupID uuid.UUID, newURI string) error {
 	for _, group := range m.Groups {
 		if group.ID == groupID {
 			group.Picture = newURI
@@ -74,7 +75,7 @@ func (m *MockDB) SetGroupProfilePicture(groupID uint, newURI string) error {
 	return gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) GetGroupProfilePicture(groupID uint) (string, error) {
+func (m *MockDB) GetGroupProfilePicture(groupID uuid.UUID) (string, error) {
 	for _, group := range m.Groups {
 		if group.ID == groupID {
 			return group.Picture, nil

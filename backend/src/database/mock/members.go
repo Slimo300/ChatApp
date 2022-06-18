@@ -4,10 +4,11 @@ import (
 	"errors"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (m *MockDB) DeleteUserFromGroup(memberID uint) (models.Member, error) {
+func (m *MockDB) DeleteUserFromGroup(memberID uuid.UUID) (models.Member, error) {
 
 	for _, member := range m.Members {
 		if member.ID == memberID {
@@ -19,7 +20,7 @@ func (m *MockDB) DeleteUserFromGroup(memberID uint) (models.Member, error) {
 
 }
 
-func (m *MockDB) GetMemberByID(memberID uint) (models.Member, error) {
+func (m *MockDB) GetMemberByID(memberID uuid.UUID) (models.Member, error) {
 	for _, member := range m.Members {
 		if member.ID == memberID {
 			return member, nil
@@ -28,7 +29,7 @@ func (m *MockDB) GetMemberByID(memberID uint) (models.Member, error) {
 	return models.Member{}, gorm.ErrRecordNotFound
 }
 
-func (m *MockDB) GrantPriv(memberID uint, adding, deleting, setting bool) error {
+func (m *MockDB) GrantPriv(memberID uuid.UUID, adding, deleting, setting bool) error {
 	for _, member := range m.Members {
 		if member.ID == memberID {
 			member.Adding = adding
@@ -41,7 +42,7 @@ func (m *MockDB) GrantPriv(memberID uint, adding, deleting, setting bool) error 
 	return errors.New("internal error")
 }
 
-func (m *MockDB) IsUserInGroup(userID, groupID uint) bool {
+func (m *MockDB) IsUserInGroup(userID, groupID uuid.UUID) bool {
 	for _, member := range m.Members {
 		if member.GroupID == groupID && member.UserID == userID && !member.Deleted {
 			return true

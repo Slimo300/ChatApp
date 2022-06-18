@@ -4,9 +4,10 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 )
 
-func (m *MockDB) GetGroupMessages(groupID uint, offset, num int) (messages []models.Message, err error) {
+func (m *MockDB) GetGroupMessages(groupID uuid.UUID, offset, num int) (messages []models.Message, err error) {
 	for _, message := range m.Messages {
 		for _, member := range m.Members {
 			if message.MemberID == member.ID && member.GroupID == groupID {
@@ -18,9 +19,9 @@ func (m *MockDB) GetGroupMessages(groupID uint, offset, num int) (messages []mod
 	return messages, nil
 }
 
-func (m *MockDB) AddMessage(memberID uint, text string, when time.Time) error {
+func (m *MockDB) AddMessage(memberID uuid.UUID, text string, when time.Time) error {
 	m.Messages = append(m.Messages, models.Message{
-		ID:       uint(len(m.Messages) + 1),
+		ID:       uuid.New(),
 		Posted:   when,
 		Text:     text,
 		MemberID: memberID,

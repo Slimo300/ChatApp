@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -11,11 +12,11 @@ const TIME_FORMAT = "2006-02-01 15:04:05"
 
 // Message is a plain message in chat app
 type Message struct {
-	Group   uint64 `json:"group"`
-	Member  uint64 `json:"member"`
-	Message string `json:"text"`
-	Nick    string `json:"nick"`
-	When    string `json:"created"`
+	Group   uuid.UUID `json:"group"`
+	Member  uuid.UUID `json:"member"`
+	Message string    `json:"text"`
+	Nick    string    `json:"nick"`
+	When    string    `json:"created"`
 }
 
 // Send sends itself through websocket connection
@@ -33,8 +34,8 @@ func (m *Message) SetTime() {
 func ShortenMessages(messages []models.Message) (shortMessages []Message) {
 	for _, msg := range messages {
 		shortMessages = append(shortMessages, Message{
-			Group:   uint64(msg.Member.GroupID),
-			Member:  uint64(msg.MemberID),
+			Group:   msg.Member.GroupID,
+			Member:  msg.MemberID,
 			Nick:    msg.Member.Nick,
 			Message: msg.Text,
 			When:    msg.Posted.Format(TIME_FORMAT),

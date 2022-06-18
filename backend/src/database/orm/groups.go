@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
+func (db *Database) GetUserGroups(id uuid.UUID) (groups []models.Group, err error) {
 
-	var userGroupsIDs []uint
+	var userGroupsIDs []uuid.UUID
 	if err := db.Table("`groups`").Select("`groups`.id").
 		Joins("inner join `members` on `members`.group_id = `groups`.id").
 		Joins("inner join `users` on `users`.id = `members`.user_id").
@@ -29,18 +30,20 @@ func (db *Database) GetUserGroups(id uint) (groups []models.Group, err error) {
 	return groups, nil
 }
 
-func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error) {
+func (db *Database) CreateGroup(userID uuid.UUID, name, desc string) (models.Group, error) {
 	group := models.Group{Name: name, Desc: desc, Created: time.Now(), Picture: ""}
 
 	var creator models.User
-	db.Where(models.User{ID: id}).First(&creator)
+	if err := db.First(&creator, userID).Error; err != nil {
+		return models.Group{}, err
+	}
 
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		creation := tx.Create(&group)
 		if creation.Error != nil {
 			return creation.Error
 		}
-		member := models.Member{UserID: id, GroupID: group.ID, Adding: true, Deleting: true, Setting: true, Creator: true, Nick: creator.UserName}
+		member := models.Member{UserID: userID, GroupID: group.ID, Adding: true, Deleting: true, Setting: true, Creator: true, Nick: creator.UserName}
 		m_create := tx.Create(&member)
 		if m_create.Error != nil {
 			return m_create.Error
@@ -57,7 +60,7 @@ func (db *Database) CreateGroup(id uint, name, desc string) (models.Group, error
 	return group, nil
 }
 
-func (db *Database) DeleteGroup(groupID uint) (group models.Group, err error) {
+func (db *Database) DeleteGroup(groupID uuid.UUID) (group models.Group, err error) {
 
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := db.Where(models.Member{GroupID: groupID}).Delete(&models.Member{}).Error; err != nil {
@@ -75,15 +78,15 @@ func (db *Database) DeleteGroup(groupID uint) (group models.Group, err error) {
 	return group, nil
 }
 
-func (db *Database) SetGroupProfilePicture(groupID uint, newURI string) error {
+func (db *Database) SetGroupProfilePicture(groupID uuid.UUID, newURI string) error {
 	return db.First(&models.Group{}, groupID).Update("picture_url", newURI).Error
 }
 
-func (db *Database) DeleteGroupProfilePicture(groupID uint) error {
+func (db *Database) DeleteGroupProfilePicture(groupID uuid.UUID) error {
 	return db.First(&models.Group{}, groupID).Update("picture_url", "").Error
 }
 
-func (db *Database) GetGroupProfilePicture(groupID uint) (string, error) {
+func (db *Database) GetGroupProfilePicture(groupID uuid.UUID) (string, error) {
 	var group models.Group
 	if err := db.First(&group, groupID).Error; err != nil {
 		return "", err

@@ -134,21 +134,21 @@ func TestSignOut(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		id                 int
+		id                 string
 		expectedStatusCode int
 		expectedResponse   interface{}
 	}{
 		{
 			desc:               "logoutsuccess",
-			id:                 1,
+			id:                 "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "success"},
 		},
 		{
 			desc:               "logoutnouser",
-			id:                 1000,
+			id:                 "2f8fd072-29d4-470a-9359-b3b0e056bf65",
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "No user with id: 1000"},
+			expectedResponse:   gin.H{"err": "No user with id: 2f8fd072-29d4-470a-9359-b3b0e056bf65"},
 		},
 	}
 

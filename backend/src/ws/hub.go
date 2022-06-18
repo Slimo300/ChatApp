@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -52,7 +53,7 @@ func (h *Hub) Run() {
 			h.messageServerChan <- msg
 			for client := range h.clients {
 				for _, gr := range client.groups {
-					if gr == int64(msg.Group) {
+					if gr == msg.Group {
 						client.send <- msg
 					}
 				}
@@ -74,7 +75,18 @@ func (h *Hub) Run() {
 	}
 }
 
-func ServeWebSocket(w http.ResponseWriter, req *http.Request, h *Hub, groups []int64, id_user int) {
+func (h *Hub) Join(c *client) {
+	h.join <- c
+}
+
+func (h *Hub) Leave(c *client) {
+	h.leave <- c
+}
+func (h *Hub) Forward(msg *communication.Message) {
+	h.forward <- msg
+}
+
+func ServeWebSocket(w http.ResponseWriter, req *http.Request, h HubInterface, groups []uuid.UUID, id_user uuid.UUID) {
 
 	socket, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
@@ -89,8 +101,8 @@ func ServeWebSocket(w http.ResponseWriter, req *http.Request, h *Hub, groups []i
 		groups: groups,
 	}
 
-	h.join <- client
-	defer func() { h.leave <- client }()
+	h.Join(client)
+	defer func() { h.Leave(client) }()
 	go client.write()
 	client.read()
 }

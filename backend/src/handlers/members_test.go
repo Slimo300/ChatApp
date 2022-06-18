@@ -18,7 +18,7 @@ func TestGrantPriv(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		userID             uint
+		userID             string
 		memberID           string
 		data               map[string]interface{}
 		expectedStatusCode int
@@ -26,16 +26,16 @@ func TestGrantPriv(t *testing.T) {
 	}{
 		{
 			desc:               "grantprivsuccess",
-			userID:             1,
-			memberID:           "2",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "b38aaff8-6733-4a1d-8eaf-fc10e656d02b",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
 		{
 			desc:               "grantprivbadrequest",
-			userID:             1,
-			memberID:           "2",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "b38aaff8-6733-4a1d-8eaf-fc10e656d02b",
 			data:               map[string]interface{}{"adding": true, "deleting": true},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "bad request, all 3 fields must be present"},
@@ -43,8 +43,8 @@ func TestGrantPriv(t *testing.T) {
 		// no member provided in request body
 		{
 			desc:               "grantprivnomember",
-			userID:             1,
-			memberID:           "100",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
 			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "resource not found"},
@@ -52,24 +52,24 @@ func TestGrantPriv(t *testing.T) {
 		// issuer has no right to add
 		{
 			desc:               "grantprivmemberdeleted",
-			userID:             1,
-			memberID:           "4",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "0ef41409-24b0-43e6-80a3-cf31a4b1a684",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
 			expectedStatusCode: http.StatusNotFound,
 			expectedResponse:   gin.H{"err": "resource not found"},
 		},
 		{
 			desc:               "grantprivnorights",
-			userID:             2,
-			memberID:           "2",
+			userID:             "0ef41409-24b0-43e6-80a3-cf31a4b1a684",
+			memberID:           "b38aaff8-6733-4a1d-8eaf-fc10e656d02b",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": true},
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "no rights to put"},
 		},
 		{
 			desc:               "grantprivcreator",
-			userID:             1,
-			memberID:           "1",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "e4372b71-30ca-42e1-8c1e-7df6d033fd3f",
 			data:               map[string]interface{}{"adding": true, "deleting": true, "setting": false},
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "creator can't be modified"},
@@ -79,7 +79,7 @@ func TestGrantPriv(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.userID))
+			jwt, err := s.CreateSignedToken(tC.userID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
@@ -114,7 +114,7 @@ func TestDeleteMember(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
-		userID             uint
+		userID             string
 		data               map[string]interface{}
 		memberID           string
 		expectedStatusCode int
@@ -122,22 +122,22 @@ func TestDeleteMember(t *testing.T) {
 	}{
 		{
 			desc:               "deleteusersuccess",
-			userID:             1,
-			memberID:           "2",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "b38aaff8-6733-4a1d-8eaf-fc10e656d02b",
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   gin.H{"message": "ok"},
 		},
 		{
 			desc:               "deletebadurl",
-			userID:             1,
-			memberID:           "0",
+			userID:             "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			memberID:           "0ef41409-24bx-43e6-80a3-cf31a4b1a684",
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   gin.H{"err": "member's id incorrect"},
+			expectedResponse:   gin.H{"err": "invalid member ID"},
 		},
 		{
 			desc:               "deletenopriv",
-			userID:             2,
-			memberID:           "2",
+			userID:             "0ef41409-24b0-43e6-80a3-cf31a4b1a684",
+			memberID:           "e4372b71-30ca-42e1-8c1e-7df6d033fd3f",
 			expectedStatusCode: http.StatusForbidden,
 			expectedResponse:   gin.H{"err": "no rights to delete"},
 		},
@@ -146,7 +146,7 @@ func TestDeleteMember(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(int(tC.userID))
+			jwt, err := s.CreateSignedToken(tC.userID)
 			if err != nil {
 				t.Error("error when creating signed token")
 			}
