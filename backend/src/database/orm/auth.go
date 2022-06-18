@@ -22,6 +22,7 @@ func (db *Database) GetUserByUsername(username string) (user models.User, err er
 }
 
 func (db *Database) RegisterUser(user models.User) (models.User, error) {
+	user.ID = uuid.New()
 	user.Active = time.Now()
 	user.SignUp = time.Now()
 	user.LoggedIn = false

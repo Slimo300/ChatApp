@@ -9,6 +9,7 @@ import (
 
 func (db *Database) AddMessage(memberID uuid.UUID, text string, when time.Time) error {
 	message := models.Message{
+		ID:       uuid.New(),
 		Text:     text,
 		MemberID: memberID,
 		Posted:   when,

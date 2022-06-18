@@ -38,7 +38,7 @@ type Message struct {
 	ID       uuid.UUID `gorm:"primaryKey"`
 	Posted   time.Time `gorm:"column:posted" json:"posted"`
 	Text     string    `gorm:"column:text" json:"text"`
-	MemberID uuid.UUID `gorm:"column:id_member" json:"member_id"`
+	MemberID uuid.UUID `gorm:"column:id_member;size:191" json:"member_id"`
 	Member   Member    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
@@ -48,8 +48,8 @@ func (Message) TableName() string {
 
 type Member struct {
 	ID       uuid.UUID `gorm:"primaryKey"`
-	GroupID  uuid.UUID `gorm:"column:group_id;uniqueIndex:idx_first" json:"group_id"`
-	UserID   uuid.UUID `gorm:"column:user_id;uniqueIndex:idx_first" json:"user_id"`
+	GroupID  uuid.UUID `gorm:"column:group_id;uniqueIndex:idx_first;size:191" json:"group_id"`
+	UserID   uuid.UUID `gorm:"column:user_id;uniqueIndex:idx_first;size:191" json:"user_id"`
 	User     User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Nick     string    `gorm:"column:nick" json:"nick"`
@@ -66,11 +66,11 @@ func (Member) TableName() string {
 
 type Invite struct {
 	ID       uuid.UUID `gorm:"primaryKey"`
-	IssId    uuid.UUID `gorm:"column:iss_id" json:"issID"`
+	IssId    uuid.UUID `gorm:"column:iss_id;size:191" json:"issID"`
 	Iss      User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"issuer"`
-	TargetID uuid.UUID `gorm:"column:target_id" json:"targetID"`
+	TargetID uuid.UUID `gorm:"column:target_id;size:191" json:"targetID"`
 	Target   User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-	GroupID  uuid.UUID `gorm:"column:group_id" json:"groupID"`
+	GroupID  uuid.UUID `gorm:"column:group_id;size:191" json:"groupID"`
 	Group    Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"group"`
 	Status   int       `gorm:"column:status" json:"status"`
 	Created  time.Time `gorm:"column:created" json:"created"`
