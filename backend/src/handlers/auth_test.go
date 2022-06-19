@@ -95,13 +95,13 @@ func TestSignIn(t *testing.T) {
 		{
 			desc:               "loginnosuchemail",
 			data:               map[string]string{"email": "mal.zein@email.co1m", "password": "test"},
-			expectedStatusCode: http.StatusUnauthorized,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "wrong email or password"},
 		},
 		{
 			desc:               "logininvalidpass",
 			data:               map[string]string{"email": "mal.zein@email.com", "password": "t2est"},
-			expectedStatusCode: http.StatusUnauthorized,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "wrong email or password"},
 		},
 	}

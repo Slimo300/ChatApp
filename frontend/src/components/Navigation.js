@@ -14,6 +14,8 @@ const Navigation = (props) => {
         let logoutPromise = Logout();
         logoutPromise.then( response => {
             if (response === undefined) {
+                if (props.ws !== undefined) props.ws.close();
+                else console.log(props.ws);
                 dispatch({type: actionTypes.LOGOUT})
                 props.setName("");
             }

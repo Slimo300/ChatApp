@@ -1,7 +1,6 @@
 import React from "react";
 
 const Message = (props) => {
-    console.log(props.picture);
     const right = (
         <li className="chat-right">
             <div className="chat-hour">{props.time} <span className="fa fa-check-circle"></span></div>

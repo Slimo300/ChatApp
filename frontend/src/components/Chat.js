@@ -47,8 +47,7 @@ const Chat = (props) => {
 
     const GetMemberPicture = (group, member) => {
         for (let i = 0; i < group.Members.length; i++) {
-            if (group.Members[i].ID == member) {
-                console.log(group.Members[i].User.pictureUrl);
+            if (group.Members[i].ID === member) {
                 return group.Members[i].User.pictureUrl;
             }
         }
@@ -77,7 +76,7 @@ const Chat = (props) => {
     const sendMessage = (e) => {
         e.preventDefault();
         if (msg.trim() === "") return false;
-        props.ws.send(JSON.stringify({
+        if (props.ws !== undefined) props.ws.send(JSON.stringify({
             "group": props.group.ID,
             "member": member.ID,
             "text": msg,

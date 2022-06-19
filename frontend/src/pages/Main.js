@@ -26,7 +26,6 @@ const AuthMain = (props) => {
     function toggleToggler(){
         setToggler(!toggler);
     }
-    const [ws, setWs] = useState({}); // websocket connection
 
     const [createGrShow, setCreateGrShow] = useState(false);
     const toggleCreateGroup = () => {
@@ -44,10 +43,10 @@ const AuthMain = (props) => {
         let invites = GetInvites();
         invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}) } );
         let websocketPromise = GetWebsocket();
-        websocketPromise.then( response => { setWs(response) } );
+        websocketPromise.then( response => { props.setWs(response) } );
     }, [dispatch]);
 
-    ws.onmessage = (e) => {
+    if (props.ws !== undefined) props.ws.onmessage = (e) => {
         const msgJSON = JSON.parse(e.data);
         if (msgJSON.action !== undefined) {
             switch (msgJSON.action) {
@@ -102,7 +101,7 @@ const AuthMain = (props) => {
                                         </ul>
                                     </div>
                                 </div>
-                                <Chat group={current} ws={ws} setCurrent={setCurrent} toggler={toggler}/>
+                                <Chat group={current} ws={props.ws} setCurrent={setCurrent} toggler={toggler}/>
                             </div>
                         </div>
                     </div>

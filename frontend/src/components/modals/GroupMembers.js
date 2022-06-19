@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {v4 as uuidv4} from "uuid";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { DeleteMember, SetRights } from '../../Requests';
+import { actionTypes, StorageContext } from '../../ChatStorage';
 
 export const ModalMembers = (props) => {
 
@@ -28,7 +29,7 @@ export const ModalMembers = (props) => {
                         <div className='form-group'>
                             <table className="table">
                                 <tbody>
-                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} member={item} setErr={setErr} toggle={props.toggle} user={props.member}/>})}
+                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} group={props.group.ID} member={item} setErr={setErr} toggle={props.toggle} user={props.member}/>})}
                                 </tbody>
                             </table>
                         </div>
@@ -40,6 +41,8 @@ export const ModalMembers = (props) => {
 } 
 
 const Member = (props) => {
+    const [, dispatch] = useContext(StorageContext);
+
     const [adding, setAdding] = useState(props.member.adding);
     const toggleAdding = () => {
         setAdding(!adding);
@@ -64,6 +67,7 @@ const Member = (props) => {
                 props.toggle();
                 props.setErr("");
             }, 2000);
+            dispatch({type: actionTypes.DELETE_MEMBER, payload: {ID: props.member.ID, group_id: props.group}})
         });
     }
 

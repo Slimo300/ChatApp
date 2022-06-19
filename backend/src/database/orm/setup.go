@@ -23,7 +23,7 @@ func Setup() (*Database, error) {
 		return nil, err
 	}
 
-	db.Debug().AutoMigrate(&models.User{}, &models.Group{}, &models.Member{}, &models.Message{}, &models.Invite{})
+	db.AutoMigrate(&models.User{}, &models.Group{}, &models.Member{}, &models.Message{}, &models.Invite{})
 
 	return &Database{DB: db}, nil
 }

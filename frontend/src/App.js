@@ -8,6 +8,7 @@ import ChatStorage from "./ChatStorage";
 function App() {
   
   const [name, setName] = useState('');
+  const [ws, setWs] = useState({}); // websocket connection
 
   const [profileShow, setProfileShow] = useState(false);
   const toggleProfileShow = () => {
@@ -18,10 +19,10 @@ function App() {
       <div >
         <ChatStorage>
         <Router>
-          <Navigation name={name} setName={setName} toggleProfile={toggleProfileShow} />
+          <Navigation name={name} setName={setName} toggleProfile={toggleProfileShow} ws={ws} />
           <main>
             <Routes>
-              <Route path="/" element={<Main name={name} profileShow={profileShow} toggleProfile={toggleProfileShow}/>}/>
+              <Route path="/" element={<Main name={name} profileShow={profileShow} toggleProfile={toggleProfileShow} ws={ws} setWs={setWs}/>}/>
               <Route path="/login" element={<SignInForm setName={setName} name={name}/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
             </Routes>
