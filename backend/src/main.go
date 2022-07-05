@@ -19,7 +19,7 @@ import (
 
 func main() {
 	engine := gin.Default()
-	db, err := orm.SetupDevelopment()
+	db, err := orm.Setup()
 	if err != nil {
 		log.Fatal(err)
 	}

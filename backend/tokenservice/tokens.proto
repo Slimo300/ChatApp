@@ -1,0 +1,27 @@
+
+syntax = "proto3";
+
+package pb;
+option go_package = "/pb";
+
+service TokenService {
+    rpc Generate(GenerateRequest) returns (GenerateResponse) {}
+    rpc Validate(ValidateRequest) returns (ValidateResponse) {}
+}
+message GenerateRequest {
+    string userID = 1;
+}
+message GenerateResponse {
+    string refreshToken = 1;
+    string accessToken = 2;
+    string error = 3;
+}
+message ValidateRequest {
+    string refreshToken = 1;
+}
+
+message ValidateResponse {
+    string refreshToken = 1;
+    string accessToken = 2;
+    string error = 3;
+}

@@ -29,6 +29,9 @@ services:
       - MYSQLHOST=${MYSQLHOST:-db}
       - MYSQLPORT=${MYSQLPORT:-3306}
       - MYSQLDBNAME=${MYSQLDBNAME:-test}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - IMAGEBUCKETNAME=${IMAGEBUCKETNAME}
     restart: always
     deploy:
       restart_policy:
