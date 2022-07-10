@@ -22,8 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TokenServiceClient interface {
-	Generate(ctx context.Context, in *GenerateRequest, opts ...grpc.CallOption) (*GenerateResponse, error)
-	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
+	NewPairFromUserID(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*TokenPair, error)
+	NewPairFromRefresh(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*TokenPair, error)
+	DeleteUserToken(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*Msg, error)
 }
 
 type tokenServiceClient struct {
@@ -34,18 +35,27 @@ func NewTokenServiceClient(cc grpc.ClientConnInterface) TokenServiceClient {
 	return &tokenServiceClient{cc}
 }
 
-func (c *tokenServiceClient) Generate(ctx context.Context, in *GenerateRequest, opts ...grpc.CallOption) (*GenerateResponse, error) {
-	out := new(GenerateResponse)
-	err := c.cc.Invoke(ctx, "/pb.TokenService/Generate", in, out, opts...)
+func (c *tokenServiceClient) NewPairFromUserID(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*TokenPair, error) {
+	out := new(TokenPair)
+	err := c.cc.Invoke(ctx, "/pb.TokenService/NewPairFromUserID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tokenServiceClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error) {
-	out := new(ValidateResponse)
-	err := c.cc.Invoke(ctx, "/pb.TokenService/Validate", in, out, opts...)
+func (c *tokenServiceClient) NewPairFromRefresh(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*TokenPair, error) {
+	out := new(TokenPair)
+	err := c.cc.Invoke(ctx, "/pb.TokenService/NewPairFromRefresh", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tokenServiceClient) DeleteUserToken(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*Msg, error) {
+	out := new(Msg)
+	err := c.cc.Invoke(ctx, "/pb.TokenService/DeleteUserToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +66,9 @@ func (c *tokenServiceClient) Validate(ctx context.Context, in *ValidateRequest, 
 // All implementations must embed UnimplementedTokenServiceServer
 // for forward compatibility
 type TokenServiceServer interface {
-	Generate(context.Context, *GenerateRequest) (*GenerateResponse, error)
-	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
+	NewPairFromUserID(context.Context, *UserID) (*TokenPair, error)
+	NewPairFromRefresh(context.Context, *RefreshToken) (*TokenPair, error)
+	DeleteUserToken(context.Context, *RefreshToken) (*Msg, error)
 	mustEmbedUnimplementedTokenServiceServer()
 }
 
@@ -65,11 +76,14 @@ type TokenServiceServer interface {
 type UnimplementedTokenServiceServer struct {
 }
 
-func (UnimplementedTokenServiceServer) Generate(context.Context, *GenerateRequest) (*GenerateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Generate not implemented")
+func (UnimplementedTokenServiceServer) NewPairFromUserID(context.Context, *UserID) (*TokenPair, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewPairFromUserID not implemented")
 }
-func (UnimplementedTokenServiceServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Validate not implemented")
+func (UnimplementedTokenServiceServer) NewPairFromRefresh(context.Context, *RefreshToken) (*TokenPair, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewPairFromRefresh not implemented")
+}
+func (UnimplementedTokenServiceServer) DeleteUserToken(context.Context, *RefreshToken) (*Msg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserToken not implemented")
 }
 func (UnimplementedTokenServiceServer) mustEmbedUnimplementedTokenServiceServer() {}
 
@@ -84,38 +98,56 @@ func RegisterTokenServiceServer(s grpc.ServiceRegistrar, srv TokenServiceServer)
 	s.RegisterService(&TokenService_ServiceDesc, srv)
 }
 
-func _TokenService_Generate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateRequest)
+func _TokenService_NewPairFromUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TokenServiceServer).Generate(ctx, in)
+		return srv.(TokenServiceServer).NewPairFromUserID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.TokenService/Generate",
+		FullMethod: "/pb.TokenService/NewPairFromUserID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TokenServiceServer).Generate(ctx, req.(*GenerateRequest))
+		return srv.(TokenServiceServer).NewPairFromUserID(ctx, req.(*UserID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TokenService_Validate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateRequest)
+func _TokenService_NewPairFromRefresh_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshToken)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TokenServiceServer).Validate(ctx, in)
+		return srv.(TokenServiceServer).NewPairFromRefresh(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.TokenService/Validate",
+		FullMethod: "/pb.TokenService/NewPairFromRefresh",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TokenServiceServer).Validate(ctx, req.(*ValidateRequest))
+		return srv.(TokenServiceServer).NewPairFromRefresh(ctx, req.(*RefreshToken))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TokenService_DeleteUserToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshToken)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TokenServiceServer).DeleteUserToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.TokenService/DeleteUserToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TokenServiceServer).DeleteUserToken(ctx, req.(*RefreshToken))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,12 +160,16 @@ var TokenService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TokenServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Generate",
-			Handler:    _TokenService_Generate_Handler,
+			MethodName: "NewPairFromUserID",
+			Handler:    _TokenService_NewPairFromUserID_Handler,
 		},
 		{
-			MethodName: "Validate",
-			Handler:    _TokenService_Validate_Handler,
+			MethodName: "NewPairFromRefresh",
+			Handler:    _TokenService_NewPairFromRefresh_Handler,
+		},
+		{
+			MethodName: "DeleteUserToken",
+			Handler:    _TokenService_DeleteUserToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

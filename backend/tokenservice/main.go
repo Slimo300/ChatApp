@@ -1,27 +1,54 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
+	"os"
+	"time"
 
+	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
+	"github.com/Slimo300/ChatApp/backend/tokenservice/repo/redis"
+	"github.com/Slimo300/ChatApp/backend/tokenservice/server"
+	"github.com/golang-jwt/jwt"
 	"google.golang.org/grpc"
-
-	"github.com/Slimo300/ChatApp/backend/tokensservice/pb"
-	"github.com/Slimo300/ChatApp/backend/tokensservice/server"
 )
 
 func main() {
 
-	lis, err := net.Listen("tcp", ":9000")
+	fmt.Println("Go gRPC Beginners Tutorial!")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9000))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := server.Server{}
+	priv, err := ioutil.ReadFile(os.Getenv("PRIV_KEY_FILE"))
+	if err != nil {
+		log.Fatal("could not read private key pem file: %w", err)
+	}
+	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(priv)
+	if err != nil {
+		log.Fatal("could not parse private key: %w", err)
+	}
+
+	pub, err := ioutil.ReadFile(os.Getenv("PUB_KEY_FILE"))
+	if err != nil {
+		log.Fatal("could not read public key pem file: %w", err)
+	}
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pub)
+	if err != nil {
+		log.Fatal("could not parse public key: %w", err)
+	}
+
+	repo := redis.NewRedisTokenRepository("localhost", "6379", "")
+
+	s := server.NewTokenService(repo, "wolowina", *privKey, *pubKey, 24*time.Hour, 20*time.Minute)
 
 	grpcServer := grpc.NewServer()
 
-	pb.RegisterTokenServiceServer(grpcServer, &s)
+	pb.RegisterTokenServiceServer(grpcServer, s)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

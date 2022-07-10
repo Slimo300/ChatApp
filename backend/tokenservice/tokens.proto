@@ -5,23 +5,24 @@ package pb;
 option go_package = "/pb";
 
 service TokenService {
-    rpc Generate(GenerateRequest) returns (GenerateResponse) {}
-    rpc Validate(ValidateRequest) returns (ValidateResponse) {}
+    rpc NewPairFromUserID(UserID) returns (TokenPair) {}
+    rpc NewPairFromRefresh(RefreshToken) returns (TokenPair) {}
+    rpc DeleteUserToken(RefreshToken) returns (Msg) {}
 }
-message GenerateRequest {
-    string userID = 1;
-}
-message GenerateResponse {
-    string refreshToken = 1;
-    string accessToken = 2;
-    string error = 3;
-}
-message ValidateRequest {
-    string refreshToken = 1;
+message UserID {
+    string ID = 1;
 }
 
-message ValidateResponse {
+message RefreshToken {
+    string token = 1;
+}
+
+message TokenPair {
     string refreshToken = 1;
     string accessToken = 2;
     string error = 3;
+}
+
+message Msg {
+    string error = 1;
 }

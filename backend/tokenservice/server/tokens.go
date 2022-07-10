@@ -9,14 +9,13 @@ import (
 )
 
 type RefreshTokenData struct {
-	Token     string
-	ID        uuid.UUID
-	ExpiresIn time.Duration
+	Token string
+	ID    uuid.UUID
 }
 
-func (t tokenService) generateRefreshToken(userID string) (*RefreshTokenData, error) {
+func (srv TokenService) generateRefreshToken(userID string) (*RefreshTokenData, error) {
 	currentTime := time.Now()
-	tokenExp := currentTime.Add(t.refreshTokenDuration)
+	tokenExp := currentTime.Add(srv.refreshTokenDuration)
 
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
@@ -31,22 +30,21 @@ func (t tokenService) generateRefreshToken(userID string) (*RefreshTokenData, er
 		Subject:   userID,
 	})
 
-	tokenString, err := token.SignedString([]byte(t.refreshTokenSecret))
+	tokenString, err := token.SignedString([]byte(srv.refreshTokenSecret))
 	if err != nil {
 		log.Println("Failed to sign refresh token string: ", err)
 		return nil, err
 	}
 
 	return &RefreshTokenData{
-		Token:     tokenString,
-		ID:        tokenID,
-		ExpiresIn: tokenExp.Sub(currentTime),
+		Token: tokenString,
+		ID:    tokenID,
 	}, nil
 }
 
-func (t tokenService) generateAccessToken(userID string) (string, error) {
+func (srv TokenService) generateAccessToken(userID string) (string, error) {
 	currentTime := time.Now()
-	tokenExp := currentTime.Add(t.accessTokenDuration)
+	tokenExp := currentTime.Add(srv.accessTokenDuration)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &jwt.StandardClaims{
 		IssuedAt:  currentTime.Unix(),
@@ -54,7 +52,7 @@ func (t tokenService) generateAccessToken(userID string) (string, error) {
 		Subject:   userID,
 	})
 
-	tokenString, err := token.SignedString(t.accessTokenPrivateKey)
+	tokenString, err := token.SignedString(&srv.accessTokenPrivateKey)
 	if err != nil {
 		log.Println("Failed to sign access token string: ", err)
 		return "", err
