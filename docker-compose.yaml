@@ -12,6 +12,39 @@ services:
       - 3307:3306
     volumes:
       - chatmysqlvolume:/var/lib/mysql
+
+  chatredis:
+    image: redis
+    restart: always
+    hostname: tokendb
+    networks:
+      - chatnet
+    ports:
+      - 6379:6379
+    container_name: chatredis
+
+  chattokenservice:
+    depends_on:
+      - chatredis
+    build:
+      context: backend/tokenservice
+    container_name: chattokenservice
+    hostname: tokens
+    networks: 
+      - chatnet
+    ports:
+      - "9000:9000"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REFRESH_SECRET=${REFRESH_SECRET}
+      - PUB_KEY_FILE=${PUB_KEY_FILE}
+      - PRIV_KEY_FILE=${PRIV_KEY_FILE}
+    deploy:
+      restart_policy:
+        condition: on-failure
+
   chatbackend:
     depends_on: 
       - chatmysql
