@@ -24,7 +24,7 @@ func main() {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: privateKeyBytes,
 	}
-	privatePem, err := os.Create("../private.pem")
+	privatePem, err := os.Create("../../private.pem")
 	if err != nil {
 		fmt.Printf("error when create private.pem: %s \n", err)
 		os.Exit(1)
@@ -45,7 +45,7 @@ func main() {
 		Type:  "PUBLIC KEY",
 		Bytes: publicKeyBytes,
 	}
-	publicPem, err := os.Create("../public.pem")
+	publicPem, err := os.Create("../../public.pem")
 	if err != nil {
 		fmt.Printf("error when create public.pem: %s \n", err)
 		os.Exit(1)

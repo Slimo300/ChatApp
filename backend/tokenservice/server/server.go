@@ -18,19 +18,17 @@ type TokenService struct {
 	repo                  repo.TokenRepository
 	refreshTokenSecret    string
 	accessTokenPrivateKey rsa.PrivateKey
-	accessTokenPublicKey  rsa.PublicKey
 	accessTokenDuration   time.Duration
 	refreshTokenDuration  time.Duration
 }
 
 func NewTokenService(repo repo.TokenRepository, refreshSecret string, accessPrivKey rsa.PrivateKey,
-	accessPubKey rsa.PublicKey, refreshDuration, accessDuration time.Duration) *TokenService {
+	refreshDuration, accessDuration time.Duration) *TokenService {
 
 	return &TokenService{
 		repo:                  repo,
 		refreshTokenSecret:    refreshSecret,
 		accessTokenPrivateKey: accessPrivKey,
-		accessTokenPublicKey:  accessPubKey,
 		refreshTokenDuration:  refreshDuration,
 		accessTokenDuration:   accessDuration,
 	}

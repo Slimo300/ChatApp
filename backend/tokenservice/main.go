@@ -33,18 +33,9 @@ func main() {
 		log.Fatal("could not parse private key: %w", err)
 	}
 
-	pub, err := ioutil.ReadFile(os.Getenv("PUB_KEY_FILE"))
-	if err != nil {
-		log.Fatal("could not read public key pem file: %w", err)
-	}
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pub)
-	if err != nil {
-		log.Fatal("could not parse public key: %w", err)
-	}
-
 	repo := redis.NewRedisTokenRepository("localhost", "6379", "")
 
-	s := server.NewTokenService(repo, "wolowina", *privKey, *pubKey, 24*time.Hour, 20*time.Minute)
+	s := server.NewTokenService(repo, "wolowina", *privKey, 24*time.Hour, 20*time.Minute)
 
 	grpcServer := grpc.NewServer()
 

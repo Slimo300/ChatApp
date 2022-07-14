@@ -48,8 +48,8 @@ func (rdb *redisTokenRepository) IsTokenValid(userID, tokenID string) (bool, err
 	if err != nil {
 		return false, err
 	}
-	if res != repo.TOKEN_VALID {
-		if res == repo.TOKEN_BLACKLISTED {
+	if repo.StringToTokenValue(res) != repo.TOKEN_VALID {
+		if repo.StringToTokenValue(res) == repo.TOKEN_BLACKLISTED {
 			return false, repo.TokenBlacklistedError
 		}
 		return false, errors.New("Unexpected token value")

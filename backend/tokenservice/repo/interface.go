@@ -5,8 +5,22 @@ import (
 	"time"
 )
 
-const TOKEN_VALID = "1"
-const TOKEN_BLACKLISTED = "2"
+type TokenValue string
+
+func StringToTokenValue(s string) TokenValue {
+	switch s {
+	case "1":
+		return TOKEN_VALID
+	case "2":
+		return TOKEN_BLACKLISTED
+	default:
+		panic("Inalid conversion to TokenValue from string")
+	}
+
+}
+
+const TOKEN_VALID TokenValue = "1"
+const TOKEN_BLACKLISTED TokenValue = "2"
 
 type TokenRepository interface {
 	SaveToken(token string, expiration time.Duration) error
