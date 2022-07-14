@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
-	"github.com/Slimo300/ChatApp/backend/src/database"
-	"github.com/Slimo300/ChatApp/backend/src/storage"
-	"github.com/Slimo300/ChatApp/backend/src/ws"
+	"github.com/Slimo300/ChatApp/backend/lib/communication"
+	"github.com/Slimo300/ChatApp/backend/lib/database"
+	"github.com/Slimo300/ChatApp/backend/lib/storage"
+	"github.com/Slimo300/ChatApp/backend/lib/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )

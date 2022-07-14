@@ -1,0 +1,28 @@
+
+syntax = "proto3";
+
+package pb;
+option go_package = ".";
+
+service TokenService {
+    rpc NewPairFromUserID(UserID) returns (TokenPair) {}
+    rpc NewPairFromRefresh(RefreshToken) returns (TokenPair) {}
+    rpc DeleteUserToken(RefreshToken) returns (Msg) {}
+}
+message UserID {
+    string ID = 1;
+}
+
+message RefreshToken {
+    string token = 1;
+}
+
+message TokenPair {
+    string refreshToken = 1;
+    string accessToken = 2;
+    string error = 3;
+}
+
+message Msg {
+    string error = 1;
+}

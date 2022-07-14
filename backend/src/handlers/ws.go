@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/Slimo300/ChatApp/backend/src/ws"
+	"github.com/Slimo300/ChatApp/backend/lib/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/src/database/orm"
-	"github.com/Slimo300/ChatApp/backend/src/handlers"
-	"github.com/Slimo300/ChatApp/backend/src/routes"
-	"github.com/Slimo300/ChatApp/backend/src/storage"
+	"github.com/Slimo300/ChatApp/backend/lib/database/orm"
+	"github.com/Slimo300/ChatApp/backend/lib/handlers"
+	"github.com/Slimo300/ChatApp/backend/lib/routes"
+	"github.com/Slimo300/ChatApp/backend/lib/storage"
 	"github.com/gin-gonic/gin"
 )
 

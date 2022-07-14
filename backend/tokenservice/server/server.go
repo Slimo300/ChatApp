@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
-	"github.com/Slimo300/ChatApp/backend/tokenservice/repo"
+	"github.com/Slimo300/ChatApp/backend/lib/pb"
+	"github.com/Slimo300/ChatApp/backend/lib/repo"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/net/context"
 )

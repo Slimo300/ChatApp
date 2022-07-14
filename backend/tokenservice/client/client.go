@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
+	"github.com/Slimo300/ChatApp/backend/lib/pb"
 )
 
 func main() {

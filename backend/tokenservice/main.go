@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
-	"github.com/Slimo300/ChatApp/backend/tokenservice/repo/redis"
-	"github.com/Slimo300/ChatApp/backend/tokenservice/server"
+	"github.com/Slimo300/ChatApp/backend/lib/pb"
+	"github.com/Slimo300/ChatApp/backend/lib/repo/redis"
+	"github.com/Slimo300/ChatApp/backend/lib/server"
 	"github.com/golang-jwt/jwt"
 	"google.golang.org/grpc"
 )

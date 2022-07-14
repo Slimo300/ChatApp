@@ -1,9 +1,9 @@
 package handlers_test
 
 import (
-	"github.com/Slimo300/ChatApp/backend/src/database/mock"
-	"github.com/Slimo300/ChatApp/backend/src/handlers"
-	"github.com/Slimo300/ChatApp/backend/src/storage"
+	"github.com/Slimo300/ChatApp/backend/lib/database/mock"
+	"github.com/Slimo300/ChatApp/backend/lib/handlers"
+	"github.com/Slimo300/ChatApp/backend/lib/storage"
 )
 
 func SetupTestServerWithHub() handlers.Server {

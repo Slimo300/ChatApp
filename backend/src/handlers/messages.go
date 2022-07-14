@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Slimo300/ChatApp/backend/src/communication"
+	"github.com/Slimo300/ChatApp/backend/lib/communication"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
