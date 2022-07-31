@@ -25,6 +25,7 @@ type TokenServiceClient interface {
 	NewPairFromUserID(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*TokenPair, error)
 	NewPairFromRefresh(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*TokenPair, error)
 	DeleteUserToken(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*Msg, error)
+	GetPublicKey(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PublicKey, error)
 }
 
 type tokenServiceClient struct {
@@ -62,6 +63,15 @@ func (c *tokenServiceClient) DeleteUserToken(ctx context.Context, in *RefreshTok
 	return out, nil
 }
 
+func (c *tokenServiceClient) GetPublicKey(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PublicKey, error) {
+	out := new(PublicKey)
+	err := c.cc.Invoke(ctx, "/pb.TokenService/GetPublicKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TokenServiceServer is the server API for TokenService service.
 // All implementations must embed UnimplementedTokenServiceServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type TokenServiceServer interface {
 	NewPairFromUserID(context.Context, *UserID) (*TokenPair, error)
 	NewPairFromRefresh(context.Context, *RefreshToken) (*TokenPair, error)
 	DeleteUserToken(context.Context, *RefreshToken) (*Msg, error)
+	GetPublicKey(context.Context, *Empty) (*PublicKey, error)
 	mustEmbedUnimplementedTokenServiceServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedTokenServiceServer) NewPairFromRefresh(context.Context, *Refr
 }
 func (UnimplementedTokenServiceServer) DeleteUserToken(context.Context, *RefreshToken) (*Msg, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserToken not implemented")
+}
+func (UnimplementedTokenServiceServer) GetPublicKey(context.Context, *Empty) (*PublicKey, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPublicKey not implemented")
 }
 func (UnimplementedTokenServiceServer) mustEmbedUnimplementedTokenServiceServer() {}
 
@@ -152,6 +166,24 @@ func _TokenService_DeleteUserToken_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TokenService_GetPublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TokenServiceServer).GetPublicKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.TokenService/GetPublicKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TokenServiceServer).GetPublicKey(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TokenService_ServiceDesc is the grpc.ServiceDesc for TokenService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var TokenService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUserToken",
 			Handler:    _TokenService_DeleteUserToken_Handler,
+		},
+		{
+			MethodName: "GetPublicKey",
+			Handler:    _TokenService_GetPublicKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

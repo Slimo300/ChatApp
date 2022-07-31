@@ -13,7 +13,7 @@ type RefreshTokenData struct {
 	ID    uuid.UUID
 }
 
-func (srv TokenService) generateRefreshToken(userID string) (*RefreshTokenData, error) {
+func (srv TokenService) GenerateRefreshToken(userID string) (*RefreshTokenData, error) {
 	currentTime := time.Now()
 	tokenExp := currentTime.Add(srv.refreshTokenDuration)
 
@@ -42,7 +42,7 @@ func (srv TokenService) generateRefreshToken(userID string) (*RefreshTokenData, 
 	}, nil
 }
 
-func (srv TokenService) generateAccessToken(userID string) (string, error) {
+func (srv TokenService) GenerateAccessToken(userID string) (string, error) {
 	currentTime := time.Now()
 	tokenExp := currentTime.Add(srv.accessTokenDuration)
 

@@ -17,8 +17,6 @@ import (
 
 func main() {
 
-	fmt.Println("Go gRPC Beginners Tutorial!")
-
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9000))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -35,7 +33,7 @@ func main() {
 
 	repo := redis.NewRedisTokenRepository("localhost", "6379", "")
 
-	s := server.NewTokenService(repo, "wolowina", *privKey, 24*time.Hour, 20*time.Minute)
+	s := server.NewTokenService(repo, os.Getenv("REFRESH_SECRET"), *privKey, 24*time.Hour, 20*time.Minute)
 
 	grpcServer := grpc.NewServer()
 

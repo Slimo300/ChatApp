@@ -71,7 +71,7 @@ func (rdb *redisTokenRepository) InvalidateTokens(userID, tokenID string) error 
 			break
 		}
 		if len(keys) > 1 {
-			return errors.New(fmt.Sprint("Too many tokens: ", keys))
+			return repo.TooManyTokensFoundError
 		}
 		if err := rdb.Do("set", keys[0], repo.TOKEN_BLACKLISTED, "keepttl").Err(); err != nil {
 			return err
@@ -89,9 +89,13 @@ func (rdb *redisTokenRepository) InvalidateToken(userID, tokenID string) error {
 	if err != nil {
 		return err
 	}
-	if len(keys) != 1 {
-		return errors.New(fmt.Sprint("Wrong number of tokens: ", keys))
+	if len(keys) == 0 {
+		return repo.TokenNotFoundError
 	}
+	if len(keys) > 1 {
+		return repo.TooManyTokensFoundError
+	}
+
 	if err := rdb.Do("set", keys[0], repo.TOKEN_BLACKLISTED, "keepttl").Err(); err != nil {
 		return err
 	}

@@ -16,7 +16,6 @@ func StringToTokenValue(s string) TokenValue {
 	default:
 		panic("Inalid conversion to TokenValue from string")
 	}
-
 }
 
 const TOKEN_VALID TokenValue = "1"
