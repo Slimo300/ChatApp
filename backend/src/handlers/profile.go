@@ -26,6 +26,10 @@ func (s *Server) ChangePassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
+	if !isPasswordValid(load.NewPassword) {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "Password must be at least 6 characters long"})
+		return
+	}
 
 	user, err := s.DB.GetUserById(userUID)
 	if err != nil {
@@ -67,7 +71,7 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 	if err != nil {
 		if err.Error() == "http: request body too large" {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
-				"err": fmt.Sprintf("Max request body size is %v bytes\n", s.maxBodyBytes),
+				"err": fmt.Sprintf("Max request body size is %v bytes\n", s.MaxBodyBytes),
 			})
 			return
 		}
@@ -93,7 +97,7 @@ func (s *Server) UpdateProfilePicture(c *gin.Context) {
 	}
 	wasEmpty := false
 	if pictureURL == "" {
-		pictureURL = uuid.New().String()
+		pictureURL = uuid.NewString()
 		wasEmpty = true
 	}
 
@@ -130,7 +134,7 @@ func (s *Server) DeleteProfilePicture(c *gin.Context) {
 
 	url, err := s.DB.GetProfilePictureURL(userUID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": "User not found"})
 		return
 	}
 	if url == "" {

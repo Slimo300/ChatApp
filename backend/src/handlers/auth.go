@@ -22,7 +22,7 @@ func (s *Server) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid email"})
 		return
 	}
-	if len(load.Pass) <= 6 {
+	if !isPasswordValid(load.Pass) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "not a valid password"})
 		return
 	}
@@ -78,13 +78,21 @@ func (s *Server) SignIn(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
+
+	// tokenPair, err := s.TokenService.NewPairFromUserID(user.ID)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+	// 	return
+	// }
 	token, err := s.CreateSignedToken(user.ID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.SetCookie("jwt", token, 3600, "/", s.domain, false, true)
+	c.SetCookie("refreshToken", token, 3600, "/", s.domain, false, true)
+	// c.SetCookie("refreshToken", tokenPair.RefreshToken, 3600, "/", s.domain, false, true)
+	// c.Header("Authentication", tokenPair.AccessToken)
 
 	c.JSON(http.StatusOK, gin.H{"name": user.UserName})
 }

@@ -15,7 +15,7 @@ import (
 
 func TestGetGroupMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := setupTestServer()
 
 	groupId, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
 	member1, _ := uuid.Parse("e4372b71-30ca-42e1-8c1e-7df6d033fd3f")

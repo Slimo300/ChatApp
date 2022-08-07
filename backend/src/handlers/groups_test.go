@@ -16,7 +16,7 @@ import (
 
 func TestGetUserGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := setupTestServer()
 
 	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 	groupID, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
@@ -80,7 +80,7 @@ func TestGetUserGroups(t *testing.T) {
 
 func TestDeleteGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServerWithHub()
+	s := setupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string
@@ -149,7 +149,7 @@ func TestDeleteGroup(t *testing.T) {
 
 func TestCreateGroup(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServerWithHub()
+	s := setupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string

@@ -23,6 +23,7 @@ func NewMockDB() *MockDB {
 			"active": "2019-01-13T22:00:45Z",
 			"username": "Mal",
 			"email": "mal.zein@email.com",
+			"pictureUrl": "16fc5e9d-da47-4923-8475-9f444177990d",
 			"password": "$2a$10$6BSuuiaPdRJJF2AygYAfnOGkrKLY2o0wDWbEpebn.9Rk0O95D3hW.",
 			"logged": true
 		},
@@ -68,12 +69,30 @@ func NewMockDB() *MockDB {
 		{
 			"ID": "61fbd273-b941-471c-983a-0a3cd2c74747",
 			"name": "New Group",
+			"pictureUrl": "16fc5e9d-da47-4923-8475-9f444177990d",
 			"desc": "totally new group",
 			"created": "2019-01-13T08:47:44Z"
-		}	
+		},
+		{
+			"ID": "87a0c639-e590-422e-9664-6aedd5ef85ba",
+			"name": "New Group2",
+			"desc": "totally new group2",
+			"created": "2019-01-13T08:47:45Z"
+		}
 	]`
 
 	MEMBERS := `[
+		{
+			"ID": "3208e6cc-858e-4ca0-b03b-e500cd335290",
+			"group_id": "87a0c639-e590-422e-9664-6aedd5ef85ba",
+			"user_id": "1c4dccaf-a341-4920-9003-f24e0412f8e0",
+			"nick": "Mal",
+			"adding": true,
+			"deleting": true,
+			"setting": true,
+			"creator": true,
+			"deleted": false
+		},
 		{
 			"ID": "e4372b71-30ca-42e1-8c1e-7df6d033fd3f",
 			"group_id": "61fbd273-b941-471c-983a-0a3cd2c74747",

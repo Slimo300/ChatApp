@@ -14,7 +14,7 @@ import (
 
 func TestGrantPriv(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := setupTestServer()
 
 	testCases := []struct {
 		desc               string
@@ -110,7 +110,7 @@ func TestGrantPriv(t *testing.T) {
 }
 func TestDeleteMember(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServerWithHub()
+	s := setupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string

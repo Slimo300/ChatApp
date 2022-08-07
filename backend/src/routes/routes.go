@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
+	limits "github.com/gin-contrib/size"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,14 +12,16 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 
 	api := engine.Group("/api")
 	api.Use(server.CheckDatabase())
+	api.Use(limits.RequestSizeLimiter(server.MaxBodyBytes))
 
 	api.POST("/register", server.RegisterUser)
 	api.POST("/login", server.SignIn)
 
 	apiAuth := api.Use(server.MustAuth())
-	apiAuth.DELETE("/delete-image", server.DeleteProfilePicture) // not tested
-	apiAuth.POST("/set-image", server.UpdateProfilePicture)      // not tested
-	apiAuth.PUT("/change-password", server.ChangePassword)       // not tested
+
+	apiAuth.DELETE("/delete-image", server.DeleteProfilePicture)
+	apiAuth.POST("/set-image", server.UpdateProfilePicture)
+	apiAuth.PUT("/change-password", server.ChangePassword)
 	apiAuth.POST("/signout", server.SignOutUser)
 	apiAuth.GET("/user", server.GetUser)
 

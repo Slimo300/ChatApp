@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	// "github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
 	"github.com/Slimo300/ChatApp/backend/src/storage"
@@ -13,14 +14,15 @@ import (
 )
 
 type Server struct {
-	DB           database.DBlayer
-	Storage      storage.StorageLayer
-	Hub          ws.HubInterface
+	DB      database.DBlayer
+	Storage storage.StorageLayer
+	Hub     ws.HubInterface
+	// TokenService auth.TokenClient
 	actionChan   chan<- *communication.Action
 	messageChan  <-chan *communication.Message
 	secret       string
 	domain       string
-	maxBodyBytes int
+	MaxBodyBytes int64
 }
 
 func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
@@ -33,7 +35,7 @@ func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
 		domain:       "localhost",
 		actionChan:   actionChan,
 		messageChan:  messageChan,
-		maxBodyBytes: 4194304,
+		MaxBodyBytes: 4194304,
 		Hub:          ws.NewHub(messageChan, actionChan),
 	}
 }
@@ -48,7 +50,7 @@ func NewServerWithMockHub(db database.DBlayer, storage storage.StorageLayer) *Se
 		domain:       "localhost",
 		actionChan:   actionChan,
 		messageChan:  messageChan,
-		maxBodyBytes: 4194304,
+		MaxBodyBytes: 4194304,
 		Hub:          ws.NewMockHub(actionChan),
 	}
 }
@@ -85,6 +87,31 @@ func (s *Server) CreateSignedToken(iss string) (string, error) {
 	}
 	return tokenString, nil
 }
+
+// func (s *Server) MustAuth2() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		accessHeader := c.GetHeader("Authorization")
+// 		if accessHeader == "" {
+// 			c.JSON(http.StatusUnauthorized, gin.H{"err": "user not authenticated"})
+// 			return
+// 		}
+// 		accessToken, err := jwt.ParseWithClaims(accessHeader, &jwt.StandardClaims{},
+// 			func(t *jwt.Token) (interface{}, error) {
+// 				return s.TokenService.GetPublicKey(), nil
+// 			})
+// 		if err != nil {
+// 			c.JSON(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 		userID := accessToken.Claims.(*jwt.StandardClaims).Subject
+// 		if userID == "" {
+// 			c.JSON(http.StatusUnauthorized, gin.H{"err": "Invalid token"})
+// 			return
+// 		}
+// 		c.Set("userID", userID)
+// 		c.Next()
+// 	}
+// }
 
 func (s *Server) MustAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {

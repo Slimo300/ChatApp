@@ -16,7 +16,7 @@ import (
 
 func TestSendGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServerWithHub()
+	s := setupTestServerWithHub()
 
 	testCases := []struct {
 		desc               string
@@ -111,7 +111,7 @@ func TestSendGroupInvite(t *testing.T) {
 
 func TestGetUserInvites(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := setupTestServer()
 
 	dateCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
 	dateModified, _ := time.Parse("2006-01-02T15:04:05Z", "2019-03-17T22:04:45Z")
@@ -175,7 +175,7 @@ func TestGetUserInvites(t *testing.T) {
 
 func TestRespondGroupInvite(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := SetupTestServer()
+	s := setupTestServer()
 
 	dateGroupCreated, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 	groupId, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")

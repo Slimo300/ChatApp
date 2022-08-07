@@ -3,13 +3,10 @@ package auth
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/x509"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
@@ -17,37 +14,40 @@ import (
 )
 
 type gRPCTokenAuthClient struct {
-	client pb.TokenServiceClient
-	pubKey rsa.PublicKey
+	client    pb.TokenServiceClient
+	pubKey    rsa.PublicKey
+	iteration string
 }
 
-func getPublicKey(pubKeyFile string) (*rsa.PublicKey, error) {
-	pub, err := ioutil.ReadFile(pubKeyFile)
-	if err != nil {
-		return nil, fmt.Errorf("could not read public key pem file: %w", err)
-	}
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pub)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse public key: %w", err)
-	}
-
-	return pubKey, nil
-}
-
-func NewGRPCTokenAuthClient() *gRPCTokenAuthClient {
+func NewGRPCTokenAuthClient() (*gRPCTokenAuthClient, error) {
 	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 	if err != nil {
-		log.Println("Couldn't connect to grpc server: ", err.Error())
-		return nil
+		return &gRPCTokenAuthClient{}, err
 	}
 	client := pb.NewTokenServiceClient(conn)
 
-	pubKey, err := getPublicKey(os.Getenv("PUB_KEY_FILE"))
+	pubKeyMsg, err := client.GetPublicKey(context.Background(), &pb.Empty{})
+	if err != nil {
+		return &gRPCTokenAuthClient{}, err
+	}
+	if pubKeyMsg.Error != "" {
+		return &gRPCTokenAuthClient{}, errors.New(fmt.Sprintf("Message from token service: %v", pubKeyMsg.Error))
+	}
+
+	publicKeyParsed, err := x509.ParsePKIXPublicKey(pubKeyMsg.PublicKey)
+	if err != nil {
+		return &gRPCTokenAuthClient{}, err
+	}
+
+	publicKey, ok := publicKeyParsed.(*rsa.PublicKey)
+	if !ok {
+		return &gRPCTokenAuthClient{}, errors.New("PublicKey not of type *rsa.PublicKey")
+	}
 
 	return &gRPCTokenAuthClient{
 		client: client,
-		pubKey: *pubKey,
-	}
+		pubKey: *publicKey,
+	}, nil
 }
 
 func (grpc *gRPCTokenAuthClient) NewPairFromUserID(userID uuid.UUID) (*pb.TokenPair, error) {
