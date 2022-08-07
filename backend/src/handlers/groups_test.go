@@ -18,8 +18,12 @@ func TestGetUserGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := setupTestServer()
 
-	date, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
-	groupID, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
+	date1, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
+	groupID1, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
+	// pictureUrl, _ := uuid.Parse("16fc5e9d-da47-4923-8475-9f444177990d")
+
+	date2, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:45Z")
+	groupID2, _ := uuid.Parse("87a0c639-e590-422e-9664-6aedd5ef85ba")
 
 	testCases := []struct {
 		desc               string
@@ -33,7 +37,10 @@ func TestGetUserGroups(t *testing.T) {
 			id:                 "1c4dccaf-a341-4920-9003-f24e0412f8e0",
 			returnVal:          true,
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   []models.Group{{ID: groupID, Name: "New Group", Desc: "totally new group", Created: date}},
+			expectedResponse: []models.Group{
+				{ID: groupID2, Name: "New Group2", Desc: "totally new group2", Created: date2},
+				{ID: groupID1, Name: "New Group", Desc: "totally new group", Picture: "16fc5e9d-da47-4923-8475-9f444177990d", Created: date1},
+			},
 		},
 		{
 			desc:               "getgroupsnone",
