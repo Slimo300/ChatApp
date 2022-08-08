@@ -79,20 +79,20 @@ func (s *Server) SignIn(c *gin.Context) {
 		return
 	}
 
-	// tokenPair, err := s.TokenService.NewPairFromUserID(user.ID)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-	// 	return
-	// }
-	token, err := s.CreateSignedToken(user.ID.String())
+	tokenPair, err := s.TokenService.NewPairFromUserID(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
+	// token, err := s.CreateSignedToken(user.ID.String())
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+	// 	return
+	// }
 
-	c.SetCookie("refreshToken", token, 3600, "/", s.domain, false, true)
-	// c.SetCookie("refreshToken", tokenPair.RefreshToken, 3600, "/", s.domain, false, true)
-	// c.Header("Authentication", tokenPair.AccessToken)
+	// c.SetCookie("refreshToken", token, 3600, "/", s.domain, false, true)
+	c.SetCookie("refreshToken", tokenPair.RefreshToken, 3600, "/", s.domain, false, true)
+	c.Header("Authentication", tokenPair.AccessToken)
 
 	c.JSON(http.StatusOK, gin.H{"name": user.UserName})
 }
@@ -108,6 +108,17 @@ func (s *Server) SignOutUser(c *gin.Context) {
 
 	if err := s.DB.SignOutUser(uid); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	refresh, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "No token to invalidate"})
+		return
+	}
+
+	if err := s.TokenService.DeleteUserToken(refresh); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 

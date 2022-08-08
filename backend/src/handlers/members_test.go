@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -142,18 +141,14 @@ func TestDeleteMember(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
 			req, _ := http.NewRequest(http.MethodDelete, "/api/member/"+tC.memberID, nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodDelete, "/api/member/:memberID", s.DeleteUserFromGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

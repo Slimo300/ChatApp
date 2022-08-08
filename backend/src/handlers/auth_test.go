@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -154,19 +153,15 @@ func TestSignOut(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			w := httptest.NewRecorder()
-
-			jwt, err := s.CreateSignedToken(tC.id)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
-			_, engine := gin.CreateTestContext(w)
 
 			req := httptest.NewRequest(http.MethodPost, "/api/signout", nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
+			w := httptest.NewRecorder()
 
-			engine.Use(s.MustAuth())
+			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.id)
+			})
+
 			engine.Handle(http.MethodPost, "/api/signout", s.SignOutUser)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
