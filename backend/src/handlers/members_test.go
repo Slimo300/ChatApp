@@ -79,18 +79,15 @@ func TestGrantPriv(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			requestBody, _ := json.Marshal(tC.data)
 			req, _ := http.NewRequest(http.MethodPut, "/api/member/"+tC.memberID, bytes.NewBuffer(requestBody))
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
+
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPut, "/api/member/:memberID", s.GrantPriv)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

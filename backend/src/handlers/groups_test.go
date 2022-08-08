@@ -20,7 +20,6 @@ func TestGetUserGroups(t *testing.T) {
 
 	date1, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:44Z")
 	groupID1, _ := uuid.Parse("61fbd273-b941-471c-983a-0a3cd2c74747")
-	// pictureUrl, _ := uuid.Parse("16fc5e9d-da47-4923-8475-9f444177990d")
 
 	date2, _ := time.Parse("2006-01-02T15:04:05Z", "2019-01-13T08:47:45Z")
 	groupID2, _ := uuid.Parse("87a0c639-e590-422e-9664-6aedd5ef85ba")
@@ -54,18 +53,14 @@ func TestGetUserGroups(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.id)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			req, _ := http.NewRequest("GET", "/api/group/get", nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
 
-			engine.Use(s.MustAuth())
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.id)
+			})
 			engine.Handle(http.MethodGet, "/api/group/get", s.GetUserGroups)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -124,18 +119,14 @@ func TestDeleteGroup(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
 			req, _ := http.NewRequest(http.MethodDelete, "/api/group/"+tC.groupID, nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
 
-			engine.Use(s.MustAuth())
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 			engine.Handle(http.MethodDelete, "/api/group/:groupID", s.DeleteGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -198,18 +189,16 @@ func TestCreateGroup(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.ID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
 			requestBody, _ := json.Marshal(tC.data)
 			req, _ := http.NewRequest("POST", "/api/group/create", bytes.NewBuffer(requestBody))
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
 
-			engine.Use(s.MustAuth())
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.ID)
+			})
+
 			engine.Handle(http.MethodPost, "/api/group/create", s.CreateGroup)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

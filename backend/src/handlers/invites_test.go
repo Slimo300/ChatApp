@@ -79,18 +79,15 @@ func TestSendGroupInvite(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.id)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
 			requestBody, _ := json.Marshal(tC.data)
 			req, _ := http.NewRequest("POST", "/api/invite", bytes.NewReader(requestBody))
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.id)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPost, "/api/invite", s.SendGroupInvite)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -143,18 +140,14 @@ func TestGetUserInvites(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.id)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			req, _ := http.NewRequest("GET", "/api/invites", nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.id)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodGet, "/api/invites", s.GetUserInvites)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -240,19 +233,15 @@ func TestRespondGroupInvite(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			requestBody, _ := json.Marshal(tC.data)
 			req, _ := http.NewRequest("PUT", "/api/invite/"+tC.inviteID, bytes.NewReader(requestBody))
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodPut, "/api/invite/:inviteID", s.RespondGroupInvite)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

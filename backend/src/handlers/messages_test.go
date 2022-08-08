@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/gin-gonic/gin"
@@ -60,19 +59,14 @@ func TestGetGroupMessages(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			req, _ := http.NewRequest("GET", "/api/group/"+tC.group+"/messages?num=4&offset=0", nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
 			engine.Handle(http.MethodGet, "/api/group/:groupID/messages", s.GetGroupMessages)
 			engine.ServeHTTP(w, req)
 			response := w.Result()

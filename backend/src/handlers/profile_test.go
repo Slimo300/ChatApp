@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	limits "github.com/gin-contrib/size"
 	"github.com/gin-gonic/gin"
@@ -67,19 +66,14 @@ func TestChangePassword(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			requestBody, _ := json.Marshal(tC.data)
 			req, _ := http.NewRequest(http.MethodPut, "/api/change-password", bytes.NewBuffer(requestBody))
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
-			// apiAuth.PUT("/change-password", server.ChangePassword)
 			engine.Handle(http.MethodPut, "/api/change-password", s.ChangePassword)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -139,18 +133,13 @@ func TestDeleteProfilePicture(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			req, _ := http.NewRequest(http.MethodDelete, "/api/delete-image", nil)
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
-			// apiAuth.POST("/set-image", server.UpdateProfilePicture)      // not tested
 			engine.Handle(http.MethodDelete, "/api/delete-image", s.DeleteProfilePicture)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
@@ -232,11 +221,6 @@ func TestSetProfilePicture(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 
-			jwt, err := s.CreateSignedToken(tC.userID)
-			if err != nil {
-				t.Error("error when creating signed token")
-			}
-
 			body, writer, err := createTestFormFile(tC.imageData["Key"], tC.imageData["CType"])
 			if err != nil {
 				t.Errorf("error when creating form file: %v", err)
@@ -245,11 +229,12 @@ func TestSetProfilePicture(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPut, "/api/set-image", body)
 			req.Header.Add("Content-Type", writer.FormDataContentType())
 
-			req.AddCookie(&http.Cookie{Name: "jwt", Value: jwt, Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 			w := httptest.NewRecorder()
 			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.userID)
+			})
 
-			engine.Use(s.MustAuth())
 			if tC.setBodyLimiter {
 				engine.Use(limits.RequestSizeLimiter(10))
 			}
