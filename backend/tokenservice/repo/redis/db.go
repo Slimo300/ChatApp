@@ -26,7 +26,7 @@ func NewRedisTokenRepository(host, port, password string) *redisTokenRepository 
 }
 
 func (rdb *redisTokenRepository) SaveToken(token string, expiration time.Duration) error {
-	return rdb.Set(token, repo.TOKEN_VALID, expiration).Err()
+	return rdb.Set(token, "1", expiration).Err()
 }
 
 func (rdb *redisTokenRepository) IsTokenValid(userID, tokenID string) (bool, error) {

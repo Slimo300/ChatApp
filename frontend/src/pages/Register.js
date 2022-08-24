@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Register } from "../Requests";
+import APICaller from "../Requests";
 
 function RegisterForm() {
   const [username, setName] = useState("");
@@ -13,17 +13,13 @@ function RegisterForm() {
   const submit = async (e) => {
     e.preventDefault();
 
-    let register = Register(email, username, password, rpassword);
-    console.log("SSASS");
-    register.then( response => {
-      console.log(response);
-      if (response.err !== undefined) {
-        setMessage(response.err);
-        return
-      } 
-      setRedirect(true);
-    } )
-  };
+    let result = await APICaller.Register(email, username, password, rpassword);
+    if (result.data.err) {
+      setMessage(result.data.err);
+      return
+    } 
+    setRedirect(true);
+  }
 
   if (redirect) {
     return <Navigate to="/login"/>;

@@ -178,3 +178,43 @@ func TestSignOut(t *testing.T) {
 		})
 	}
 }
+
+func TestRefresh(t *testing.T) {
+
+	gin.SetMode(gin.TestMode)
+	s := setupTestServer()
+
+	testCases := []struct {
+		desc               string
+		id                 string
+		expectedStatusCode int
+		expectedResponse   interface{}
+	}{}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+
+			req := httptest.NewRequest(http.MethodPost, "/api/refresh", nil)
+			w := httptest.NewRecorder()
+
+			_, engine := gin.CreateTestContext(w)
+			engine.Use(func(c *gin.Context) {
+				c.Set("userID", tC.id)
+			})
+
+			engine.Handle(http.MethodPost, "/api/signout", s.SignOutUser)
+			engine.ServeHTTP(w, req)
+			response := w.Result()
+
+			if response.StatusCode != tC.expectedStatusCode {
+				t.Errorf("Received Status code %d does not match expected status %d", response.StatusCode, tC.expectedStatusCode)
+			}
+
+			var respBody gin.H
+			json.NewDecoder(response.Body).Decode(&respBody)
+			if !reflect.DeepEqual(respBody, tC.expectedResponse) {
+				t.Errorf("Received HTTP response body %+v does not match expected HTTP response Body %+v", respBody, tC.expectedResponse)
+			}
+		})
+	}
+}

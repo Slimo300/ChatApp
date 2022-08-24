@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/auth"
@@ -90,7 +91,7 @@ func (s *Server) ListenToHub() {
 
 func (s *Server) MustAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		accessHeader := c.GetHeader("Authorization")
+		accessHeader := strings.Split(c.GetHeader("Authorization"), " ")[1]
 		if accessHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"err": "user not authenticated"})
 			return

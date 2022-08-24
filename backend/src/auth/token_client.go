@@ -82,3 +82,7 @@ func (grpc *gRPCTokenAuthClient) DeleteUserToken(refresh string) error {
 	}
 	return nil
 }
+
+func (grpc *gRPCTokenAuthClient) GetPublicKey() *rsa.PublicKey {
+	return &grpc.pubKey
+}

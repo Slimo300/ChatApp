@@ -1,49 +1,61 @@
-
 const port = "8080";
+const hostname = "localhost";
 
-let hostname;
-
-if (window.location.host ==="localhost:3000") {
-    hostname="localhost";
-}else{
-    hostname="backend";
-}
-
-export async function GetUser() {
-    const response = await fetch('http://'+hostname+':'+port+'/api/user', {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include'});
-    if (response.status !== 200) {
-        throw new Error("couldn't get user");
+export class API{
+    constructor() {
+        this.axios = require('axios').default;
+        this.axios.defaults.baseURL = 'http://'+hostname+':'+port+'/api/';
+        this.axios.defaults.headers.common['Content-Type'] = "application/json";
     }
-    const promise = await response.json();
-    return promise;  
-}
 
-export async function GetInvites() {
-    const response = await fetch('http://'+hostname+':'+port+'/api/invites', {
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include'
-    });
-    if (response.status !== 200 && response.status !== 204) {
-        throw new Error("Invalid response when requesting user invites");
+    SetAccessToken(accessToken) {
+        this.axios.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
     }
-    if (response.status === 200) {
-        const promise = await response.json();
-        return promise
-    }
-}
 
-export async function GetGroups() {
-    const response = await fetch('http://'+hostname+':'+port+'/api/group', {
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include'});
-    if (response.status === 204) {
-        return {"err": "no groups"};
+    async Register(email, username, password, rpassword){
+        if (email.trim() === "") {
+            throw new Error("Email can't be blank");
+        }
+        if (username.trim() === "") {
+            throw new Error("Username can't be blank");
+        }
+        if (password.trim() === "") {
+            throw new Error("Password can't be blank");
+        }
+        if (password !== rpassword) {
+            throw new Error("Passwords don't match");
+        }
+        return await this.axios.post("/register", {
+                username: username, 
+                email: email,
+                password: password,
+            });
     }
-    const promise = await response.json();
-    return promise;
+
+    async Login(email, password) {
+        if (email.trim() === "") {
+            throw new Error("Email cannot be blank");
+        }
+        if (password.trim() === "") {
+            throw new Error("Password cannot be blank");
+        }
+        return await this.axios.post("/login", {
+            email: email,
+            password: password,
+        });
+    }
+
+    async GetUser() {
+        return await this.axios.get('/user');
+    }
+
+    async GetInvites() {
+        return await this.axios.get("/invites");
+    }
+
+    async GetGroups() {
+        return await this.axios.get("/group");
+    }
 }
 
 export async function GetWebsocket() {
@@ -55,29 +67,6 @@ export async function GetWebsocket() {
         console.log("closed");
     };
     return socket
-}
-
-export async function Login(email, password) {
-    if (email.trim() === "") {
-        throw new Error("Email cannot be blank");
-    }
-    if (password.trim() === "") {
-        throw new Error("Password cannot be blank");
-    }
-
-    let response = await fetch('http://'+hostname+':'+port+'/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-            email,
-            password,
-        })
-    });
-
-    let responseJSON = await response.json();
-
-    return responseJSON;
 }
 
 export async function Logout() {
@@ -93,28 +82,6 @@ export async function Logout() {
     } catch(err) {
         return err;
     }
-}
-
-export async function Register(email, username, password, rpassword) {
-    if (password.trim() === "") {
-        throw new Error("Password can't be blank");
-    }
-    if (password !== rpassword) {
-        throw new Error("Passwords don't match");
-    }
-    let response = await fetch('http://'+hostname+':'+port+'/api/register', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-            username, 
-            email,
-            password
-        })
-    });
-    let responseJSON = await response.json();
-
-    return responseJSON;
 }
 
 export async function LoadMessages(groupID, offset) {
@@ -302,3 +269,91 @@ export async function DeleteGroupProfilePicture(groupID) {
     let responseJSON = await response.json();
     return responseJSON;
 }
+
+const APICaller = new API();
+
+export default APICaller;
+
+
+// export async function Register(email, username, password, rpassword) {
+//     if (password.trim() === "") {
+//         throw new Error("Password can't be blank");
+//     }
+//     if (password !== rpassword) {
+//         throw new Error("Passwords don't match");
+//     }
+//     let response = await fetch('http://'+hostname+':'+port+'/api/register', {
+//         method: 'POST',
+//         headers: {'Content-Type': 'application/json'},
+//         credentials: 'include',
+//         body: JSON.stringify({
+//             username: username, 
+//             email: email,
+//             password: password
+//         })
+//     });
+//     let responseJSON = await response.json();
+
+//     return responseJSON;
+// }
+
+// export async function Login(email, password) {
+//     if (email.trim() === "") {
+//         throw new Error("Email cannot be blank");
+//     }
+//     if (password.trim() === "") {
+//         throw new Error("Password cannot be blank");
+//     }
+
+//     let response = await fetch('http://'+hostname+':'+port+'/api/login', {
+//         method: 'POST',
+//         headers: {'Content-Type': 'application/json'},
+//         credentials: 'include',
+//         body: JSON.stringify({
+//             email: email,
+//             password: password,
+//         })
+//     });
+
+//     let responseJSON = await response.json();
+
+//     return responseJSON;
+// }
+
+
+// export async function GetUser() {
+//     const response = await fetch('http://'+hostname+':'+port+'/api/user', {
+//         method: 'GET',
+//         headers: {'Content-Type': 'application/json'},
+//         credentials: 'include'});
+//     if (response.status !== 200) {
+//         throw new Error("couldn't get user");
+//     }
+//     const promise = await response.json();
+//     return promise;  
+// }
+
+// export async function GetInvites() {
+//     const response = await fetch('http://'+hostname+':'+port+'/api/invites', {
+//         headers: {'Content-Type': 'application/json'},
+//         credentials: 'include'
+//     });
+//     if (response.status !== 200 && response.status !== 204) {
+//         throw new Error("Invalid response when requesting user invites");
+//     }
+//     if (response.status === 200) {
+//         const promise = await response.json();
+//         return promise
+//     }
+// }
+
+// export async function GetGroups() {
+//     const response = await fetch('http://'+hostname+':'+port+'/api/group', {
+//         headers: {'Content-Type': 'application/json'},
+//         credentials: 'include'});
+//     if (response.status === 204) {
+//         return {"err": "no groups"};
+//     }
+//     const promise = await response.json();
+//     return promise;
+// }

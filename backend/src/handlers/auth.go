@@ -92,9 +92,8 @@ func (s *Server) SignIn(c *gin.Context) {
 
 	// c.SetCookie("refreshToken", token, 3600, "/", s.domain, false, true)
 	c.SetCookie("refreshToken", tokenPair.RefreshToken, 3600, "/", s.domain, false, true)
-	c.Header("Authentication", tokenPair.AccessToken)
 
-	c.JSON(http.StatusOK, gin.H{"name": user.UserName})
+	c.JSON(http.StatusOK, gin.H{"accessToken": tokenPair.AccessToken})
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,4 +143,31 @@ func (s *Server) GetUser(c *gin.Context) {
 	user.Pass = ""
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (s *Server) Refresh(c *gin.Context) {
+
+	refresh, err := c.Cookie("refreshToken")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "No token provided"})
+		return
+	}
+
+	tokens, err := s.TokenService.NewPairFromRefresh(refresh)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
+
+	if tokens.Error != "" {
+		if tokens.Error == "Token Blacklisted" {
+			c.JSON(http.StatusForbidden, gin.H{"err": "Token Blacklisted"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"err": tokens.Error})
+		return
+	}
+	c.SetCookie("refreshToken", tokens.RefreshToken, 86400, "/", s.domain, false, true)
+
+	c.JSON(http.StatusOK, gin.H{"accessToken": tokens.AccessToken})
 }

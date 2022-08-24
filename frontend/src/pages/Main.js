@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
 import { GetGroups, GetInvites, GetUser, GetWebsocket, LoadMessages } from "../Requests";
+import APICaller from "../Requests";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ModalUserProfile } from "./Profile";
 
@@ -33,15 +34,24 @@ const AuthMain = (props) => {
     }
 
     // Getting user data, groups and invites and setting websocket connection
-    useEffect(() => {
-        let userPromise = GetUser();
-        userPromise.then( response => { dispatch({type: actionTypes.LOGIN, payload: response}) } );
-        let groupsPromise = GetGroups();
-        groupsPromise.then( response => { 
-            if (response.err === undefined) dispatch({type: actionTypes.SET_GROUPS, payload: response});
-        } );
-        let invites = GetInvites();
-        invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}) } );
+    useEffect(async () => {
+        const userResult = await APICaller.GetUser();
+        dispatch({type: actionTypes.LOGIN, payload: userResult.data});
+        // let userPromise = GetUser();
+        // userPromise.then( response => { dispatch({type: actionTypes.LOGIN, payload: response}) } );
+        const groupsResult = await APICaller.GetGroups();
+        if (groupsResult.status === 200) {
+            dispatch({type: actionTypes.SET_GROUPS, payload: groupsResult.data});
+        }
+        // groupsPromise.then( response => { 
+        //     if (response.err === undefined) dispatch({type: actionTypes.SET_GROUPS, payload: response});
+        // } );
+        const invitesResult = await APICaller.GetInvites();
+        if (invitesResult.status === 200) {
+            console.log("here");
+            dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: invitesResult.data});
+        }
+        // invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}) } );
         let websocketPromise = GetWebsocket();
         websocketPromise.then( response => { props.setWs(response) } );
     }, [dispatch]);

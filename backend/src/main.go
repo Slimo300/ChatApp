@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/database/orm"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/routes"
@@ -25,6 +26,10 @@ func main() {
 	}
 	storage := storage.Setup()
 	server := handlers.NewServer(db, &storage)
+	server.TokenService, err = auth.NewGRPCTokenAuthClient()
+	if err != nil {
+		panic("Couldn't connect to grpc auth server")
+	}
 	routes.Setup(engine, server)
 	go server.RunHub()
 
@@ -32,8 +37,6 @@ func main() {
 		Addr:    ":8080",
 		Handler: engine,
 	}
-
-	// engine.Run(":8080")
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {

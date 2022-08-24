@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Login } from "../Requests";
+import APICaller from "../Requests";
 
 const SignInForm = (props) => {
 
@@ -11,15 +11,15 @@ const SignInForm = (props) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    let result = Login(email, password);
-    result.then( res => {
-      if (res.err !== undefined) {
-        setMessage(res.err);
-        return;
-      }
-      props.setName(res.name);
-      setRedirect(true);
-    });
+
+    let result = await APICaller.Login(email, password);
+    if (result.data.err) {
+      setMessage(result.data.err);
+      return;
+    }
+    APICaller.SetAccessToken(result.data.accessToken);
+    props.setName("logged");
+    setRedirect(true);
   }
 
   if (redirect) {
