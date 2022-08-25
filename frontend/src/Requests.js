@@ -6,6 +6,7 @@ export class API{
         this.axios = require('axios').default;
         this.axios.defaults.baseURL = 'http://'+hostname+':'+port+'/api/';
         this.axios.defaults.headers.common['Content-Type'] = "application/json";
+        this.axios.defaults.withCredentials = true;
     }
 
     SetAccessToken(accessToken) {
@@ -56,113 +57,123 @@ export class API{
     async GetGroups() {
         return await this.axios.get("/group");
     }
-}
 
-export async function GetWebsocket() {
-    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
-    socket.onopen = () => {
-        console.log("Websocket openned");
-    };
-    socket.onclose = () => {
-        console.log("closed");
-    };
-    return socket
-}
+    async GetWebsocket() {
+        let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/');
+        socket.onopen = () => {
+            console.log("Websocket openned");
+        };
+        socket.onclose = () => {
+            console.log("closed");
+        };
+        return socket;
+    }
 
-export async function Logout() {
-    try {
-        let response = await fetch('http://'+hostname+':'+port+'/api/signout', {
-            method: "POST",
-            credentials: "include",
-            headers: {"Content-Type": "application/json"}
+    async Logout() {
+        return await this.axios.post("/signout", {}, {
+            withCredentials: true,
         });
-        if (response.status !== 200) {
-            throw new Error("Logout unsuccesful");
-        }
-    } catch(err) {
-        return err;
+    }
+
+    async LoadMessages(groupID, offset) {
+        return await this.axios.get("/group/"+groupID+"/messages?num=8&offset="+offset);
+    }
+
+    async CreateGroup(name, desc) {
+        return await this.axios.post("/group", {
+            "name": name,
+            "desc": desc,
+        })
+    }
+
+    async DeleteGroup(groupID) {
+        return await this.axios.delete("/group/"+groupID);
+    }
+
+    async DeleteMember(memberID) {
+        return await this.axios.delete("member/"+memberID);
     }
 }
 
-export async function LoadMessages(groupID, offset) {
-    let messages;
-    try {
-        let response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID+'/messages?num=8&offset=' + offset, {
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-        });
-        if (response.status === 200) {
-            messages = await response.json();
-        }
-        else if (response.status === 204) {
-            messages = [];
-        } 
-        else {
-            throw new Error("getting messages failed with status code: " + response.status.toString());
-        } 
-    } catch(err) {
-        return err;
-    }
-    return messages;
-}
+// export async function LoadMessages(groupID, offset) {
+//     let messages;
+//     try {
+//         let response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID+'/messages?num=8&offset=' + offset, {
+//             headers: {"Content-Type": "application/json"},
+//             credentials: "include",
+//         });
+//         if (response.status === 200) {
+//             messages = await response.json();
+//         }
+//         else if (response.status === 204) {
+//             messages = [];
+//         } 
+//         else {
+//             throw new Error("getting messages failed with status code: " + response.status.toString());
+//         } 
+//     } catch(err) {
+//         return err;
+//     }
+//     return messages;
+// }
 
-export async function CreateGroup(name, desc) {
-    let response;
-    try {
-        response = await fetch('http://'+hostname+':'+port+'/api/group', {
-            method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                "name": name,
-                "desc": desc,
-            })
-        });
-        if (response.status !== 201) {
-            throw new Error("Invalid status code: " + response.status.toString());
-        }
-    } catch(err) {
-        return err;
-    }
-    let newGroup = await response.json();
-    return newGroup;
-}
+// export async function CreateGroup(name, desc) {
+//     let response;
+//     try {
+//         response = await fetch('http://'+hostname+':'+port+'/api/group', {
+//             method: "POST",
+//             headers: {'Content-Type': 'application/json'},
+//             credentials: 'include',
+//             body: JSON.stringify({
+//                 "name": name,
+//                 "desc": desc,
+//             })
+//         });
+//         if (response.status !== 201) {
+//             throw new Error("Invalid status code: " + response.status.toString());
+//         }
+//     } catch(err) {
+//         return err;
+//     }
+//     let newGroup = await response.json();
+//     return newGroup;
+// }
 
-export async function DeleteGroup(groupID) {
-    let response;
-    try {
-        response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID, {
-            method: "DELETE",
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-        });
+// export async function DeleteGroup(groupID) {
+//     let response;
+//     try {
+//         response = await fetch('http://'+hostname+':'+port+'/api/group/'+groupID, {
+//             method: "DELETE",
+//             headers: {'Content-Type': 'application/json'},
+//             credentials: 'include',
+//         });
 
-        if (response.status !== 200) {
-            throw new Error("Invalid status code: " + response.status.toString())
-        }
-    } catch(err) {
-        return err;
-    }
-    return null;
-}
+//         if (response.status !== 200) {
+//             throw new Error("Invalid status code: " + response.status.toString())
+//         }
+//     } catch(err) {
+//         return err;
+//     }
+//     return null;
+// }
 
-export async function DeleteMember(memberID) {
-    let response;
-    try {
-        response = await fetch('http://'+hostname+':'+port+'/api/member/'+memberID, {
-            method: 'DELETE',
-            headers: {"Content-Type": "application/json"},
-            credentials: "include"
-        });
-        if (response.status !== 200) {
-            throw new Error('invalid status code: ' + response.status.toString());
-        }
-    } catch(err) {
-        return err;
-    }
-    let responseJSON = await response.json();
-    return responseJSON;
-}
+// export async function DeleteMember(memberID) {
+//     let response;
+//     try {
+//         response = await fetch('http://'+hostname+':'+port+'/api/member/'+memberID, {
+//             method: 'DELETE',
+//             headers: {"Content-Type": "application/json"},
+//             credentials: "include"
+//         });
+//         if (response.status !== 200) {
+//             throw new Error('invalid status code: ' + response.status.toString());
+//         }
+//     } catch(err) {
+//         return err;
+//     }
+//     let responseJSON = await response.json();
+//     return responseJSON;
+// }
 
 export async function SetRights(memberID, adding, deleting, setting) {
     let response;
@@ -274,6 +285,16 @@ const APICaller = new API();
 
 export default APICaller;
 
+export async function GetWebsocket() {
+    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
+    socket.onopen = () => {
+        console.log("Websocket openned");
+    };
+    socket.onclose = () => {
+        console.log("closed");
+    };
+    return socket
+}
 
 // export async function Register(email, username, password, rpassword) {
 //     if (password.trim() === "") {

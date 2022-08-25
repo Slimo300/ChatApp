@@ -1,33 +1,31 @@
 import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { actionTypes, StorageContext } from '../../ChatStorage';
-import { DeleteMember } from '../../Requests';
+import APICaller from '../../Requests';
 
 export const ModalLeaveGroup = (props) => {
 
     const [, dispatch] = useContext(StorageContext);
 
-    const [err, setErr] = useState("");
+    const [msg, setMsg] = useState("");
 
     const submit = async() => {
-        let promise = DeleteMember(props.member.ID);
+        let response = await APICaller.DeleteMember(props.member.ID);
         let flag = false;
-        promise.then( response => { 
-            if (response.err !== null){
-                dispatch({type: actionTypes.DELETE_GROUP, payload: props.group.ID})
-                setErr("You left group");
-                flag = true;
-            } else {
-                setErr(response.err);
+        if (response.status !== 200){
+            dispatch({type: actionTypes.DELETE_GROUP, payload: props.group.ID})
+            setMsg("You left group");
+            flag = true;
+        } else {
+            setMsg(response.data.err);
+        }
+        setTimeout(function () {    
+            props.toggle();
+            setMsg("");
+            if (flag) {
+                props.setCurrent({});
             }
-            setTimeout(function () {    
-                props.toggle();
-                setErr("");
-                if (flag) {
-                    props.setCurrent({});
-                }
-            }, 1000);
-         } );
+        }, 1000);
     }
 
     return (
@@ -38,7 +36,7 @@ export const ModalLeaveGroup = (props) => {
                 </ModalHeader>
                 <ModalBody>
                     <div>
-                        {err!==""?<h5 className="mb-4 text-danger">{err}</h5>:null}
+                        {msg!==""?<h5 className="mb-4 text-danger">{msg}</h5>:null}
                         <div className='form-group'>
                             <label>Are you sure you want to delete group {props.group.name}?</label>
                         </div>

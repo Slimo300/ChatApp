@@ -90,8 +90,7 @@ func (s *Server) SignIn(c *gin.Context) {
 	// 	return
 	// }
 
-	// c.SetCookie("refreshToken", token, 3600, "/", s.domain, false, true)
-	c.SetCookie("refreshToken", tokenPair.RefreshToken, 3600, "/", s.domain, false, true)
+	c.SetCookie("refreshToken", tokenPair.RefreshToken, 86400, "/", s.domain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"accessToken": tokenPair.AccessToken})
 }
@@ -110,7 +109,7 @@ func (s *Server) SignOutUser(c *gin.Context) {
 		return
 	}
 
-	refresh, err := c.Cookie("jwt")
+	refresh, err := c.Cookie("refreshToken")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "No token to invalidate"})
 		return
@@ -121,7 +120,7 @@ func (s *Server) SignOutUser(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("jwt", "", -1, "/", s.domain, false, true)
+	c.SetCookie("refreshToken", "", -1, "/", s.domain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }

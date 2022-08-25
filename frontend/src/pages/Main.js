@@ -34,26 +34,24 @@ const AuthMain = (props) => {
     }
 
     // Getting user data, groups and invites and setting websocket connection
-    useEffect(async () => {
-        const userResult = await APICaller.GetUser();
-        dispatch({type: actionTypes.LOGIN, payload: userResult.data});
-        // let userPromise = GetUser();
-        // userPromise.then( response => { dispatch({type: actionTypes.LOGIN, payload: response}) } );
-        const groupsResult = await APICaller.GetGroups();
-        if (groupsResult.status === 200) {
-            dispatch({type: actionTypes.SET_GROUPS, payload: groupsResult.data});
-        }
-        // groupsPromise.then( response => { 
-        //     if (response.err === undefined) dispatch({type: actionTypes.SET_GROUPS, payload: response});
-        // } );
-        const invitesResult = await APICaller.GetInvites();
-        if (invitesResult.status === 200) {
-            console.log("here");
-            dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: invitesResult.data});
-        }
-        // invites.then( response => { dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: response}) } );
-        let websocketPromise = GetWebsocket();
-        websocketPromise.then( response => { props.setWs(response) } );
+    useEffect(() => {
+        const fetchData = async () => {
+            const userResult = await APICaller.GetUser();
+            dispatch({type: actionTypes.LOGIN, payload: userResult.data});
+            const groupsResult = await APICaller.GetGroups();
+            if (groupsResult.status === 200) {
+                dispatch({type: actionTypes.SET_GROUPS, payload: groupsResult.data});
+            }
+            const invitesResult = await APICaller.GetInvites();
+            if (invitesResult.status === 200) {
+                dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: invitesResult.data});
+            }
+            // let websocketResult = await GetWebsocket();
+            // props.setWs(websocketResult);
+        };
+
+        fetchData();
+        
     }, [dispatch]);
 
     if (props.ws !== undefined) props.ws.onmessage = (e) => {
@@ -87,8 +85,11 @@ const AuthMain = (props) => {
         (
             async () => {
                 if (current.ID !== undefined && current.messages.length === 0) {
-                    let messagesPromise = LoadMessages(current.ID.toString(), 0)
-                    messagesPromise.then( response => { dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: response, group: current.ID}}) } )
+                    let messages = await APICaller.LoadMessages(current.ID.toString(), 0);
+                    if (messages.status === 204) {
+                        return;
+                    }
+                    dispatch({type: actionTypes.SET_MESSAGES, payload: {messages: messages.data, group: current.ID}})
                     toggleToggler();
                 }
             }

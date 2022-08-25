@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { StorageContext, actionTypes } from "../ChatStorage";
-import { LoadMessages } from "../Requests";
+import APICaller from "../Requests";
 import GroupMenu from "./GroupMenu";
 import Message from "./Message";
 import { ModalAddUser } from "./modals/AddUser";
@@ -44,6 +44,7 @@ const Chat = (props) => {
     const toggleOptions = () => {
         setOptionsShow(!optionsShow);
     };
+    const [allMessagesFlag, setAllMessagesFlag] = useState(false);
 
     const GetMemberPicture = (group, member) => {
         for (let i = 0; i < group.Members.length; i++) {
@@ -87,15 +88,13 @@ const Chat = (props) => {
     }
 
     const loadMessages = async() => {
-        let messagesPromise = LoadMessages(props.group.ID.toString(), props.group.messages.length);
-        messagesPromise.then( response => {
-            if (response.name === "Error") {
-                alert("Error when getting messages");
-                return;
-            }
-            dispatch({type: actionTypes.ADD_MESSAGES, payload: {messages: response, group: props.group.ID}}); 
-        } )
-    }
+        let messages = await APICaller.LoadMessages(props.group.ID.toString(), props.group.messages.length);
+        if (messages.status === 204) {
+            setAllMessagesFlag(true);
+            return;
+        }
+        dispatch({type: actionTypes.ADD_MESSAGES, payload: {messages: messages.data, group: props.group.ID}}); 
+    };
 
     let load;
     if (props.group.ID === undefined) {
@@ -114,7 +113,7 @@ const Chat = (props) => {
                 </div>
                 <div className="chat-container">
                     <ul className="chat-box" style={{height: '70vh', overflow: 'scroll'}}>
-                        <li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>
+                        {!allMessagesFlag?<li className="text-center"><a className="text-primary" style={{cursor: "pointer"}} onClick={loadMessages}>Load more messages</a></li>:null}
                         {props.group.messages===undefined?null:props.group.messages.map((item) => {
                         return <div ref={scrollRef}>
                                 <Message key={item.ID} time={item.created} message={item.text} name={item.nick} member={item.member} user={member.ID} picture={GetMemberPicture(props.group, item.member)} />

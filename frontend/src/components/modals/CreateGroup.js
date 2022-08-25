@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { actionTypes, StorageContext } from '../../ChatStorage';
-import { CreateGroup } from '../../Requests';
+import APICaller from '../../Requests';
 
 export const ModalCreateGroup = (props) => {
 
@@ -9,23 +9,21 @@ export const ModalCreateGroup = (props) => {
 
     const [grName, setGrName] = useState("");
     const [grDesc, setGrDesc] = useState("");
-    const [err, setErr] = useState("");
+    const [msg, setMsg] = useState("");
 
     const submit = async(e) => {
         e.preventDefault();
-        let promise = CreateGroup(grName, grDesc);
-        promise.then( response => {
-            if (response.name === "Error") {
-                setErr(response);
-            } else {
-                dispatch({type: actionTypes.NEW_GROUP, payload: response});
-                setErr("Group created");
-            }
-            setTimeout(function () {    
-                props.toggle();
-                setErr("");
-            }, 1000);
-        } );
+        let group = await APICaller.CreateGroup(grName, grDesc);
+        if (group.data.name === "Error") {
+            setMsg(group.data);
+        } else {
+            dispatch({type: actionTypes.NEW_GROUP, payload: group.data});
+            setMsg("Group created");
+        }
+        setTimeout(function () {    
+            props.toggle();
+            setMsg("");
+        }, 1000);
     }
 
     return (
@@ -36,7 +34,7 @@ export const ModalCreateGroup = (props) => {
                 </ModalHeader>
                 <ModalBody>
                     <div>
-                        {err!==""?<h5 className="mb-4 text-danger">{err}</h5>:null}
+                        {msg!==""?<h5 className="mb-4 text-danger">{msg}</h5>:null}
                         <form onSubmit={submit}>
                             <div className="form-group">
                                 <label htmlFor="email">Group name:</label>

@@ -96,7 +96,7 @@ func (rdb *redisTokenRepository) InvalidateToken(userID, tokenID string) error {
 		return repo.TooManyTokensFoundError
 	}
 
-	if err := rdb.Do("set", keys[0], repo.TOKEN_BLACKLISTED, "keepttl").Err(); err != nil {
+	if err := rdb.Do("set", keys[0], string(repo.TOKEN_BLACKLISTED), "keepttl").Err(); err != nil {
 		return err
 	}
 	return nil

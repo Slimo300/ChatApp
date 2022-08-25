@@ -1,16 +1,17 @@
 import React, {useContext, useState} from 'react';
 import {v4 as uuidv4} from "uuid";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { DeleteMember, SetRights } from '../../Requests';
+import APICaller from '../../Requests';
+import { SetRights } from '../../Requests';
 import { actionTypes, StorageContext } from '../../ChatStorage';
 
 export const ModalMembers = (props) => {
 
-    const [err, setErr] = useState("");
+    const [msg, setMsg] = useState("");
 
     let message = null;
-    if (err !== "") {
-        message = <h5 className='text-danger'>{err}</h5>
+    if (msg !== "") {
+        message = <h5 className='text-danger'>{msg}</h5>
     }
 
     let nogroup = false;
@@ -29,7 +30,7 @@ export const ModalMembers = (props) => {
                         <div className='form-group'>
                             <table className="table">
                                 <tbody>
-                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} group={props.group.ID} member={item} setErr={setErr} toggle={props.toggle} user={props.member}/>})}
+                                    {nogroup?null:props.group.Members.map((item) => {return <Member key={uuidv4()} group={props.group.ID} member={item} setMsg={setMsg} toggle={props.toggle} user={props.member}/>})}
                                 </tbody>
                             </table>
                         </div>
@@ -58,17 +59,15 @@ const Member = (props) => {
 
     const deleteMember = async() => {
 
-        let promise = DeleteMember(props.member.ID);
-        promise.then( response => {
-            if (response.message === "ok") {
-                props.setErr("Member deleted");
-            } else props.setErr(response);
-            setTimeout(function() {
-                props.toggle();
-                props.setErr("");
-            }, 2000);
-            dispatch({type: actionTypes.DELETE_MEMBER, payload: {ID: props.member.ID, group_id: props.group}})
-        });
+        let response = await APICaller.DeleteMember(props.member.ID);
+        if (response.status === 200) {
+            props.setMsg("Member deleted");
+        } else props.setMsg(response.data.err);
+        setTimeout(function() {
+            props.toggle();
+            props.setMsg("");
+        }, 2000);
+        dispatch({type: actionTypes.DELETE_MEMBER, payload: {ID: props.member.ID, group_id: props.group}})
     }
 
     const setRights = async() => {
@@ -78,9 +77,9 @@ const Member = (props) => {
         let promise = SetRights(props.member.ID, adding, deleting, setting);
         promise.then( response => {
             if (response.message === "ok") props.setErr("Rights changed");
-            else props.setErr(response);
+            else props.setMsg(response);
             setTimeout(function() {
-                props.setErr("");
+                props.setMsg("");
             }, 2000);
         });
     }
