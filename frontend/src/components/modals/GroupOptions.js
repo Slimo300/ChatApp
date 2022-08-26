@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { DeleteGroupProfilePicture, UpdateGroupProfilePicture } from "../../Requests";
+import APICaller from "../../Requests";
 import { actionTypes, StorageContext } from '../../ChatStorage';
 
 export const ModalGroupOptions = (props) => {
@@ -11,43 +11,41 @@ export const ModalGroupOptions = (props) => {
 
     const [message, setMessage] = useState("");
 
-    const updatePicture = (e) => {
+    const updatePicture = async(e) => {
         e.preventDefault();
         let data = new FormData();
         data.append("avatarFile", file);
     
-        let response = UpdateGroupProfilePicture(data, props.group.ID);
-        response.then(resp => {
-            if (resp.err !== undefined) {
-                setMessage(resp.err);
-            } else {
-                setMessage("image uploaded");
-                dispatch({type: actionTypes.NEW_GROUP_PROFILE_PICTURE, payload: {newURI: resp.newUrl, groupID: props.group.ID}});
-                let timestamp = new Date().getTime();
-                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.group.pictureUrl+"?"+timestamp;
-                document.getElementById("customFile").value= null;
-            }
-            setTimeout(function() {
-                setMessage("");
-            }, 3000);
-        })
+        let response = await APICaller.UpdateGroupProfilePicture(data, props.group.ID);
+
+        if (response.status === 200) {
+            setMessage("Image uploaded successfully");
+            dispatch({type: actionTypes.NEW_GROUP_PROFILE_PICTURE, payload: {newURI: response.data.newUrl, groupID: props.group.ID}});
+            let timestamp = new Date().getTime();
+            document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.group.pictureUrl+"?"+timestamp;
+            document.getElementById("customFile").value= null;
+        } else {
+            setMessage(response.data.err);
+        }
+        setTimeout(function() {
+            setMessage("");
+        }, 3000);
     };
 
-    const deletePicture = (e) => {
-        let response = DeleteGroupProfilePicture(props.group.ID)
-        response.then(resp => {
-            if (resp.err !== undefined) {
-                setMessage(resp.err);
-            } else {
-                setMessage("image deleted");
-                dispatch({type: actionTypes.DELETE_GROUP_PROFILE_PICTURE, payload: props.group.ID})
-                let timestamp = new Date().getTime();
-                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.group.ID+"?"+timestamp;
-            }
-            setTimeout(function() {
-                setMessage("");
-            }, 3000);
-        })
+    const deletePicture = async() => {
+        let response = await APICaller.DeleteGroupProfilePicture(props.group.ID)
+
+        if (response.status === 200) {
+            setMessage("Image deleted successfully");
+            dispatch({type: actionTypes.DELETE_GROUP_PROFILE_PICTURE, payload: props.group.ID})
+            let timestamp = new Date().getTime();
+            document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+props.group.ID+"?"+timestamp;
+        } else {
+            setMessage(response.data.err);
+        }
+        setTimeout(function() {
+            setMessage("");
+        }, 3000);
     };
 
     return (

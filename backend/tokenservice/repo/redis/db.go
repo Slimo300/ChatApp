@@ -73,7 +73,7 @@ func (rdb *redisTokenRepository) InvalidateTokens(userID, tokenID string) error 
 		if len(keys) > 1 {
 			return repo.TooManyTokensFoundError
 		}
-		if err := rdb.Do("set", keys[0], repo.TOKEN_BLACKLISTED, "keepttl").Err(); err != nil {
+		if err := rdb.Do("set", keys[0], string(repo.TOKEN_BLACKLISTED), "keepttl").Err(); err != nil {
 			return err
 		}
 		t = strings.Split(keys[0], ":")[2]

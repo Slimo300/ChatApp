@@ -1,40 +1,28 @@
 import React, {useState} from "react";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import APICaller from "../../Requests";
 
 export const ModalAddUser = (props) => {
 
     const [username, setUsername] = useState("");
-    const [err, setErr] = useState("");
+    const [msg, setMsg] = useState("");
 
     const submitAddToGroup = async(e) => {
         e.preventDefault();
-        const response = await fetch('http://localhost:8080/api/invites', {
-            method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({
-                "target": username,
-                "group": props.group.ID
-            })
-        });
 
-        const responseJSON = await response.json();
+        const response = await APICaller.SendGroupInvite(username, props.group.ID);
 
-        if (responseJSON.err !== undefined) {
-            setErr(responseJSON.err);
+        if (response.status !== 200) {
+            setMsg(response.data.err);
         } else {
-            setErr("invite sent");
+            setMsg("invite sent");
         }
         setTimeout(function () {    
             props.toggle();
-            setErr("");
+            setMsg("");
         }, 1000);
     }
-    let message;
-    if (err !== "") {
-        message = <h5 className="mb-4 text-danger">{err}</h5>;
-    }
-
+    
     return (
         <Modal id="buy" tabIndex="-1" role="dialog" isOpen={props.show} toggle={props.toggle}>
             <div role="document">
@@ -43,7 +31,7 @@ export const ModalAddUser = (props) => {
                 </ModalHeader>
                 <ModalBody>
                     <div>
-                        {message}
+                        {msg!==""?<h5 className="mb-4 text-danger">{msg}</h5>:null}
                         <form onSubmit={submitAddToGroup}>
                             <div className="form-group">
                                 <label htmlFor="email">Username:</label>

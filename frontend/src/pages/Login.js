@@ -11,9 +11,15 @@ const SignInForm = (props) => {
 
   const submit = async (e) => {
     e.preventDefault();
+    let result;
 
-    let result = await APICaller.Login(email, password);
-    if (result.data.err) {
+    try {
+      result = await APICaller.Login(email, password);
+    } catch(err) {
+      setMessage(err.message);
+    }
+
+    if (result.status !== 200) {
       setMessage(result.data.err);
       return;
     }

@@ -1,22 +1,19 @@
 import React, { useContext } from "react";
 import { actionTypes, StorageContext } from "../ChatStorage";
-import { RespondInvite } from "../Requests";
+import APICaller from "../Requests";
 
 const Invite = (props) => {
 
     const [, dispatch] = useContext(StorageContext);
 
-    const Respond = (answer) => {
-        let result = RespondInvite(props.invite.ID, answer);
-        result.then(response => {
-            if (response === null) {
-                alert("couldn't respond to invte");
-                return;
-            }
-            dispatch({type: actionTypes.NEW_GROUP, payload: response});
+    const Respond = async (answer) => {
+        let response = await APICaller.RespondGroupInvite(props.invite.ID, answer);
+        if (response.status === 200) {
+            dispatch({type: actionTypes.NEW_GROUP, payload: response.data});
             dispatch({type: actionTypes.DELETE_NOTIFICATION, payload: props.invite.ID});
-            console.log(response);
-        });
+        } else {
+            alert(response.data.err);
+        }
     };
 
     return (

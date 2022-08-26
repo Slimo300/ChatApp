@@ -13,7 +13,15 @@ function RegisterForm() {
   const submit = async (e) => {
     e.preventDefault();
 
-    let result = await APICaller.Register(email, username, password, rpassword);
+    let result;
+
+    try {
+      result = await APICaller.Register(email, username, password, rpassword);
+    } catch(err) {
+      setMessage(err.message);
+      return;
+    }
+
     if (result.data.err) {
       setMessage(result.data.err);
       return

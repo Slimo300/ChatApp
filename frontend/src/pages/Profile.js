@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { ChangePassword, DeleteProfilePicture, UpdateProfilePicture } from "../Requests";
+import APICaller from "../Requests";
 import { actionTypes, StorageContext } from '../ChatStorage';
 
 export const ModalUserProfile = (props) => {
@@ -15,62 +15,62 @@ export const ModalUserProfile = (props) => {
 
     const [message, setMessage] = useState("");
 
-    const changePassword = (e) => {
-            e.preventDefault()
-            let response = ChangePassword(oldPassword, newPassword, repeatPassword);
-            response.then(resp => {
-                document.getElementById("oldpassword").value = "";
-                document.getElementById("newpassword").value = "";
-                document.getElementById("rpassword").value = "";
-                if (resp.err !== undefined) {
-                    setMessage(resp.err);
-                } else {
-                    setMessage(resp.message);
-                }
-                setTimeout(function() {
-                    setMessage("");
-                }, 3000);
-            })
+    const changePassword = async(e) => {
+            e.preventDefault();
+            let response;
+
+            try {
+                response = await APICaller.ChangePassword(oldPassword, newPassword, repeatPassword);
+            } catch(err) {
+                setMessage(err.message);
+            }
+            
+            if (response.status === 200) {
+                setMessage("Password changed succesfully");
+            } else {
+                setMessage(response.data.err);
+            }
+            setTimeout(function() {
+                setMessage("");
+            }, 3000);
     }
 
-    const updatePicture = (e) => {
+    const updatePicture = async(e) => {
         e.preventDefault();
+
         let data = new FormData();
         data.append("avatarFile", file);
     
-        let response = UpdateProfilePicture(data);
-        response.then(resp => {
-            if (resp.err !== undefined) {
-                setMessage(resp.err);
-            } else {
-                setMessage("image uploaded");
-                dispatch({type: actionTypes.NEW_PROFILE_PICTURE, payload: resp.newUrl});
-                let timestamp = new Date().getTime();
-                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
-                document.getElementById("customFile").value= null;
-            }
-            setTimeout(function() {
-                setMessage("");
-            }, 3000);
-        })
+        let response = await APICaller.UpdateProfilePicture(data);
+        if (response.status === 200) {
+            setMessage("Image uploaded succesfully");
+            dispatch({type: actionTypes.NEW_PROFILE_PICTURE, payload: response.data.newUrl});
+            let timestamp = new Date().getTime();
+            document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
+            document.getElementById("customFile").value= null;
+
+        } else {
+            setMessage(response.data.err);
+        }
+        setTimeout(function() {
+            setMessage("");
+        }, 3000);
     };
 
-    const deletePicture = (e) => {
-        let response = DeleteProfilePicture()
-        response.then(resp => {
-            if (resp.err !== undefined) {
-                setMessage(resp.err);
-            } else {
-                setMessage("image deleted");
-                dispatch({type: actionTypes.DELETE_PROFILE_PICTURE})
-                let timestamp = new Date().getTime();
-                document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
-            }
-            setTimeout(function() {
-                setMessage("");
-            }, 3000);
-        })
+    const deletePicture = async() => {
 
+        let response = await APICaller.DeleteProfilePicture();
+        if (response.status === 200) {
+            setMessage("Image deleted successfully");
+            dispatch({type: actionTypes.DELETE_PROFILE_PICTURE});
+            let timestamp = new Date().getTime();
+            document.getElementById("profilePicture").src = "https://chatprofilepics.s3.eu-central-1.amazonaws.com/"+state.user.pictureUrl+"?"+timestamp;
+        } else {
+            setMessage(response.data.err);
+        }
+        setTimeout(function() {
+            setMessage("");
+        }, 3000);
     };
 
     return (
