@@ -163,15 +163,3 @@ export class API{
 const APICaller = new API();
 
 export default APICaller;
-
-
-export async function GetWebsocket() {
-    let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/')
-    socket.onopen = () => {
-        console.log("Websocket openned");
-    };
-    socket.onclose = () => {
-        console.log("closed");
-    };
-    return socket
-}

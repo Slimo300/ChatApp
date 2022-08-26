@@ -5,7 +5,6 @@ import Chat from "../components/Chat";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GroupLabel } from "../components/GroupLabel";
 import { ModalCreateGroup } from "../components/modals/CreateGroup";
-import { GetGroups, GetInvites, GetUser, GetWebsocket, LoadMessages } from "../Requests";
 import APICaller from "../Requests";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ModalUserProfile } from "./Profile";
