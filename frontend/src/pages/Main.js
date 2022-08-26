@@ -46,8 +46,8 @@ const AuthMain = (props) => {
             if (invitesResult.status === 200) {
                 dispatch({type: actionTypes.SET_NOTIFICATIONS, payload: invitesResult.data});
             }
-            // let websocketResult = await GetWebsocket();
-            // props.setWs(websocketResult);
+            let websocket = await APICaller.GetWebsocket();
+            props.setWs(websocket);
         };
 
         fetchData();

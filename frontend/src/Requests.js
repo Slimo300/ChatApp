@@ -7,10 +7,12 @@ export class API{
         this.axios.defaults.baseURL = 'http://'+hostname+':'+port+'/api/';
         this.axios.defaults.headers.common['Content-Type'] = "application/json";
         this.axios.defaults.withCredentials = true;
+        this.accessToken = "";
     }
 
     SetAccessToken(accessToken) {
         this.axios.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
+        this.accessToken = accessToken;
     }
 
     async Register(email, username, password, rpassword){
@@ -56,17 +58,6 @@ export class API{
 
     async GetGroups() {
         return await this.axios.get("/group");
-    }
-
-    async GetWebsocket() {
-        let socket = new WebSocket('ws://'+hostname+':'+port+'/ws/');
-        socket.onopen = () => {
-            console.log("Websocket openned");
-        };
-        socket.onclose = () => {
-            console.log("closed");
-        };
-        return socket;
     }
 
     async Logout() {
@@ -154,6 +145,17 @@ export class API{
 
     async DeleteGroupProfilePicture(groupID) {
         return await this.axios.delete("group/"+groupID+"/image");
+    }
+
+    async GetWebsocket() {
+        let socket = new WebSocket('ws://'+hostname+':'+port+'/ws?authToken='+this.accessToken);
+        socket.onopen = () => {
+            console.log("Websocket openned");
+        };
+        socket.onclose = () => {
+            console.log("closed");
+        };
+        return socket;
     }
 }
 
