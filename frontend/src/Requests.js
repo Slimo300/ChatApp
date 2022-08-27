@@ -4,17 +4,11 @@ const hostname = "localhost";
 export class API{
     constructor() {
         this.axios = require('axios').default;
+        console.log("NEW Caller");
         this.axios.defaults.baseURL = 'http://'+hostname+':'+port+'/api/';
         this.axios.defaults.headers.common['Content-Type'] = "application/json";
-        this.axios.defaults.withCredentials = true;
         this.accessToken = "";
 
-        this.axios.interceptors.response.use(function (response) {
-            return response;
-          }, function (error) {
-            if (error.response.s)
-            return Promise.reject(error);
-          });
     }
 
     SetAccessToken(accessToken) {
@@ -52,6 +46,8 @@ export class API{
         return await this.axios.post("/login", {
             email: email,
             password: password,
+        }, {
+            withCredentials: true,
         });
     }
 
@@ -168,5 +164,30 @@ export class API{
 
 
 const APICaller = new API();
+
+// Response interceptor for API calls
+APICaller.axios.interceptors.response.use((response) => {
+    return response
+}, async function (error) {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        let response;
+        try {
+            response = await APICaller.axios.post("/refresh", {}, {
+                withCredentials: true,
+            });
+        } catch(err) {
+            console.log(err);
+            return;
+        }
+        APICaller.SetAccessToken(response.data.accessToken);
+        originalRequest.headers.Authorization = "Bearer "+response.data.accessToken;
+
+        return APICaller.axios(originalRequest);
+    }
+    return Promise.reject(error);
+});
 
 export default APICaller;

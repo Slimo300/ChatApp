@@ -97,6 +97,7 @@ func (s *Server) SignOutUser(c *gin.Context) {
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "invalid ID"})
+		return
 	}
 
 	if err := s.DB.SignOutUser(uid); err != nil {

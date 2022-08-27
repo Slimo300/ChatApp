@@ -243,7 +243,7 @@ func TestRefresh(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			tC.prepare(&mockTokenClient.Mock)
 
-			req := httptest.NewRequest(http.MethodPut, "/api/refresh", nil)
+			req := httptest.NewRequest(http.MethodPost, "/api/refresh", nil)
 			if tC.withCookie {
 				req.AddCookie(&http.Cookie{Name: "refreshToken", Value: "validRefreshToken", Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 			}
@@ -251,7 +251,7 @@ func TestRefresh(t *testing.T) {
 
 			_, engine := gin.CreateTestContext(w)
 
-			engine.Handle(http.MethodPut, "/api/refresh", s.RefreshToken)
+			engine.Handle(http.MethodPost, "/api/refresh", s.RefreshToken)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 

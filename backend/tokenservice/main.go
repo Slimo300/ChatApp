@@ -33,7 +33,7 @@ func main() {
 
 	repo := redis.NewRedisTokenRepository("localhost", "6379", "")
 
-	s := server.NewTokenService(repo, os.Getenv("REFRESH_SECRET"), *privKey, 24*time.Hour, 20*time.Minute)
+	s := server.NewTokenService(repo, os.Getenv("REFRESH_SECRET"), *privKey, 24*time.Hour, 20*time.Second)
 
 	grpcServer := grpc.NewServer()
 

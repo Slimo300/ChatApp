@@ -17,6 +17,7 @@ const Navigation = (props) => {
             dispatch({type: actionTypes.LOGOUT});
             APICaller.SetAccessToken("");
             props.setName("");
+            props.ws.close();
         } else alert(response.data.message);
     };
 

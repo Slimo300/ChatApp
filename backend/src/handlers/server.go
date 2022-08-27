@@ -78,36 +78,24 @@ func (s *Server) ListenToHub() {
 	}
 }
 
-// func (s *Server) CreateSignedToken(iss string) (string, error) {
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-// 		Issuer:    iss,
-// 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-// 	})
-// 	tokenString, err := token.SignedString([]byte(s.secret))
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return tokenString, nil
-// }
-
 func (s *Server) MustAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessHeader := strings.Split(c.GetHeader("Authorization"), " ")[1]
 		if accessHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"err": "user not authenticated"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"err": "user not authenticated"})
 			return
 		}
 		accessToken, err := jwt.ParseWithClaims(accessHeader, &jwt.StandardClaims{},
 			func(t *jwt.Token) (interface{}, error) {
-				return *s.TokenService.GetPublicKey(), nil
+				return s.TokenService.GetPublicKey(), nil
 			})
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
 			return
 		}
 		userID := accessToken.Claims.(*jwt.StandardClaims).Subject
 		if userID == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"err": "Invalid token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"err": "Invalid token"})
 			return
 		}
 		c.Set("userID", userID)
@@ -144,7 +132,7 @@ func (s *Server) MustAuth() gin.HandlerFunc {
 func (s *Server) CheckDatabase() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if s.DB == nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"err": ErrNoDatabase.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": ErrNoDatabase.Error()})
 			return
 		}
 		c.Next()
