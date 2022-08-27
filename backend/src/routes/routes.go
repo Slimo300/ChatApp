@@ -16,6 +16,7 @@ func Setup(engine *gin.Engine, server *handlers.Server) {
 
 	api.POST("/register", server.RegisterUser)
 	api.POST("/login", server.SignIn)
+	api.PUT("/refresh", server.RefreshToken)
 
 	apiAuth := api.Use(server.MustAuth())
 

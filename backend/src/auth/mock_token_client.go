@@ -12,8 +12,8 @@ type MockAuthClient struct {
 	mock.Mock
 }
 
-func NewMockAuthClient() MockAuthClient {
-	return MockAuthClient{}
+func NewMockAuthClient() *MockAuthClient {
+	return new(MockAuthClient)
 }
 
 func (m MockAuthClient) NewPairFromUserID(userID uuid.UUID) (*pb.TokenPair, error) {

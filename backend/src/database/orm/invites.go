@@ -11,7 +11,7 @@ import (
 )
 
 func (db *Database) AddInvite(issID, targetID, groupID uuid.UUID) (invite models.Invite, err error) {
-	invite = models.Invite{IssId: issID, TargetID: targetID, GroupID: groupID, Status: database.INVITE_AWAITING, Created: time.Now(), Modified: time.Now()}
+	invite = models.Invite{ID: uuid.New(), IssId: issID, TargetID: targetID, GroupID: groupID, Status: database.INVITE_AWAITING, Created: time.Now(), Modified: time.Now()}
 	return invite, db.Create(&invite).Error
 }
 

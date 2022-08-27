@@ -8,6 +8,13 @@ export class API{
         this.axios.defaults.headers.common['Content-Type'] = "application/json";
         this.axios.defaults.withCredentials = true;
         this.accessToken = "";
+
+        this.axios.interceptors.response.use(function (response) {
+            return response;
+          }, function (error) {
+            if (error.response.s)
+            return Promise.reject(error);
+          });
     }
 
     SetAccessToken(accessToken) {

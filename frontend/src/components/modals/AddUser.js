@@ -10,12 +10,13 @@ export const ModalAddUser = (props) => {
     const submitAddToGroup = async(e) => {
         e.preventDefault();
 
-        const response = await APICaller.SendGroupInvite(username, props.group.ID);
+        let response;
 
-        if (response.status !== 200) {
-            setMsg(response.data.err);
-        } else {
-            setMsg("invite sent");
+        try {
+            response = await APICaller.SendGroupInvite(username, props.group.ID);
+            setMsg("Invite sent successfully");
+        } catch(err) {
+            setMsg(err.response.data.err);
         }
         setTimeout(function () {    
             props.toggle();

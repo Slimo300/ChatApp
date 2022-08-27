@@ -139,8 +139,7 @@ func TestNewPairFromRefresh(t *testing.T) {
 				assert.Empty(t, tokens.RefreshToken)
 				assert.NotEmpty(t, tokens.Error)
 			},
-			prepare: func(m *mock.Mock) {
-			},
+			prepare: func(m *mock.Mock) {},
 		},
 		{
 			desc:  "PairFromRefresh Blacklisted",

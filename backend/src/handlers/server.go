@@ -26,7 +26,7 @@ type Server struct {
 	MaxBodyBytes int64
 }
 
-func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
+func NewServer(db database.DBlayer, storage storage.StorageLayer, auth auth.TokenClient) *Server {
 	actionChan := make(chan *communication.Action)
 	messageChan := make(chan *communication.Message)
 	return &Server{
@@ -37,6 +37,7 @@ func NewServer(db database.DBlayer, storage storage.StorageLayer) *Server {
 		actionChan:   actionChan,
 		messageChan:  messageChan,
 		MaxBodyBytes: 4194304,
+		TokenService: auth,
 		Hub:          ws.NewHub(messageChan, actionChan),
 	}
 }
@@ -98,10 +99,10 @@ func (s *Server) MustAuth() gin.HandlerFunc {
 		}
 		accessToken, err := jwt.ParseWithClaims(accessHeader, &jwt.StandardClaims{},
 			func(t *jwt.Token) (interface{}, error) {
-				return s.TokenService.GetPublicKey(), nil
+				return *s.TokenService.GetPublicKey(), nil
 			})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
 			return
 		}
 		userID := accessToken.Claims.(*jwt.StandardClaims).Subject

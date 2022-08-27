@@ -25,11 +25,11 @@ func main() {
 		log.Fatal(err)
 	}
 	storage := storage.Setup()
-	server := handlers.NewServer(db, &storage)
-	server.TokenService, err = auth.NewGRPCTokenAuthClient()
+	authService, err := auth.NewGRPCTokenAuthClient()
 	if err != nil {
 		panic("Couldn't connect to grpc auth server")
 	}
+	server := handlers.NewServer(db, &storage, authService)
 	routes.Setup(engine, server)
 	go server.RunHub()
 

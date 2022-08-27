@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/textproto"
 
+	"github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/database/mock"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/storage"
@@ -21,10 +22,17 @@ func setupTestServerWithHub() handlers.Server {
 	return *s
 }
 
-func setupTestServer() handlers.Server {
+func setupTestServer() *handlers.Server {
+
 	mockDB := mock.NewMockDB()
-	s := handlers.NewServer(mockDB, storage.MockStorage{})
-	return *s
+	mockAuthClient := auth.NewMockAuthClient()
+	s := handlers.NewServer(mockDB, storage.MockStorage{}, mockAuthClient)
+	return s
+}
+
+func setupTestServerWithAuthClient(auth auth.TokenClient) *handlers.Server {
+	s := handlers.NewServer(mock.NewMockDB(), storage.MockStorage{}, auth)
+	return s
 }
 
 func createImage() *image.RGBA {

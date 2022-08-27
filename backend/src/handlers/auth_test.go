@@ -7,8 +7,12 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/Slimo300/ChatApp/backend/src/auth"
+	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRegister(t *testing.T) {
@@ -78,7 +82,13 @@ func TestRegister(t *testing.T) {
 
 func TestSignIn(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := setupTestServer()
+	mockTokenClient := auth.NewMockAuthClient()
+	mockTokenClient.On("NewPairFromUserID", mock.Anything).Return(&pb.TokenPair{
+		AccessToken:  "validAccessToken",
+		RefreshToken: "validRefreshToken",
+		Error:        "",
+	}, nil)
+	s := setupTestServerWithAuthClient(mockTokenClient)
 	testCases := []struct {
 		desc               string
 		data               map[string]string
@@ -89,7 +99,7 @@ func TestSignIn(t *testing.T) {
 			desc:               "loginsuccess",
 			data:               map[string]string{"email": "mal.zein@email.com", "password": "test"},
 			expectedStatusCode: http.StatusOK,
-			expectedResponse:   gin.H{"name": "Mal"},
+			expectedResponse:   gin.H{"accessToken": "validAccessToken"},
 		},
 		{
 			desc:               "loginnosuchemail",
@@ -129,7 +139,9 @@ func TestSignIn(t *testing.T) {
 
 func TestSignOut(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := setupTestServer()
+	mockAuthClient := auth.NewMockAuthClient()
+	mockAuthClient.On("DeleteUserToken", mock.Anything).Return(nil)
+	s := setupTestServerWithAuthClient(mockAuthClient)
 
 	testCases := []struct {
 		desc               string
@@ -155,6 +167,7 @@ func TestSignOut(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/api/signout", nil)
+			req.AddCookie(&http.Cookie{Name: "refreshToken", Value: "validRefreshToken", Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
 			w := httptest.NewRecorder()
 
 			_, engine := gin.CreateTestContext(w)
@@ -182,27 +195,63 @@ func TestSignOut(t *testing.T) {
 func TestRefresh(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
-	s := setupTestServer()
+	mockTokenClient := auth.NewMockAuthClient()
+	s := setupTestServerWithAuthClient(mockTokenClient)
 
 	testCases := []struct {
 		desc               string
-		id                 string
+		withCookie         bool
+		prepare            func(m *mock.Mock)
 		expectedStatusCode int
 		expectedResponse   interface{}
-	}{}
-
+	}{
+		{
+			desc:               "refreshNoCookie",
+			withCookie:         false,
+			prepare:            func(m *mock.Mock) {},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   gin.H{"err": "No token provided"},
+		},
+		{
+			desc:       "refreshTokenBlacklisted",
+			withCookie: true,
+			prepare: func(m *mock.Mock) {
+				mockTokenClient.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
+					AccessToken:  "",
+					RefreshToken: "",
+					Error:        "Token Blacklisted",
+				}, nil).Once()
+			},
+			expectedStatusCode: http.StatusForbidden,
+			expectedResponse:   gin.H{"err": "Token Blacklisted"},
+		},
+		{
+			desc:       "refreshOK",
+			withCookie: true,
+			prepare: func(m *mock.Mock) {
+				mockTokenClient.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
+					AccessToken:  "validAccessToken",
+					RefreshToken: "validRefreshToken",
+					Error:        "",
+				}, nil).Once()
+			},
+			expectedStatusCode: http.StatusOK,
+			expectedResponse:   gin.H{"accessToken": "validAccessToken"},
+		},
+	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
+			tC.prepare(&mockTokenClient.Mock)
 
-			req := httptest.NewRequest(http.MethodPost, "/api/refresh", nil)
+			req := httptest.NewRequest(http.MethodPut, "/api/refresh", nil)
+			if tC.withCookie {
+				req.AddCookie(&http.Cookie{Name: "refreshToken", Value: "validRefreshToken", Path: "/", Expires: time.Now().Add(time.Hour * 24), Domain: "localhost"})
+			}
 			w := httptest.NewRecorder()
 
 			_, engine := gin.CreateTestContext(w)
-			engine.Use(func(c *gin.Context) {
-				c.Set("userID", tC.id)
-			})
 
-			engine.Handle(http.MethodPost, "/api/signout", s.SignOutUser)
+			engine.Handle(http.MethodPut, "/api/refresh", s.RefreshToken)
 			engine.ServeHTTP(w, req)
 			response := w.Result()
 
