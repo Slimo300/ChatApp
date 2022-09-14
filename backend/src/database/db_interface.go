@@ -33,7 +33,7 @@ type DBlayer interface {
 	GetGroupMessages(grouID uuid.UUID, offset, num int) ([]models.Message, error)
 	AddMessage(memberID uuid.UUID, text string, when time.Time) error
 
-	CreateGroup(ID uuid.UUID, name, desc string) (models.Group, error)
+	CreateGroup(userID uuid.UUID, name, desc string) (models.Group, error)
 	DeleteUserFromGroup(memberID uuid.UUID) (models.Member, error)
 	GrantPriv(memberID uuid.UUID, adding, deleting, setting bool) error
 
@@ -53,6 +53,9 @@ type DBlayer interface {
 	IsUserInvited(userID, groupID uuid.UUID) bool
 
 	GetInviteByID(inviteID uuid.UUID) (models.Invite, error)
+
+	NewVerificationCode(userID uuid.UUID, code string) (models.VerificationCode, error)
+	VerifyCode(userID uuid.UUID, code string) error
 }
 
 const INVITE_AWAITING = 1

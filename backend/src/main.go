@@ -12,6 +12,7 @@ import (
 
 	"github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/database/orm"
+	"github.com/Slimo300/ChatApp/backend/src/email"
 	"github.com/Slimo300/ChatApp/backend/src/handlers"
 	"github.com/Slimo300/ChatApp/backend/src/routes"
 	"github.com/Slimo300/ChatApp/backend/src/storage"
@@ -30,6 +31,7 @@ func main() {
 		panic("Couldn't connect to grpc auth server")
 	}
 	server := handlers.NewServer(db, &storage, authService)
+	server.EmailService = email.NewMockEmailService()
 	routes.Setup(engine, server)
 	go server.RunHub()
 

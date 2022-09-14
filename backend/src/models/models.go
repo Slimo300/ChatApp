@@ -7,14 +7,15 @@ import (
 )
 
 type User struct {
-	ID       uuid.UUID `gorm:"primaryKey"`
-	UserName string    `gorm:"column:username;unique" json:"username"`
-	Email    string    `gorm:"column:email;unique" json:"email"`
-	Pass     string    `gorm:"column:password" json:"-"`
-	Picture  string    `gorm:"picture_url" json:"pictureUrl"`
-	Active   time.Time `gorm:"column:activity" json:"activity"`
-	SignUp   time.Time `gorm:"column:signup" json:"signup"`
-	LoggedIn bool      `gorm:"column:logged" json:"logged"`
+	ID        uuid.UUID `gorm:"primaryKey"`
+	UserName  string    `gorm:"column:username;unique" json:"username"`
+	Email     string    `gorm:"column:email;unique" json:"email"`
+	Pass      string    `gorm:"column:password" json:"-"`
+	Picture   string    `gorm:"picture_url" json:"pictureUrl"`
+	Active    time.Time `gorm:"column:activity" json:"activity"`
+	SignUp    time.Time `gorm:"column:signup" json:"signup"`
+	LoggedIn  bool      `gorm:"column:logged" json:"logged"`
+	Activated bool      `gorm:"column:activated" json:"activated"`
 }
 
 func (User) TableName() string {
@@ -79,4 +80,13 @@ type Invite struct {
 
 func (Invite) TableName() string {
 	return "invites"
+}
+
+type VerificationCode struct {
+	UserID         uuid.UUID `gorm:"column:user_id;size:191;primaryKey" json:"userID"`
+	ActivationCode string    `gorm:"column:activation_code" json:"activation"`
+}
+
+func (VerificationCode) TableName() string {
+	return "activation_codes"
 }

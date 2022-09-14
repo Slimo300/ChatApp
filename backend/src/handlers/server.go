@@ -8,6 +8,7 @@ import (
 	"github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
+	"github.com/Slimo300/ChatApp/backend/src/email"
 	"github.com/Slimo300/ChatApp/backend/src/storage"
 	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ type Server struct {
 	Storage      storage.StorageLayer
 	Hub          ws.HubInterface
 	TokenService auth.TokenClient
+	EmailService email.EmailService
 	actionChan   chan<- *communication.Action
 	messageChan  <-chan *communication.Message
 	secret       string
@@ -102,31 +104,6 @@ func (s *Server) MustAuth() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-// func (s *Server) MustAuth() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		cookie, err := c.Cookie("jwt")
-// 		if err != nil {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-// 			return
-// 		}
-// 		token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{},
-// 			func(t *jwt.Token) (interface{}, error) {
-// 				return []byte(s.secret), nil
-// 			})
-// 		if err != nil {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-// 			return
-// 		}
-// 		userID := token.Claims.(*jwt.StandardClaims).Issuer
-// 		if err != nil {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"err": err.Error()})
-// 			return
-// 		}
-// 		c.Set("userID", userID)
-// 		c.Next()
-// 	}
-// }
 
 // middleware for checking database connection
 func (s *Server) CheckDatabase() gin.HandlerFunc {

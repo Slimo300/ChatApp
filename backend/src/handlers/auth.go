@@ -3,9 +3,11 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/Slimo300/ChatApp/backend/src/email"
 	"github.com/Slimo300/ChatApp/backend/src/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/thanhpk/randstr"
 )
 
 func (s *Server) RegisterUser(c *gin.Context) {
@@ -43,9 +45,24 @@ func (s *Server) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
-	user := models.User{Email: load.Email, UserName: load.UserName, Pass: load.Pass}
+	user := models.User{Email: load.Email, UserName: load.UserName, Pass: load.Pass, Activated: false}
 	user, err = s.DB.RegisterUser(user)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
+	verificationCode, err := s.DB.NewVerificationCode(user.ID, randstr.String(10))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
+
+	if err := s.EmailService.SendVerificationEmail(email.VerificationEmailData{
+		UserID:           user.ID.String(),
+		Email:            user.Email,
+		Name:             user.UserName,
+		VerificationCode: verificationCode.ActivationCode,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}

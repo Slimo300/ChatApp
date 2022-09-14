@@ -63,11 +63,11 @@ func (db *Database) CreateGroup(userID uuid.UUID, name, desc string) (models.Gro
 func (db *Database) DeleteGroup(groupID uuid.UUID) (group models.Group, err error) {
 
 	if err := db.Transaction(func(tx *gorm.DB) error {
-		if err := db.Where(models.Member{GroupID: groupID}).Delete(&models.Member{}).Error; err != nil {
+		if err := tx.Where(models.Member{GroupID: groupID}).Delete(&models.Member{}).Error; err != nil {
 			return err
 		}
 		group = models.Group{ID: groupID}
-		if err := db.Delete(&group).Error; err != nil {
+		if err := tx.Delete(&group).Error; err != nil {
 			return err
 		}
 		return nil

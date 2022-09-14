@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Slimo300/ChatApp/backend/src/auth"
+	"github.com/Slimo300/ChatApp/backend/src/email"
 	"github.com/Slimo300/ChatApp/backend/tokenservice/pb"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
@@ -18,45 +19,57 @@ import (
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := setupTestServer()
+	mockEmailService := email.NewMockEmailService()
+	s.EmailService = mockEmailService
 	testCases := []struct {
 		desc               string
 		data               map[string]string
 		expectedStatusCode int
 		expectedResponse   interface{}
+		prepare            func(emailService *mock.Mock)
 	}{
 		{
 			desc:               "registersuccess",
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusCreated,
 			expectedResponse:   gin.H{"message": "success"},
+			prepare: func(m *mock.Mock) {
+				m.On("SendVerificationEmail", mock.Anything).Return(nil)
+			},
 		},
 		{
 			desc:               "registeremailtaken",
 			data:               map[string]string{"username": "johnny12", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusConflict,
 			expectedResponse:   gin.H{"err": "email already in database"},
+			prepare:            func(emailService *mock.Mock) {},
 		},
 		{
 			desc:               "registerinvalidpass",
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl", "password": ""},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid password"},
+			prepare:            func(emailService *mock.Mock) {},
 		},
 		{
 			desc:               "registerinvalidemail",
 			data:               map[string]string{"username": "johnny", "email": "johnny@net.pl2", "password": "password"},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid email"},
+			prepare:            func(emailService *mock.Mock) {},
 		},
 		{
 			desc:               "registerinvalidusername",
 			data:               map[string]string{"username": "j", "email": "johnny@net.pl", "password": "password"},
 			expectedStatusCode: http.StatusBadRequest,
 			expectedResponse:   gin.H{"err": "not a valid username"},
+			prepare:            func(emailService *mock.Mock) {},
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
+
+			tC.prepare(&mockEmailService.Mock)
 
 			requestBody, _ := json.Marshal(tC.data)
 
@@ -216,7 +229,7 @@ func TestRefresh(t *testing.T) {
 			desc:       "refreshTokenBlacklisted",
 			withCookie: true,
 			prepare: func(m *mock.Mock) {
-				mockTokenClient.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
+				m.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
 					AccessToken:  "",
 					RefreshToken: "",
 					Error:        "Token Blacklisted",
@@ -229,7 +242,7 @@ func TestRefresh(t *testing.T) {
 			desc:       "refreshOK",
 			withCookie: true,
 			prepare: func(m *mock.Mock) {
-				mockTokenClient.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
+				m.On("NewPairFromRefresh", mock.Anything).Return(&pb.TokenPair{
 					AccessToken:  "validAccessToken",
 					RefreshToken: "validRefreshToken",
 					Error:        "",
