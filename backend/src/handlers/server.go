@@ -23,7 +23,6 @@ type Server struct {
 	EmailService email.EmailService
 	actionChan   chan<- *communication.Action
 	messageChan  <-chan *communication.Message
-	secret       string
 	domain       string
 	MaxBodyBytes int64
 }
@@ -34,7 +33,6 @@ func NewServer(db database.DBlayer, storage storage.StorageLayer, auth auth.Toke
 	return &Server{
 		DB:           db,
 		Storage:      storage,
-		secret:       "wołowina",
 		domain:       "localhost",
 		actionChan:   actionChan,
 		messageChan:  messageChan,
@@ -50,7 +48,6 @@ func NewServerWithMockHub(db database.DBlayer, storage storage.StorageLayer) *Se
 	return &Server{
 		DB:           db,
 		Storage:      storage,
-		secret:       "wołowina",
 		domain:       "localhost",
 		actionChan:   actionChan,
 		messageChan:  messageChan,
