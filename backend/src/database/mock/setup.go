@@ -7,12 +7,11 @@ import (
 )
 
 type MockDB struct {
-	Users             []models.User
-	Groups            []models.Group
-	Members           []models.Member
-	Messages          []models.Message
-	Invites           []models.Invite
-	VerificationCodes []models.VerificationCode
+	Users    []models.User
+	Groups   []models.Group
+	Members  []models.Member
+	Messages []models.Message
+	Invites  []models.Invite
 }
 
 func NewMockDB() *MockDB {
@@ -168,13 +167,6 @@ func NewMockDB() *MockDB {
 		}
 	]`
 
-	VERIFICATION_CODES := `[
-		{
-			"userID": "fe98176b-cf09-4da5-94ae-81207519a75f",
-			"activation": "qwertyuiop"
-		}
-	]`
-
 	var users []models.User
 	json.Unmarshal([]byte(USERS), &users)
 
@@ -195,9 +187,6 @@ func NewMockDB() *MockDB {
 	var invites []models.Invite
 	json.Unmarshal([]byte(INVITES), &invites)
 
-	var verificationCodes []models.VerificationCode
-	json.Unmarshal([]byte(VERIFICATION_CODES), &verificationCodes)
-
 	// add data
-	return &MockDB{Users: users, Groups: groups, Members: members, Messages: messages, Invites: invites, VerificationCodes: verificationCodes}
+	return &MockDB{Users: users, Groups: groups, Members: members, Messages: messages, Invites: invites}
 }

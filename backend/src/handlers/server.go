@@ -8,7 +8,6 @@ import (
 	"github.com/Slimo300/ChatApp/backend/src/auth"
 	"github.com/Slimo300/ChatApp/backend/src/communication"
 	"github.com/Slimo300/ChatApp/backend/src/database"
-	"github.com/Slimo300/ChatApp/backend/src/email"
 	"github.com/Slimo300/ChatApp/backend/src/storage"
 	"github.com/Slimo300/ChatApp/backend/src/ws"
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,6 @@ type Server struct {
 	Storage      storage.StorageLayer
 	Hub          ws.HubInterface
 	TokenService auth.TokenClient
-	EmailService email.EmailService
 	actionChan   chan<- *communication.Action
 	messageChan  <-chan *communication.Message
 	domain       string
@@ -106,7 +104,7 @@ func (s *Server) MustAuth() gin.HandlerFunc {
 func (s *Server) CheckDatabase() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if s.DB == nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": ErrNoDatabase.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": "No database connection"})
 			return
 		}
 		c.Next()
