@@ -1,9 +1,9 @@
-module github.com/Slimo300/user-service
+module github.com/Slimo300/backend/user-service
 
 go 1.17
 
 require (
-	github.com/Slimo300/ChatApp v0.0.0-20220914103348-911fcff99bc7
+	github.com/Slimo300/ChatApp v0.0.0-20220915102540-eeef1607f100
 	github.com/Slimo300/ChatApp/backend/src v0.0.0-20220914080147-a8b20380e48a
 	github.com/Slimo300/ChatApp/backend/tokenservice v0.0.0-20220914080147-a8b20380e48a
 	github.com/gin-contrib/size v0.0.0-20220829131622-0fc0bc875336

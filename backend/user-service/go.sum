@@ -3,6 +3,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Slimo300/ChatApp v0.0.0-20220914103348-911fcff99bc7 h1:OErL+3HaSENY54dyeBMMV5wa6SS3LSZmqR6v9wg1fJM=
 github.com/Slimo300/ChatApp v0.0.0-20220914103348-911fcff99bc7/go.mod h1:IlgvLK56H1tsO+0bDXUOuTYlteF7Wg7KZWGRIvbnxEc=
+github.com/Slimo300/ChatApp v0.0.0-20220915102540-eeef1607f100 h1:Fe4SZvIQ4QD9ZrV/AF+uCq6HcGuplY5c3yYtV+srIXI=
+github.com/Slimo300/ChatApp v0.0.0-20220915102540-eeef1607f100/go.mod h1:IlgvLK56H1tsO+0bDXUOuTYlteF7Wg7KZWGRIvbnxEc=
 github.com/Slimo300/ChatApp/backend/src v0.0.0-20220914080147-a8b20380e48a h1:bgxWc+H5S4bWCdlkqoU5X69uT30QHyBJuJBwwCz4Teo=
 github.com/Slimo300/ChatApp/backend/src v0.0.0-20220914080147-a8b20380e48a/go.mod h1:OCLMust1S+Vji0buZBvL40qsxujaAWEd45vQc4DhGJ4=
 github.com/Slimo300/ChatApp/backend/tokenservice v0.0.0-20220731214715-bee79310154e/go.mod h1:nq1WubEwFjELKO0EKrOIM0pJZKcduwGkpq9w/DtEqrk=
