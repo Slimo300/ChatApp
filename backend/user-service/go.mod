@@ -1,4 +1,4 @@
-module github.com/Slimo300/backend/user-service
+module github.com/Slimo300/ChatApp/backend/user-service
 
 go 1.17
 
